@@ -3,9 +3,8 @@ from App.models import User, Admin, Staff
 
 def validate_Staff(email, password):
     staff = Staff.query.filter_by(email=email).first()
-    for s in staff:
-        if s and s.check_password(password):
-            return s
+    if staff and staff.check_password(password):
+        return staff
     return None
 
 def validate_Admin(email, password):
@@ -24,5 +23,7 @@ def get_user(email, password):
     return None
 
 def get_uid(email):
-    user = Staff.query.filter_by(email=email).first()
-    return user.u_ID
+    user= Staff.query.filter_by(email=email).first()
+    if user:
+        return user.u_ID
+    return None
