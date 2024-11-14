@@ -1,12 +1,12 @@
 from App.models import Staff, CourseStaff
 from App.database import db
 
-def register_staff(firstName, lastName, u_ID, status, email, pwd):
+def register_staff(firstName, lastName, userID, staffType, email, password):
     #Check if email is already used by another lecturer ie. lecturer already registered
     staff = db.session.query(Staff).filter(Staff.email == email).count()
 
     if staff == 0:
-        newLect = Staff.register(firstName, lastName, u_ID, status, email, pwd)
+        newLect = Staff.register(firstName, lastName, userID, staffType, email, password)
         return newLect
     return None
 
@@ -17,13 +17,13 @@ def login_staff(email, password):
             return staff.login()
     return "Login failed"
 
-def add_CourseStaff(u_ID,courseCode):
-    existing_course_staff = CourseStaff.query.filter_by(u_ID=u_ID, courseCode=courseCode).first()
+def add_CourseStaff(userID,courseCode):
+    existing_course_staff = CourseStaff.query.filter_by(userID=userID, courseCode=courseCode).first()
     if existing_course_staff:
         return existing_course_staff  # Return existing CourseStaff if found
 
     # Create a new CourseStaff object
-    new_course_staff = CourseStaff(u_ID=u_ID, courseCode=courseCode)
+    new_course_staff = CourseStaff(userID=userID, courseCode=courseCode)
 
     # Add and commit to the database
     db.session.add(new_course_staff)
@@ -31,8 +31,8 @@ def add_CourseStaff(u_ID,courseCode):
 
     return new_course_staff
 
-def get_registered_courses(u_ID):
-    course_listing = CourseStaff.query.filter_by(u_ID=u_ID).all()
+def get_registered_courses(userID):
+    course_listing = CourseStaff.query.filter_by(userID=userID).all()
     codes=[]
     for item in course_listing:
         codes.append(item.courseCode)
