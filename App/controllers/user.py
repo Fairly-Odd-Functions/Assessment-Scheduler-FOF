@@ -25,5 +25,5 @@ def get_user(email, password):
 def get_uid(email):
     user= Staff.query.filter_by(email=email).first()
     if user:
-        return user.u_ID
+        return user.userID
     return None
