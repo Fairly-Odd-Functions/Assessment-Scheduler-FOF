@@ -2,6 +2,7 @@ from App.database import db
 
 class ClashRule(db.Model):
   __tablename__ = 'clashrule'
+  # __abstract__ = True
 
   clashRuleID = db.Column(db.Integer, primary_key=True)
   clashRuleTitle = db.Column(db.String(120), nullable=False)
@@ -21,7 +22,8 @@ class ClashRule(db.Model):
       
     }
 
-#  def is_clash(courses):
+  # def is_clash(courses):
+
 
 
 
