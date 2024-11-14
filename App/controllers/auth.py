@@ -31,8 +31,8 @@ def add_auth_context(app):
   def inject_user():
       try:
         verify_jwt_in_request()
-        user_id = get_jwt_identity()
-        current_user = User.query.get(user_id)
+        userID = get_jwt_identity()
+        current_user = User.query.get(userID)
         is_authenticated = True
       except Exception as e:
           print(e)
@@ -52,20 +52,16 @@ def logout(user, remember):
 
 def setup_flask_login(app):
   login_manager = flask_login.LoginManager()
-  login_manager = flask_login.LoginManager()
   login_manager.init_app(app)
   login_manager.login_view = 'login'
 
   @login_manager.user_loader
-  def load_user(user_id):
-    staff = Staff.query.get(user_id)
-    if staff:
-      return staff
-    staff = Staff.query.get(user_id)
+  def load_user(userID):
+    staff = Staff.query.get(userID)
     if staff:
       return staff
 
-    admin = Admin.query.get(user_id)
+    admin = Admin.query.get(userID)
     if admin:
       return admin
     return None
