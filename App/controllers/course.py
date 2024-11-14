@@ -1,16 +1,15 @@
 from App.models import Course
 from App.database import db
 
-def add_Course(courseCode, courseTitle, description, level, semester, aNum):
+def add_Course(courseCode, courseTitle, courseDescription, courseLevel, offeredSemester, clashRuleID, courseCredits): #aNum removed and clashRuleID and courseCredits were added
     # Check if courseCode is already in db ie. course was already added
     course = Course.query.get(courseCode)
     if course: 
         return course
     else:
          #Add new Course
-        newCourse = Course.addCourse(courseCode, courseTitle, description, level, semester, aNum)
-        return newCourse
-    return None        
+        newCourse = Course.addCourse(courseCode, courseTitle, courseDescription, courseLevel, offeredSemester, clashRuleID, courseCredits)
+        return newCourse     
 
 def list_Courses():
     return Course.query.all() 
@@ -27,7 +26,7 @@ def edit_course(review, staff, is_positive, comment):
         return review
     return None    
 
-def delete_Course(course):
+def delete_Course(course): #parameter should be updated e.g. delete_Course(courseCode, offeredSemester) *New Comment
     db.session.delete(course)
     db.session.commit()
     return True     
