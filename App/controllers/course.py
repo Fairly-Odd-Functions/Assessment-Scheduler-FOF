@@ -1,14 +1,14 @@
 from App.models import Course
 from App.database import db
 
-def add_Course(courseCode, courseTitle, courseDescription, courseLevel, offeredSemester, clashRuleID, courseCredits): #aNum removed and clashRuleID and courseCredits were added
+def add_Course(courseCode, courseTitle, courseDescription, courseLevel, offeredSemester, clashRules, courseCredits): #aNum removed and clashRuleID and courseCredits were added // clashRuleID was changed to clashRules to match the new model diagram
     # Check if courseCode is already in db ie. course was already added
     course = Course.query.get(courseCode)
     if course: 
         return course
     else:
          #Add new Course
-        newCourse = Course.addCourse(courseCode, courseTitle, courseDescription, courseLevel, offeredSemester, clashRuleID, courseCredits)
+        newCourse = Course.addCourse(courseCode, courseTitle, courseDescription, courseLevel, offeredSemester, clashRules, courseCredits)
         return newCourse     
 
 def list_Courses():
@@ -26,7 +26,7 @@ def edit_course(review, staff, is_positive, comment):
         return review
     return None    
 
-def delete_Course(course): #parameter should be updated e.g. delete_Course(courseCode, offeredSemester) *New Comment
+def delete_Course(course): #parameter should be updated e.g. delete_Course(courseCode, offeredSemester) for unique identification, since different courses can have the same course codes but are offered during differnet semesters *New Comment
     db.session.delete(course)
     db.session.commit()
     return True     
