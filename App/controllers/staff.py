@@ -1,12 +1,12 @@
 from App.models import Staff, CourseStaff
 from App.database import db
 
-def register_staff(firstName, lastName, userID, staffType, email, password):
+def register_staff(firstName, lastName, userID, email, password): #staffType was removed from the first model update
     #Check if email is already used by another lecturer ie. lecturer already registered
     staff = db.session.query(Staff).filter(Staff.email == email).count()
 
     if staff == 0:
-        newLect = Staff.register(firstName, lastName, userID, staffType, email, password)
+        newLect = Staff.register(firstName, lastName, userID, email, password)
         return newLect
     return None
 
