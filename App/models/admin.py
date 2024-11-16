@@ -22,11 +22,11 @@ class Admin(User,UserMixin):
   def __init__(self, userID, firstName, lastName, password, email):
     super().__init__(userID, firstName, lastName, password, email)
 
-  # def __createStaff__(userID, firstName, lastName, email, password, status):
-  #   newStaff = Staff(self, userID, firstName, lastName, email, password,status)
-  #   db.session.add(newStaff)  #add to db
-  #   db.session.commit()
-  #   return newStaff
+  def __createStaff__(userID, firstName, lastName, password, email, status):
+    newStaff = Staff(self, userID, firstName, lastName, password, email, status)
+    db.session.add(newStaff)  #add to db
+    db.session.commit()
+    return newStaff
 
   def __str__(self):
         return f"Admin(id={self.adminID}, email={self.email})" 

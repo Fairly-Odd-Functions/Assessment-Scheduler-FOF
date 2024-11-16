@@ -5,9 +5,11 @@ class ClashRule(db.Model):
   # __abstract__ = True
 
   clashRuleID = db.Column(db.Integer, primary_key=True)
+  userID = db.Column(db.Integer, db.ForeignKey('user.userID'), nullable=False)
   clashRuleTitle = db.Column(db.String(120), nullable=False)
   clashRuleDescription = db.Column(db.String(120),nullable=False)
-  courses = db.relationship('Course',backref='clashrule',lazy=True)
+  allowableDays = db.Column(db.Integer)
+  # courses = db.relationship('Course',backref='clashrule',lazy=True)
   
 
   def __init__(self, clashRuleTitle, clashRuleDescription):
@@ -23,13 +25,3 @@ class ClashRule(db.Model):
     }
 
   # def is_clash(courses):
-
-
-
-
-  # #Add new Course
-  # def addCourse(courseCode, courseTitle, description, level, semester, aNum):
-  #   newCourse = Course(courseCode, courseTitle, description, level, semester, aNum)
-  #   db.session.add(newCourse)  #add to db
-  #   db.session.commit()
-  #   return newCourse

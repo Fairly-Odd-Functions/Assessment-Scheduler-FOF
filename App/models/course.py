@@ -5,6 +5,9 @@ class Course(db.Model):
 
   courseCode = db.Column(db.String(9), primary_key=True)
   offeredSemester = db.Column(db.Integer,db.ForeignKey('semester.semesterID'), nullable=False)
+  clashRules = db.relationship('ClashRule',backref='course', lazy=True)
+  # , cascade="all, delete-orphan" 
+  
   clashRuleID = db.Column(db.Integer,db.ForeignKey('clashrule.clashRuleID'),nullable=False)
   courseTitle = db.Column(db.String(120), nullable=False)
   courseCredits = db.Column(db.Integer)
