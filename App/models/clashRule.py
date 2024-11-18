@@ -24,4 +24,15 @@ class ClashRule(db.Model):
       
     }
 
+  # def addCourse(courseCode, courseTitle, description, level, semester, aNum):
+  #   newCourse = Course(courseCode, courseTitle, description, level, semester, aNum)
+  #   db.session.add(newCourse)  #add to db
+  #   db.session.commit()
+  #   return newCourse
   # def is_clash(courses):
+  
+  def addNewRule(clashRuleTitle, clashRuleDescription):
+    newRule = ClashRule(clashRuleTitle, clashRuleDescription)
+    db.session.add(newRule)
+    db.session.commit()
+    return newRule

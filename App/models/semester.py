@@ -7,6 +7,7 @@ class Semester(db.Model):
     semesterTitle = db.Column(db.String(120),nullable = False)
     startDate = db.Column(db.Date,nullable=False)
     endDate = db.Column(db.Date,nullable=False)
+    courses = db.relationship('Course',backref='semester', lazy=True)
     # semNum = db.Column(db.Integer,nullable=False)
     # maxAssessments = db.Column(db.Integer,nullable=False)
 
