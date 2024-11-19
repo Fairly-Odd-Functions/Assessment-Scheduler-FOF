@@ -8,16 +8,12 @@ class Semester(db.Model):
     startDate = db.Column(db.Date,nullable=False)
     endDate = db.Column(db.Date,nullable=False)
     courses = db.relationship('Course',backref='semester', lazy=True)
-    # semNum = db.Column(db.Integer,nullable=False)
-    # maxAssessments = db.Column(db.Integer,nullable=False)
-
+    
 def __init__(self, semesterTitle, startDate, endDate):
     self.semesterTitle = semesterTitle
     self.startDate = startDate
     self.endDate = endDate
-    # self.semNum = semNum
-    # self.maxAssessments = maxAssessments
-
+    
 def to_json(self):
     return{
         "SemesterID":self.semesterID,

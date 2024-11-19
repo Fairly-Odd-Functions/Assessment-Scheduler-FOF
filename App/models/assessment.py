@@ -1,15 +1,4 @@
 from App.database import db
-import enum
-
-class Category(enum.Enum):
-    EXAM = "Exam"
-    ASSIGNMENT = "Assignment"
-    QUIZ = "Quiz"
-    PROJECT = "Project"
-    DEBATE = "Debate"
-    PRESENTATION = "Presentation"
-    ORALEXAM = "Oral Exam"
-    PARTICIPATION = "Participation"
 
 class Assessment(db.Model):
     __tablename__ = 'assessment'
@@ -20,7 +9,7 @@ class Assessment(db.Model):
     assessmentType = db.Column(db.String(120),nullable=False)
     startDate = db.Column(db.Date)
     dueDate = db.Column(db.Date)
-    # category = db.Column(db.Enum(Category), nullable=False)
+    
 
     def __init__(self, assessmentID, courseCode, assessmentTitle, assessmentType, startDate, dueDate):
         self.assessmentID = assessmentID
@@ -30,9 +19,9 @@ class Assessment(db.Model):
         self.startDate = startDate
         self.dueDate = dueDate
 
-        # self.category = category
+    
 
-    def to_json(self):
+    def get_json(self):
         return {
         "assessmentID" : self.assessmentID,
         "courseCode" : self.courseCode,
@@ -40,5 +29,5 @@ class Assessment(db.Model):
         "assessmentType" : self.assessmentType,
         "startDate" : self.startDate,
         "dueDate" : self.dueDate
-        # "category" : self.category
+        
         }     
