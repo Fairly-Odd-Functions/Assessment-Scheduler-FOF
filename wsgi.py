@@ -21,7 +21,7 @@ def initialize():
   db.create_all()
   # bob = Staff("bob", "test", 300456, "Lecturer 1", "bob@gmail.com", "bobpass")
   bob = Admin(userID=999, firstName="Robert", lastName="Incredible", password="bobpass", email="bob@gmail.com")
-  jen = Staff(userID=555, firstName="Jennifer", lastName="Say", password="Saypass", email="say@gmail.com", status="Lecturer 1")
+  jen = Staff(userID=555, firstName="Jennifer", lastName="Say", password="Saypass", email="say@gmail.com")
   # self, userID, firstName, lastName, password, email
   db.session.add(bob)
   db.session.add(jen)
