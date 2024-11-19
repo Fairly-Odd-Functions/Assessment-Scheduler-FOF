@@ -5,7 +5,7 @@ class CourseAssessment(db.Model):
 
     id = db.Column(db.Integer, primary_key= True, autoincrement=True)
     courseCode = db.Column(db.String(9), db.ForeignKey('course.courseCode'), nullable = False)
-    a_ID = db.Column(db.Integer, db.ForeignKey('assessment.a_ID'), nullable = False)
+    assessmentID = db.Column(db.Integer, db.ForeignKey('assessment.assessmentID'), nullable = False)
     startDate = db.Column(db.Date, nullable = True)
     endDate = db.Column(db.Date, nullable = True)
     startTime = db.Column(db.Time, nullable = True)

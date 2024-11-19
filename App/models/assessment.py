@@ -14,14 +14,44 @@ class Category(enum.Enum):
 class Assessment(db.Model):
     __tablename__ = 'assessment'
 
-    a_ID = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    category = db.Column(db.Enum(Category), nullable=False)
+    assessmentID = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    courseCode = db.Column(db.Integer, db.ForeignKey('course.courseCode'),nullable=False)
+    assessmentTitle = db.Column(db.String(120),nullable=False)
+    assessmentType = db.Column(db.String(120),nullable=False)
+    startDate = db.Column(db.Date)
+    dueDate = db.Column(db.Date)
+    # category = db.Column(db.Enum(Category), nullable=False)
 
-    def __init__(self, category):
-        self.category = category
+    def __init__(self, assessmentID, courseCode, assessmentTitle, assessmentType, startDate, dueDate):
+        self.assessmentID = assessmentID
+        self.courseCode = courseCode
+        self.assessmentTitle = assessmentTitle
+        self.assessmentType = assessmentType
+        self.startDate = startDate
+        self.dueDate = dueDate
+
+        # self.category = category
+
+    # ^^^^^^^^^^^^^^^^
+    # COMMENT(RYNNIA):      (Optional) For the 'assesmentType' attribute maybe it would be 
+    #
+    #
 
     def to_json(self):
         return {
-        "a_ID" : self.a_ID,
-        "category" : self.category
+        "assessmentID" : self.assessmentID,
+        "courseCode" : self.courseCode,
+        "assessmentTitle" : self.assessmentTitle,
+        "assessmentType" : self.assessmentType,
+        "startDate" : self.startDate,
+        "dueDate" : self.dueDate
+        # "category" : self.category
         }     
+    
+    # -----------------------------------------------------------------------------------------------------------------------------
+    # JaleneA
+    #   - You know you can delete old code that's been refactored from the original project.
+    #     i.e. The nested Category class, remove stuff we're not going to use.
+    #
+    #   - The model diagram has get_json() rather than to_json().
+    # -----------------------------------------------------------------------------------------------------------------------------

@@ -20,10 +20,14 @@ def initialize():
   # db.init_app(app)
   db.create_all()
   # bob = Staff("bob", "test", 300456, "Lecturer 1", "bob@gmail.com", "bobpass")
-  bob = Admin(u_ID=999, email="bob@gmail.com", password="bobpass")
+  bob = Admin(userID=999, firstName="Robert", lastName="Incredible", password="bobpass", email="bob@gmail.com")
+  jen = Staff(userID=555, firstName="Jennifer", lastName="Say", password="Saypass", email="say@gmail.com", status="Lecturer 1")
+  # self, userID, firstName, lastName, password, email
   db.session.add(bob)
+  db.session.add(jen)
   db.session.commit()
   print(bob)
+  print(jen)
   print('database initialized')
 
 # This command retrieves all staff objects

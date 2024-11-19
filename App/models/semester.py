@@ -2,23 +2,40 @@ from App.database import db
 
 class Semester(db.Model):
     __tablename__='semester'
-    id = db.Column(db.Integer, primary_key= True, autoincrement=True)
+    
+    semesterID = db.Column(db.Integer, primary_key= True, autoincrement=True)
+    semesterTitle = db.Column(db.String(120),nullable = False)
     startDate = db.Column(db.Date,nullable=False)
     endDate = db.Column(db.Date,nullable=False)
-    semNum = db.Column(db.Integer,nullable=False)
-    maxAssessments = db.Column(db.Integer,nullable=False)
+    courses = db.relationship('Course',backref='semester', lazy=True)
+    # semNum = db.Column(db.Integer,nullable=False)
+    # maxAssessments = db.Column(db.Integer,nullable=False)
 
-def __init__(self, startDate, endDate, semNum, maxAssessments):
+    # ^^^^^^^^^^^^^^^^
+    # COMMENT(RYNNIA):      (1) There is a new attribute 'courses' here that is not within the Model Diagram
+    #                           need to discuss reasons for addition.
+
+    # -----------------------------------------------------------------------------------------------------------------------------
+    # JaleneA
+    #   - It'd be a good idea to organize your code for readability, there's alot of commented out code
+    #     that we're not using in our refactoring inwhich its getting confusing to look at whilst performing a review.
+    #
+    #   - Comments that can be added is one that separates attributes from relationships.
+    # -----------------------------------------------------------------------------------------------------------------------------
+
+
+def __init__(self, semesterTitle, startDate, endDate):
+    self.semesterTitle = semesterTitle
     self.startDate = startDate
     self.endDate = endDate
-    self.semNum = semNum
-    self.maxAssessments = maxAssessments
+    # self.semNum = semNum
+    # self.maxAssessments = maxAssessments
 
 def to_json(self):
     return{
-        "id":self.id,
+        "SemesterID":self.semesterID,
+        "SemesterTitle":self.semesterTitle,
         "startDate":self.startDate,
-        "endDate":self.endDate,
-        "semNum":self.semNum,
-        "maxAssessments":self.maxAssessments
+        "endDate":self.endDate
+        
     }
