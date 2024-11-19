@@ -18,6 +18,13 @@ class Course(db.Model):
   # creates reverse relationship from Course back to Assessment to access assessments for a specific course
   # assessmentsAssigned = db.relationship('assessment', backref=db.backref('assessment', lazy='joined'))
 
+
+  # ^^^^^^^^^^^^^^^^
+  # COMMENT(RYNNIA):      (1) I see that you added 'clashRuleID' attribute, however it may not be needed as
+  #                           you already created a relationship attribute 'clashRules'
+  #
+  
+
   def __init__(self, courseCode, offeredSemester, courseTitle, courseCredits,  courseDescription, courseLevel):
     self.courseCode = courseCode
     self.offeredSemester = offeredSemester
@@ -27,6 +34,11 @@ class Course(db.Model):
     self.courseLevel = courseLevel
     # self.semester = semester
     # self.aNum = aNum
+
+  # ^^^^^^^^^^^^^^^^
+  # COMMENT(RYNNIA):      (1) I think there should be a  definition of the relationship attribute 'clashRules' here
+  #
+
 
   def to_json(self):
     return {

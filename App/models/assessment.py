@@ -32,6 +32,11 @@ class Assessment(db.Model):
 
         # self.category = category
 
+    # ^^^^^^^^^^^^^^^^
+    # COMMENT(RYNNIA):      (Optional) For the 'assesmentType' attribute maybe it would be 
+    #
+    #
+
     def to_json(self):
         return {
         "assessmentID" : self.assessmentID,

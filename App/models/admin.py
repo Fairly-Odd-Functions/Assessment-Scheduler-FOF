@@ -27,6 +27,17 @@ class Admin(User,UserMixin):
     db.session.add(newStaff)  #add to db
     db.session.commit()
     return newStaff
+  
+  # ^^^^^^^^^^^^^^^^
+  # COMMENT (RYNNIA):     (1) Staff is not defined change to Admin
+  #
+  #                       (2) Staff(self, userID, firstName, lastName, password,   email, status)  , 
+  #                           status would not be passed properly because __init__ for Staff does not have status as a parameter.
+  #
+  #                       (3) There is no specification for staffType it should be hardcoded as ‘staff’ for example 
+  #
+  #                       (4) Status is not specified within Model diagram, unless you meant to include it and left it as is?
+  #                           This needs to be discussed
 
   def __str__(self):
         return f"Admin(id={self.adminID}, email={self.email})" 

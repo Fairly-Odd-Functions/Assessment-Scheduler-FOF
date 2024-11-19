@@ -38,6 +38,14 @@ class Staff(User,UserMixin):
     # else: 
       # self.cNum = 3 #Instructor
 
+
+    # ^^^^^^^^^^^^^^^^
+    # COMMENT (RYNNIA):     (1) What is status for? Its not specified within the Model Diagram. Unless you meant it be included 
+    #                           I think it has somthing to do with (enum.Enum):
+    #
+    #                       (2) There is no parssed 'type' attribute so specify the type of User as 'staff' when you call on super()
+    #
+
     # Other teaching positions for possible extension
     # if status == "Part-Time Instructor": 
     #   self.cNum = 1

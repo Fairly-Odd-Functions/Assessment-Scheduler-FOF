@@ -27,6 +27,14 @@ class User(db.Model, UserMixin):
         self.set_password(password)
         self.email = email
 
+    # ^^^^^^^^^^^^^^^^
+    # COMMENT(RYNNIA):   (1) There is a new attribute ‘type’ which is not present within he Updated Model Diagram but
+    #                        I can see why it is necessary for subclass implementation so:
+    #                        Model Diagram Needs Updating to include attribute ‘type’
+    #
+    #                    (2) UserID should not be a parameter unless we talking about staffID given to them by university? so,
+    #                        Are we using staffID as a parameter?
+
     def set_password(self, password):
         """Create hashed password."""
         self.password = generate_password_hash(password)

@@ -11,6 +11,11 @@ class Semester(db.Model):
     # semNum = db.Column(db.Integer,nullable=False)
     # maxAssessments = db.Column(db.Integer,nullable=False)
 
+    # ^^^^^^^^^^^^^^^^
+    # COMMENT(RYNNIA):      (1) There is a new attribute 'courses' here that is not within the Model Diagram
+    #                           need to discuss reasons for addition.
+    #
+
 def __init__(self, semesterTitle, startDate, endDate):
     self.semesterTitle = semesterTitle
     self.startDate = startDate

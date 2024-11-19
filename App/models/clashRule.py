@@ -15,6 +15,12 @@ class ClashRule(db.Model):
   def __init__(self, clashRuleTitle, clashRuleDescription):
     self.clashRuleTitle = clashRuleTitle
     self.clashRuleDescription = clashRuleDescription
+  
+  # ^^^^^^^^^^^^^^^^
+  # COMMENT(RYNNIA):      (1) There needs to be definition of the 'userID' attribute here so that the admin
+  #                           who made the rule can be referenced. 
+  #
+  #
     
 
   def to_json(self):
