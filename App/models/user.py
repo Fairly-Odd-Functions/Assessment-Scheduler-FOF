@@ -27,6 +27,8 @@ class User(db.Model, UserMixin):
         self.set_password(password)
         self.email = email
 
+
+    # ~~~~~~~~~~~~ FEEDBACK ~~~~~~~~~~~~
     # ^^^^^^^^^^^^^^^^
     # COMMENT(RYNNIA):   (1) There is a new attribute ‘type’ which is not present within he Updated Model Diagram but
     #                        I can see why it is necessary for subclass implementation so:
@@ -34,6 +36,10 @@ class User(db.Model, UserMixin):
     #
     #                    (2) UserID should not be a parameter unless we talking about staffID given to them by university? so,
     #                        Are we using staffID as a parameter?
+    # ------------------------------------------------------------------------------------------------------------------------
+    # JaleneA
+    #   - What is UserMixin?
+
 
     def set_password(self, password):
         """Create hashed password."""
@@ -44,13 +50,13 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password, password)
     
     def to_json(self):
-	    return {
-            "userID": self.userID,
-            "firstName": self.firstName,
-            "lastName": self.lastName,
-            "password": self.password,
-            "email":self.email
-        }
-        
+        return {
+                "userID": self.userID,
+                "firstName": self.firstName,
+                "lastName": self.lastName,
+                "password": self.password,
+                "email":self.email
+            }
+
     def __str__(self):
         return f"Staff(id={self.userID}, email={self.email})"

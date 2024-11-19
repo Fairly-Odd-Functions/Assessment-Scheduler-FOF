@@ -47,3 +47,11 @@ class Assessment(db.Model):
         "dueDate" : self.dueDate
         # "category" : self.category
         }     
+    
+    # -----------------------------------------------------------------------------------------------------------------------------
+    # JaleneA
+    #   - You know you can delete old code that's been refactored from the original project.
+    #     i.e. The nested Category class, remove stuff we're not going to use.
+    #
+    #   - The model diagram has get_json() rather than to_json().
+    # -----------------------------------------------------------------------------------------------------------------------------

@@ -11,11 +11,9 @@ class CourseProgramme(db.Model):
   def __init__(self, programmeID, courseCode):
     self.programmeID = programmeID
     self.courseCode = courseCode
-    
-    
+
   def to_json(self):
     return {
       "programmeID": self.programmeID,
       "courseCode": self.courseCode
-      
-    }  
+    }

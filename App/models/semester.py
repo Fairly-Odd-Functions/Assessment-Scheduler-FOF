@@ -14,7 +14,15 @@ class Semester(db.Model):
     # ^^^^^^^^^^^^^^^^
     # COMMENT(RYNNIA):      (1) There is a new attribute 'courses' here that is not within the Model Diagram
     #                           need to discuss reasons for addition.
+
+    # -----------------------------------------------------------------------------------------------------------------------------
+    # JaleneA
+    #   - It'd be a good idea to organize your code for readability, there's alot of commented out code
+    #     that we're not using in our refactoring inwhich its getting confusing to look at whilst performing a review.
     #
+    #   - Comments that can be added is one that separates attributes from relationships.
+    # -----------------------------------------------------------------------------------------------------------------------------
+
 
 def __init__(self, semesterTitle, startDate, endDate):
     self.semesterTitle = semesterTitle

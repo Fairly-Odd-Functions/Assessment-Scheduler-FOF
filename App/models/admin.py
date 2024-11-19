@@ -28,6 +28,7 @@ class Admin(User,UserMixin):
     db.session.commit()
     return newStaff
   
+  # ~~~~~~~~~~~~ FEEDBACK ~~~~~~~~~~~~
   # ^^^^^^^^^^^^^^^^
   # COMMENT (RYNNIA):     (1) Staff is not defined change to Admin
   #
@@ -38,6 +39,20 @@ class Admin(User,UserMixin):
   #
   #                       (4) Status is not specified within Model diagram, unless you meant to include it and left it as is?
   #                           This needs to be discussed
+  # -----------------------------------------------------------------------------------------------------------------------------
+  # JaleneA
+  #   - What is UserMixin?
+  #
+  #   - Why is their an inclusion of self within the Staff parameter?
+  #     should just be userID, firstName, lastName, password, email and staffType
+  #
+  #   - staffType won't be hardcorded as "Staff", but rather is depends on what's inputted in the parameter of the function.
+  #
+  #   - The __tablename__ annonation, its not something I've ever seen sir used in its flaskmvc repository.
+  #
+  #   - Points 2 & 4 from Rynnia
+  # -----------------------------------------------------------------------------------------------------------------------------
+
 
   def __str__(self):
         return f"Admin(id={self.adminID}, email={self.email})" 
