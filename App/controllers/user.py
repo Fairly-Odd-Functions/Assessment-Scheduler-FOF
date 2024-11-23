@@ -1,6 +1,29 @@
 from App.models import User, Admin, Staff
-    
 
+def validate_User(email, password, staffType):
+    systemUser = staffType.query.filter_by(email=email).first() #can this work?
+    #systemUser = User.query.filter_by(email=email).first() #or should it be this
+    if systemUser and systemUser.check_password(password):
+        return systemUser
+    return None
+
+def get_user(email, password):
+    for staffType in (Staff , Admin):
+        systemUser = validate_User(email, password, staffType)
+        if systemUser != None:
+            return systemUser
+    return None
+
+def get_uid(email):
+    for staffType in (Staff, Admin):
+        systemUser= staffType.query.filter_by(email=email).first()
+        if systemUser != None:
+            return systemUser.userID
+    return None
+
+
+
+''' Original Code
 def validate_Staff(email, password):
     staff = Staff.query.filter_by(email=email).first()
     if staff and staff.check_password(password):
@@ -27,3 +50,4 @@ def get_uid(email):
     if user:
         return user.userID
     return None
+'''
