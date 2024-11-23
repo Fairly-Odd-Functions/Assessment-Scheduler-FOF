@@ -1,16 +1,16 @@
 from App.models import Staff, CourseStaff
 from App.database import db
 
-def register_staff(firstName, lastName, userID, email, password): #staffType was removed from the first model update
+def register_staff(firstName, lastName, userID, email, password):
     #Check if email is already used by another lecturer ie. lecturer already registered
-    staff = db.session.query(Staff).filter(Staff.email == email).count()
+    staff = db.session.query(Staff).filter(Staff.email == email).count() # from the code I have seen so far they only store unique email address, but we should check if some one is already registed using their userID *New Comment
 
     if staff == 0:
         newLect = Staff.register(firstName, lastName, userID, email, password)
         return newLect
     return None
 
-def login_staff(email, password):
+def login_staff(email, password): #I'll need to vaiadate the staff *New Comment
     staff = db.session.query(Staff).filter(Staff.email==email).first()
     if staff != None:
         if staff.check_password(password):
