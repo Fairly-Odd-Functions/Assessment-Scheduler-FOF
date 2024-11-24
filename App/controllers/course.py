@@ -42,6 +42,9 @@ def get_course(courseCode, offeredSemester):
     except Exception as e:
         print(f"Error While Trying to Find Course: {e}") 
         return None 
+    
+def get_list_coursecode(courseCode):
+    return Course.query.filter_by(courseCode=courseCode).all()
 
 def edit_course(review, staff, is_positive, comment):
     if review.reviewer == staff:
