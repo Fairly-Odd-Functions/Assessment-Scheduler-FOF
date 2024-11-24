@@ -34,5 +34,13 @@ def custom_clash_rule(clashRuleID, userID, clashRuleTitle, clashRuleDescription,
     except Exception as e:
         print(f"Error Adding New Rule: {e}")
         db.session.rollback() 
+        return None
+
+def list_clash_rules():
+    try:
+        return ClashRule.query.all()
+    
+    except Exception as e:
+        print(f"Error While Trying to List Clash Rules: {e}") 
         return None 
 
