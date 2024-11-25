@@ -10,9 +10,6 @@ class Course(db.Model):
     courseDescription = db.Column(db.String(1024), nullable=False)
     courseLevel = db.Column(db.Integer, nullable=False)
 
-    # Relationships
-    offerings = db.relationship('CourseOffering', backref='course', lazy=True)
-
     def __init__(self, courseCode, courseTitle, courseCredits=0, courseDescription="", courseLevel=1):
         self.courseCode = courseCode
         self.courseTitle = courseTitle

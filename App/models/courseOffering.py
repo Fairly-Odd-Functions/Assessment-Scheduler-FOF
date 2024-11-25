@@ -10,6 +10,10 @@ class CourseOffering(db.Model):
     academicYear = db.Column(db.String(9), nullable=False)
     totalStudentsEnrolled = db.Column(db.Integer, default=0)
 
+    # Relationships
+    course = db.relationship('Course', backref='course_offerings')
+    semester = db.relationship('Semester', backref='semester_offerings')
+
     def __init__(self, courseCode, semesterID, academicYear, totalStudentsEnrolled=0):
         self.courseCode = courseCode
         self.semesterID = semesterID
