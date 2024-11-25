@@ -9,6 +9,7 @@ class Assessment(db.Model):
     assessmentType = db.Column(db.String(120),nullable=False)
     startDate = db.Column(db.Date)
     dueDate = db.Column(db.Date)
+    
 
     def __init__(self, assessmentID, courseCode, assessmentTitle, assessmentType, startDate, dueDate):
         self.assessmentID = assessmentID
@@ -16,29 +17,17 @@ class Assessment(db.Model):
         self.assessmentTitle = assessmentTitle
         self.assessmentType = assessmentType
         self.startDate = startDate
-        self.dueDate = dueDate    
+        self.dueDate = dueDate
+
+    
 
     def get_json(self):
         return {
-            'assessmentID': self.assessmentID,
-            'courseCode': self.courseCode,
-            'assessmentTitle': self.assessmentTitle,
-            'assessmentType': self.assessmentType,
-            'startDate': self.startDate,
-            'dueDate': self.dueDate
-        }  
-    
-    def __str__(self):
-        return f"assessmentID={self.assessmentID}, 
-                courseCode={self.courseCode}, 
-                assessmentTitle={self.assessmentTitle}, 
-                assessmentType={self.assessmentType}, 
-                startDate={self.startDate}, 
-                dueDate={self.dueDate}"
-
-    def __repr__(self):
-        return (f"<Assessment: {self.assessmentTitle} | "
-                f"Course Code: {self.courseCode} | "
-                f"Type: {self.assessmentType} | "
-                f"Start Date: {self.startDate} | "
-                f"Due Date: {self.dueDate}>")
+        "assessmentID" : self.assessmentID,
+        "courseCode" : self.courseCode,
+        "assessmentTitle" : self.assessmentTitle,
+        "assessmentType" : self.assessmentType,
+        "startDate" : self.startDate,
+        "dueDate" : self.dueDate
+        
+        }     
