@@ -1,25 +1,39 @@
 from App.database import db
-from .course import Course
 from .staff import Staff
 
 class CourseStaff(db.Model):
-  __tablename__ = 'courseStaff'
+    __tablename__ = 'courseStaff'
 
-  id = db.Column(db.Integer, primary_key= True, autoincrement=True)
-  u_ID = db.Column(db.Integer, db.ForeignKey('staff.u_ID'), nullable=False)
-  courseCode = db.Column(db.String(120), db.ForeignKey('course.courseCode'), nullable=False)
+    # Attributes
+    courseStaffID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    courseCode = db.Column(db.String(9), db.ForeignKey('course.courseCode'), nullable=False)
+    staffID = db.Column(db.Integer, db.ForeignKey('staff.staffID'), nullable=False)
 
-def __init__(self, u_ID, courseCode):
-  self.u_ID = u_ID
-  self.courseCode = courseCode
+    # Relationships
+    course = db.relationship('Course', backref='course_staff')
+    staff = db.relationship('Staff', backref='assigned_courses')
 
-def to_json(self):
-  return{
-    "u_ID":self.u_ID,
-    "courseCode":self.courseCode,
-  }
+    def __init__(self, courseCode, staffEmail):
+        self.courseCode = courseCode
 
-#Add new CourseStaff
-def addCourseStaff(self):
-  db.session.add(self)
-  db.session.commit()
+        # Fetching StaffID Using Email
+        staff = Staff.query.filter_by(email=staffEmail).first()
+        if staff is None:
+            raise ValueError(f"No Staff Found With email: {staffEmail}")
+        self.staffID = staff.staffID
+
+    def get_json(self):
+        return {
+            "courseCode": self.courseCode,
+            "staffID": self.staffID,
+            "staffEmail": self.staff.email
+        }
+
+    def __str__(self):
+        return f"CourseStaff(courseCode='{self.courseCode}', staffEmail='{self.staff.email}')"
+
+    def __repr__(self):
+        return (
+            f"CourseStaff(courseStaffID={self.courseStaffID}, courseCode='{self.courseCode}', "
+            f"staffID={self.staffID}, staffEmail='{self.staff.email}')"
+        )
