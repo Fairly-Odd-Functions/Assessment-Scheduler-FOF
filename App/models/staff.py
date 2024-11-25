@@ -15,7 +15,7 @@ class Staff(User):
 
   def get_json(self):
     return {
-        "irst_name": self.firstName,
+        "first_name": self.firstName,
         "last_name": self.lastName,
         "email": self.email
     } 
