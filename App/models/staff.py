@@ -1,32 +1,24 @@
-import flask_login
 from App.database import db
 from .user import User
-import enum
-from flask_login import UserMixin
 
 class Staff(User):
   __tablename__ = 'staff'
   staffID = db.Column(db.Integer, db.ForeignKey('user.userID'), primary_key=True)
-  
-  
+
   __mapper_args__ ={
     'polymorphic_identity': 'staff'
   }
 
-  def __init__(self, userID, firstName, lastName, password, email):
-    super().__init__(userID, firstName, lastName, password, email)
-  
-  def get_id(self):
-    return self.u_ID 
+  def __init__(self, firstName, lastName, password, email):
+    # Passing Relevant Fields To User Constructor
+    super().__init__(firstName, lastName, password, email)
 
-  def to_json(self):
+  def get_json(self):
     return {
-        "staff_ID": self.staffID,
+        "irst_name": self.firstName,
+        "last_name": self.lastName,
+        "email": self.email
     } 
-  
-  def login(self):
-    return flask_login.login_user(self)
 
   def __str__(self):
-        return f"Staff(id={self.userID}, email={self.email})"
-
+        return f"Staff(ID={self.staffID}, email={self.email})"
