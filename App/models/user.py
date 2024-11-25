@@ -1,7 +1,9 @@
 from App.database import db
 from werkzeug.security import check_password_hash, generate_password_hash
+from flask_login import UserMixin
+from flask_login import UserMixin
 
-class User(db.Mode):
+class User(db.Model, UserMixin):
     __tablename__ = 'user'
     
     userID = db.Column(db.Integer, unique=True, primary_key=True) 
@@ -9,14 +11,16 @@ class User(db.Mode):
     lastName = db.Column(db.String(120), nullable=False)
     password = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique = True)
+    type = db.Column(db.String(120))
 
+    
     __mapper_args__ = {
         'polymorphic_identity': 'user',
         'polymorphic_on': 'type'
     }
 
-    def __init__(self, staffID, firstName, lastName, password, email):
-        self.staffD = staffID
+    def __init__(self, userID, firstName, lastName, password, email):
+        self.userID = userID
         self.firstName = firstName
         self.lastName = lastName
         self.set_password(password)
@@ -30,16 +34,14 @@ class User(db.Mode):
         """Check hashed password."""
         return check_password_hash(self.password, password)
     
-    def get_json(self):
-        return {
+    def to_json(self):
+	    return {
+            "userID": self.userID,
             "firstName": self.firstName,
             "lastName": self.lastName,
             "password": self.password,
-            "email": self.email
+            "email":self.email
         }
         
     def __str__(self):
-        return f"Staff(id={self.userID}, 
-                firstName={self.firstName}, 
-                lastName={self.lastName}, 
-                email={self.email})"
+        return f"Staff(id={self.userID}, email={self.email})"
