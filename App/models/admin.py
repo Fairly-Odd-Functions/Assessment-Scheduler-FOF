@@ -1,15 +1,24 @@
 from App.database import db
-from .user import User  
-from flask_login import UserMixin, login_user
-import flask_login
-from flask_login import UserMixin, login_user
-import flask_login
+from App.models import User 
 
-class Admin(User,UserMixin):
+class Admin(User):
   __tablename__ = 'admin'
+  adminID = db.Column(db.Integer, db.ForeignKey('user.userID'), primary_key=True)
 
-  def login(self):
-      return flask_login.login_user(self)
+  __mapper_args__ ={
+    'polymorphic_identity': 'admin'
+  }
   
-  def __init__(self, u_ID, password, email):
-    super().__init__(u_ID, password, email)
+  def __init__(self, adminID, firstName, lastName, password, email):
+    # Calling the constructor of the parent class (User) with the provided arguments
+    super().__init__(adminID, firstName, lastName, password, email)
+
+  def __str__(self):
+    return f"Admin(id={self.adminID}, email={self.email})" 
+  
+  def get_json(self):
+    return {
+      "firstName": self.firstName,
+      "lastName": self.lastName,
+      "email": self.email
+    }  
