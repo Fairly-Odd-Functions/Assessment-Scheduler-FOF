@@ -33,31 +33,50 @@ def list_Courses():
         return None 
  
 
-def get_course(courseCode, offeredSemester):
+def get_course(courseCode):
     try:
-        course = Course.query.filter_by(courseCode = courseCode, offeredSemester=offeredSemester).first()
+        course = Course.query.filter_by(courseCode = courseCode).first()
         if not course:
             return {"Error Message": "Course Not Found"}
-        return {"Course Found" : course}
+        return course
+    
     except Exception as e:
         print(f"Error While Trying to Find Course: {e}") 
         return None 
     
+
 def get_list_coursecode(courseCode):
     return Course.query.filter_by(courseCode=courseCode).all()
 
-def edit_course(review, staff, is_positive, comment):
-    if review.reviewer == staff:
-        review.isPositive = is_positive
-        review.comment = comment
-        db.session.add(review)
-        db.session.commit()
-        return review
-    return None    
 
-def delete_Course(courseCode, offeredSemester): #parameter should be updated e.g. delete_Course(courseCode, offeredSemester) for unique identification, since different courses can have the same course codes but are offered during differnet semesters *New Comment
+def edit_course(course, courseTitle=None, courseDescription=None, courseCredits=None, courseLevel=None, offeredSemester=None):
+
     try:
-        course = Course.query.filter_by(courseCode = courseCode, offeredSemester=offeredSemester).first()
+        # Updating respective attributes only if new values are provided
+        if courseTitle is not None:
+            course.courseTitle = courseTitle
+        if courseDescription is not None:
+            course.courseDescription = courseDescription
+        if courseCredits is not None:
+            course.courseCredits = courseCredits
+        if courseLevel is not None:
+            course.courseLevel = courseLevel
+        if offeredSemester is not None:
+            course.offeredSemester = offeredSemester
+
+        db.session.add(course)
+        db.session.commit()
+
+        return course
+    except Exception as e:
+        print(f"Error editing course: {e}")
+        db.session.rollback()
+        return None
+ 
+
+def delete_Course(courseCode):
+    try:
+        course = Course.query.filter_by(courseCode = courseCode).first()
         if not course:
             return {"Error Message": "Course Not Found"}
         db.session.delete(course)
