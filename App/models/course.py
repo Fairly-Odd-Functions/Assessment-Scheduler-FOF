@@ -1,38 +1,37 @@
 from App.database import db
 
 class Course(db.Model):
-  __tablename__ = 'course'
+    __tablename__ = 'course'
 
-  courseCode = db.Column(db.String(9), primary_key=True)
-  courseTitle = db.Column(db.String(120), nullable=False)
-  description = db.Column(db.String(1024), nullable=False)
-  level = db.Column(db.Integer, nullable=False)
-  semester = db.Column(db.Integer, nullable=False)
-  aNum = db.Column(db.Integer, nullable=False, default=0)
-  # creates reverse relationship from Course back to Assessment to access assessments for a specific course
-  # assessmentsAssigned = db.relationship('assessment', backref=db.backref('assessment', lazy='joined'))
+    # Attributes
+    courseCode = db.Column(db.String(9), primary_key=True)
+    courseTitle = db.Column(db.String(120), nullable=False)
+    courseCredits = db.Column(db.Integer, default=0)
+    courseDescription = db.Column(db.String(1024), nullable=False)
+    courseLevel = db.Column(db.Integer, nullable=False)
 
-  def __init__(self, courseCode, courseTitle, description, level, semester, aNum):
-    self.courseCode = courseCode
-    self.courseTitle = courseTitle
-    self.description = description
-    self.level = level
-    self.semester = semester
-    self.aNum = aNum
+    def __init__(self, courseCode, courseTitle, courseCredits=0, courseDescription="", courseLevel=1):
+        self.courseCode = courseCode
+        self.courseTitle = courseTitle
+        self.courseCredits = courseCredits
+        self.courseDescription = courseDescription
+        self.courseLevel = courseLevel
 
-  def to_json(self):
-    return {
-      "courseCode" : self.courseCode,
-      "courseTitle" : self.courseTitle,
-      "description" : self.description,
-      "level" : self.level,
-      "semester" : self.semester,
-      "aNum" : self.aNum,
-    }
+    def get_json(self):
+        return {
+            "courseCode": self.courseCode,
+            "courseTitle": self.courseTitle,
+            "courseCredits": self.courseCredits,
+            "courseDescription": self.courseDescription,
+            "courseLevel": self.courseLevel,
+        }
 
-  #Add new Course
-  def addCourse(courseCode, courseTitle, description, level, semester, aNum):
-    newCourse = Course(courseCode, courseTitle, description, level, semester, aNum)
-    db.session.add(newCourse)  #add to db
-    db.session.commit()
-    return newCourse
+    def __str__(self):
+        return f"{self.courseTitle} ({self.courseCode}) - {self.courseCredits} credits, Level {self.courseLevel}"
+
+    def __repr__(self):
+        return (
+            f"Course(courseCode='{self.courseCode}', courseTitle='{self.courseTitle}', "
+            f"courseCredits={self.courseCredits}, courseDescription='{self.courseDescription[:30]}...', "
+            f"courseLevel={self.courseLevel})"
+        )
