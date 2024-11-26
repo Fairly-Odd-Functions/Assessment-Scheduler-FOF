@@ -18,8 +18,7 @@ class User(db.Model):
         'polymorphic_identity': 'user',
     }
 
-    def __init__(self, userID, firstName, lastName, password, email, user_type):
-        self.staffD = userID
+    def __init__(self, firstName, lastName, password, email, user_type):
         self.firstName = firstName
         self.lastName = lastName
         self.set_password(password)
