@@ -9,7 +9,7 @@ from datetime import timedelta
 # Clash Rule for Validation of Assesment Schedule by Programm
 # -> Checks whether an assessment for a course clashes with another assessment
 #    in the same degree programme, on the same day.
-def validate_by_degree(courseCode, assessment, start_date, end_date):
+def validate_by_degree(courseCode,start_date, end_date):
 
     # Retrieving all programmes associated with the given course
     related_programmes = CourseProgramme.query.filter_by(courseCode=courseCode).all()
@@ -38,7 +38,7 @@ def validate_by_degree(courseCode, assessment, start_date, end_date):
 # -> Checks all courses scheduled on the same day to see if the number of students 
 #    taking each of those courses exceeds the threshold, calculated based 
 #    on the percentage of overlapping student enrollment.m
-def validate_by_student_overlap(courseCode, assessment, startDate, dueDate, overlap_threshold):
+def validate_by_student_overlap(courseCode,startDate, dueDate, overlap_threshold):
     
     # Getting all courses which overlap schedule
     overlaping_courses = CourseAssessment.query.filter(
