@@ -1,7 +1,7 @@
 from App.database import db
 from werkzeug.security import check_password_hash, generate_password_hash
 
-class User(db.Mode):
+class User(db.Model):
     __tablename__ = 'user'
     
     #Attributes
@@ -12,19 +12,19 @@ class User(db.Mode):
     email = db.Column(db.String(120), nullable=False, unique = True)
 
     #Distinguishes between different user types ('admin', 'staff')
-    type = db.Column(db.String(30))
+    user_type = db.Column(db.String(30))
 
     __mapper_args__ = {
         'polymorphic_identity': 'user',
     }
 
-    def __init__(self, userID, firstName, lastName, password, email, type):
+    def __init__(self, userID, firstName, lastName, password, email, user_type):
         self.staffD = userID
         self.firstName = firstName
         self.lastName = lastName
         self.set_password(password)
         self.email = email
-        self.type = type
+        self.user_type = user_type
 
     def set_password(self, password):
         """Create hashed password."""
