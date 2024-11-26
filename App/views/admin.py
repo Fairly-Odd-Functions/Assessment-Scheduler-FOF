@@ -7,22 +7,6 @@ from werkzeug.utils import secure_filename
 import os, csv
 from datetime import datetime
 
-from App.controllers.course import (
-    add_Course,
-    list_Courses,
-    get_course,
-    delete_Course
-)
-
-from App.controllers.semester import(
-    add_sem
-)
-
-from App.controllers.courseAssessment import(
-    get_clashes,
-    get_CourseAsm_id
-)
-
 admin_views = Blueprint('admin_views', __name__, template_folder='../templates')
 
 # Gets Semester Details Page

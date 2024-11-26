@@ -1,7 +1,5 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for
 from App.models import Staff, Admin
-from App.controllers.admin import login_admin
-from App.controllers.staff import login_staff
 from App.database import db
 
 user_views = Blueprint('user_views', __name__, template_folder='../templates')

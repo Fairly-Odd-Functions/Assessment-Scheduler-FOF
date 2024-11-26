@@ -42,10 +42,12 @@ class User(db.Model):
         }
 
     def __str__(self):
-        return f"Staff(id={self.userID}, 
-                firstName={self.firstName}, 
-                lastName={self.lastName}, 
-                email={self.email})"
+        return (
+            f"Staff(id={self.userID}, "
+            f"firstName={self.firstName}, "
+            f"lastName={self.lastName}, "
+            f"email={self.email})"
+        )
 
     def __repr__(self):
         return (

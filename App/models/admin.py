@@ -23,7 +23,7 @@ class Admin(User):
       }
 
     def __str__(self):
-      return f"Admin(firstname={self.adminID}, email={self.email})"
+      return f"Admin(userID={self.adminID}, firstname={self.firstName}, lastname={self.lastName}, email={self.email})"
 
     def __repr__(self):
       return (

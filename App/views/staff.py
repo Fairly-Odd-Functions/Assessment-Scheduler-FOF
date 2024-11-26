@@ -14,31 +14,6 @@ from flask_jwt_extended import jwt_required
 from datetime import date, timedelta
 import time
 
-from App.controllers.staff import (
-    register_staff,
-    login_staff,
-    add_CourseStaff,
-    get_registered_courses,
-)
-
-from App.controllers.course import (
-    list_Courses
-)
-
-from App.controllers.user import(
-    get_uid
-)
-
-from App.controllers.courseAssessment import(
-    get_CourseAsm_id,
-    get_CourseAsm_code,
-    add_CourseAsm,
-    delete_CourseAsm,
-    list_Assessments,
-    get_Assessment_id,
-    get_Assessment_type
-)
-
 staff_views = Blueprint('staff_views', __name__, template_folder='../templates')
 
 # Gets Signup Page

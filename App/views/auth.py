@@ -1,7 +1,6 @@
 from flask import Blueprint, flash, redirect, request, jsonify, render_template, url_for, make_response
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, current_user, unset_jwt_cookies, set_access_cookies
 from flask_login import logout_user
-from App.controllers.auth import login
 from App.models.user import User
 from App.models.staff import Staff
 from App.models.admin import Admin
