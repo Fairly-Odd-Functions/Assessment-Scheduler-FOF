@@ -1,33 +1,58 @@
-from App.models import Course
 from App.database import db
+from App.models import Course
 
-def add_Course(courseCode, courseTitle, description, level, semester, aNum):
-    # Check if courseCode is already in db ie. course was already added
-    course = Course.query.get(courseCode)
-    if course: 
-        return course
-    else:
-         #Add new Course
-        newCourse = Course.addCourse(courseCode, courseTitle, description, level, semester, aNum)
-        return newCourse
-    return None        
+def add_course(courseCode, courseTitle, courseCredits, courseDescription, courseLevel):
+    try:
+        existing_course = Course.query.get(courseCode)
+        if existing_course: 
+            return {"Error": "Course With This courseCode Already Exists"}
 
-def list_Courses():
-    return Course.query.all() 
+        new_course = Course(
+            courseCode=courseCode,
+            courseTitle=courseTitle,
+            courseCredits=courseCredits,
+            courseDescription=courseDescription,
+            courseLevel=courseLevel
+        )
+
+        db.session.add(new_course)
+        db.session.commit()
+        return {"Message": "New Course Added", "Course": new_course.get_json()}
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error while adding course: {e}")
+        return {"Error": "An error occurred while adding the course"}
+
+def list_courses():
+    courses = Course.query.all()
+    return [course.get_json() for course in courses] 
 
 def get_course(courseCode):
-    return Course.query.filter_by(courseCode=courseCode).first()
+    course = Course.query.filter_by(courseCode=courseCode).first()
+    if not course:
+        return {"Error": "Course Not Found"}
+    return course.get_json()
 
-def edit_course(review, staff, is_positive, comment):
-    if review.reviewer == staff:
-        review.isPositive = is_positive
-        review.comment = comment
-        db.session.add(review)
+def edit_course(courseCode, new_courseTitle=None, new_courseCredits=None, new_courseDescription=None, new_courseLevel=None):
+    try:
+        course = Course.query.filter_by(courseCode=courseCode).first()
+        if not course:
+            return {"Error": "Course not found"}
+
+        if new_courseTitle:
+            course.courseTitle = new_courseTitle
+        if new_courseCredits:
+            course.courseCredits = new_courseCredits
+        if new_courseDescription:
+            course.courseDescription = new_courseDescription
+        if new_courseLevel:
+            course.courseLevel = new_courseLevel
+
         db.session.commit()
-        return review
-    return None    
-
-def delete_Course(course):
-    db.session.delete(course)
-    db.session.commit()
-    return True     
+        return {"Message": "Course Updated", "Course": course.get_json()}
+    
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error while updating course: {e}")
+        return {"Error": "An error occurred while updating the course"}
