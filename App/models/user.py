@@ -4,23 +4,27 @@ from werkzeug.security import check_password_hash, generate_password_hash
 class User(db.Mode):
     __tablename__ = 'user'
     
+    #Attributes
     userID = db.Column(db.Integer, unique=True, primary_key=True) 
     firstName = db.Column(db.String(120), nullable=False) 
     lastName = db.Column(db.String(120), nullable=False)
     password = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique = True)
 
+    #Distinguishes between different user types ('admin', 'staff')
+    type = db.Column(db.String(30))
+
     __mapper_args__ = {
         'polymorphic_identity': 'user',
-        'polymorphic_on': 'type'
     }
 
-    def __init__(self, staffID, firstName, lastName, password, email):
-        self.staffD = staffID
+    def __init__(self, userID, firstName, lastName, password, email, type):
+        self.staffD = userID
         self.firstName = firstName
         self.lastName = lastName
         self.set_password(password)
         self.email = email
+        self.type = type
 
     def set_password(self, password):
         """Create hashed password."""
@@ -43,3 +47,9 @@ class User(db.Mode):
                 firstName={self.firstName}, 
                 lastName={self.lastName}, 
                 email={self.email})"
+    
+    def __repr__(self):
+        return (
+            f"Staff(userID={self.userID}, firstName='{self.firstName}', "
+            f"lastName='{self.lastName}', email='{self.email}')"
+        )
