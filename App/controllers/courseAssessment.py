@@ -1,45 +1,78 @@
-from App.models import CourseAssessment
-from App.models import Assessment
-from App.models import Course
 from App.database import db
+from App.models import Course, Assessment, CourseAssessment
 
-def add_CourseAsm(courseCode, a_ID, startDate, endDate, startTime, endTime, clashDetected):
-    #Add new Assessment to Course
-    # newAsm = addCourseAsg(courseCode, a_ID, startDate, endDate, startTime, endTime)
-    # return newAsm
-    newAsg = CourseAssessment(courseCode, a_ID, startDate, endDate, startTime, endTime, clashDetected)
-    db.session.add(newAsg)  #add to db
-    db.session.commit()
-    return newAsg
+# Link New Course Assessment To Relevant Code
+def add_course_assessment(courseCode, assessmentID, startDate, dueDate):
+    try:
+        course = Course.query.get(courseCode)
+        if not course:
+            return {"Error": "Course with this courseCode does not exist"}
 
-def list_Assessments():
-    return Assessment.query.all()  
+        assessment = Assessment.query.get(assessmentID)
+        if not assessment:
+            return {"Error": "Assessment with this assessmentID does not exist"}
 
-def get_Assessment_id(aType):
-    assessment=Assessment.query.filter_by(category=aType).first()
-    return assessment.a_ID
+        new_course_assessment = CourseAssessment(
+            courseCode=courseCode,
+            assessmentID=assessmentID,
+            startDate=startDate,
+            dueDate=dueDate
+        )
 
-def get_Assessment_type(id):
-    assessment=Assessment.query.filter_by(a_ID=id).first()
-    return assessment.category.name
+        db.session.add(new_course_assessment)
+        db.session.commit()
 
-def get_CourseAsm_id(id):
-    return CourseAssessment.query.filter_by(id=id).first()   
+        return {"Message": "Course and Assessment successfully associated", "CourseAssessment": new_course_assessment.get_json()}
 
-def get_CourseAsm_code(code):
-    return CourseAssessment.query.filter_by(courseCode=code).all()
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error while adding course assessment: {e}")
+        return {"Error": "An error occurred while associating the course with the assessment"}
 
-def get_CourseAsm_level(level):
-    courses = Course.query(level=level).all()
-    assessments=[]
-    for c in courses:
-        assessments = assessments + get_CourseAsm_code(c)
-    return assessments
+# List All Assessments For A Specific Course (Throughout Time)
+def list_course_assessments(courseCode):
+    try:
+        course_assessments = CourseAssessment.query.filter_by(courseCode=courseCode).all()
+        
+        if not course_assessments:
+            return {"Message": f"No assessments found for course {courseCode}"}
+        return {"CourseAssessments": [assessments.get_json() for assessments in course_assessments]}
 
-def delete_CourseAsm(courseAsm):
-    db.session.delete(courseAsm)
-    db.session.commit()
-    return True        
-     
-def get_clashes():
-    return CourseAssessment.query.filter_by(clashDetected=True).all()
+    except Exception as e:
+        print(f"Error while listing course assessments: {e}")
+        return {"Error": "An error occurred while fetching course assessments"}
+
+# Get Specific Course Assessment Via AssessmentID
+def get_course_assessment(courseAssessmentID):
+    try:
+        course_assessment = CourseAssessment.query.get(courseAssessmentID)
+        
+        if not course_assessment:
+            return {"Error": "CourseAssessment not found"}
+        return {"CourseAssessment": course_assessment.get_json()}
+
+    except Exception as e:
+        print(f"Error while fetching course assessment: {e}")
+        return {"Error": "An error occurred while fetching the course assessment"}
+
+# Unlink CourseAssessment From Course | Deletes The Associated Assessment As Well
+def delete_course_assessment(courseAssessmentID):
+    try:
+        course_assessment = CourseAssessment.query.get(courseAssessmentID)
+
+        if not course_assessment:
+            return {"Error": "CourseAssessment not found"}
+
+        assessment = course_assessment.assessment
+
+        if not assessment.assessment_courses:  # Safe Guard
+            db.session.delete(assessment)
+
+        db.session.delete(course_assessment)
+        db.session.commit()
+        return {"Message": "CourseAssessment and associated Assessment deleted"}
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error while deleting course assessment: {e}")
+        return {"Error": "An error occurred while deleting the course assessment"}
