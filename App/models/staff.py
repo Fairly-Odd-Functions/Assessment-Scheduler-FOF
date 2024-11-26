@@ -2,23 +2,25 @@ from App.database import db
 from .user import User
 
 class Staff(User):
-  __tablename__ = 'staff'
-  staffID = db.Column(db.Integer, db.ForeignKey('user.userID'), primary_key=True)
+    __tablename__ = 'staff'
 
-  __mapper_args__ ={
-    'polymorphic_identity': 'staff'
-  }
+    # Attributes
+    staffID = db.Column(db.Integer, db.ForeignKey('user.userID'), primary_key=True)
 
-  def __init__(self, firstName, lastName, password, email):
-    # Passing Relevant Fields To User Constructor
-    super().__init__(firstName, lastName, password, email, user_type='staff')
+    __mapper_args__ ={
+      'polymorphic_identity': 'staff'
+    }
 
-  def get_json(self):
-    return {
-        "first_name": self.firstName,
-        "last_name": self.lastName,
-        "email": self.email
-    } 
+    def __init__(self, firstName, lastName, password, email):
+      # Passing Relevant Fields To User Constructor
+      super().__init__(firstName, lastName, password, email, user_type='staff')
 
-  def __str__(self):
-        return f"Staff(ID={self.staffID}, email={self.email})"
+    def get_json(self):
+      return {
+          "first_name": self.firstName,
+          "last_name": self.lastName,
+          "email": self.email
+      }
+
+    def __str__(self):
+          return f"Staff(ID={self.staffID}, email={self.email})"

@@ -2,9 +2,10 @@ from .user import *
 from .admin import *
 from .staff import *
 from .course import *
+from .semester import *
 from .programme import *
 from .assessment import *
 from .courseStaff import *
-from .courseAssessment import *
+from .courseOffering import *
 from .courseProgramme import *
-from .semester import *
+from .courseAssessment import *

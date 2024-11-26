@@ -3,15 +3,15 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 class User(db.Model):
     __tablename__ = 'user'
-    
-    #Attributes
+
+    # Attributes
     userID = db.Column(db.Integer, unique=True, primary_key=True) 
     firstName = db.Column(db.String(120), nullable=False) 
     lastName = db.Column(db.String(120), nullable=False)
     password = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique = True)
 
-    #Distinguishes between different user types ('admin', 'staff')
+    # Distinguishes between different user types ('admin', 'staff')
     user_type = db.Column(db.String(30))
 
     __mapper_args__ = {
@@ -32,7 +32,7 @@ class User(db.Model):
     def check_password(self, password):
         """Check hashed password."""
         return check_password_hash(self.password, password)
-    
+
     def get_json(self):
         return {
             "firstName": self.firstName,
@@ -40,13 +40,13 @@ class User(db.Model):
             "password": self.password,
             "email": self.email
         }
-        
+
     def __str__(self):
         return f"Staff(id={self.userID}, 
                 firstName={self.firstName}, 
                 lastName={self.lastName}, 
                 email={self.email})"
-    
+
     def __repr__(self):
         return (
             f"Staff(userID={self.userID}, firstName='{self.firstName}', "
