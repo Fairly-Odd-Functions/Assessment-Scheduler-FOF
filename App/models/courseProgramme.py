@@ -1,17 +1,40 @@
 from App.database import db
+from App.models import Programme
+from App.models import Course
 
 class CourseProgramme(db.Model):
   __tablename__ = 'courseProgramme'
 
-  courseCode = db.Column(db.String(8), db.ForeignKey('course.courseCode'), primary_key=True, nullable = False)
-  p_ID = db.Column(db.Integer, db.ForeignKey('programme.p_ID'), primary_key=True, nullable = False)  
+  #Attributes
+  courseProgrammeID = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+  programmeID = db.Column(db.Integer, db.ForeignKey('programme.programmeID'), nullable = False)   
+  courseCode = db.Column(db.String(8), db.ForeignKey('course.courseCode'), nullable = False)
 
-  def __init__(self, id, courseCode, p_ID):
+  #Relationships
+  course = db.relationship('Course', backref='programme', lazy='joined')
+  programme = db.relationship('Programme', backref='course', lazy='joined')
+ 
+  def __init__(self, programmeID, courseCode):
+    self.programmeID = programmeID
     self.courseCode = courseCode
-    self.p_ID = p_ID
     
-  def to_json(self):
+  def get_json(self):
     return {
-      "courseCode": self.courseCode,
-      "programmeID": self.p_ID
-    }  
+        'courseProgrammeID': self.courseProgrammeID,
+        'programmeID': self.programmeID,
+        'courseCode': self.courseCode
+    } 
+  
+  def __str__(self):
+    return (
+        f"CourseProgramme(programmeTitle={self.programme.programmeTitle}, "
+        f"courseCode={self.course.courseCode}, "
+        f"courseTitle={self.course.courseTitle})"
+    )
+
+  def __repr__(self):
+      return (
+          f"<CourseProgramme(programmeTitle: '{self.programme.programmeTitle}' | "
+          f"courseCode: '{self.course.courseCode}' | "
+          f"courseTitle: '{self.course.courseTitle}')>"
+      )
