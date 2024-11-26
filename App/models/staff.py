@@ -11,7 +11,7 @@ class Staff(User):
 
   def __init__(self, firstName, lastName, password, email):
     # Passing Relevant Fields To User Constructor
-    super().__init__(firstName, lastName, password, email)
+    super().__init__(firstName, lastName, password, email, user_type='staff')
 
   def get_json(self):
     return {
