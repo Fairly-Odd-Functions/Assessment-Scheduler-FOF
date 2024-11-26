@@ -11,9 +11,9 @@ class Admin(User):
     'polymorphic_identity': 'admin'
   }
 
-  def __init__(self, firstName, lastName, password, email, type='admin'):
+  def __init__(self, firstName, lastName, password, email):
     # Calling the constructor of the parent class (User) with the provided arguments
-    super().__init__(firstName, lastName, password, email, type)
+    super().__init__(firstName, lastName, password, email, user_type='admin')
 
   def get_json(self):
     return {
