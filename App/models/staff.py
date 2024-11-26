@@ -23,4 +23,4 @@ class Staff(User):
       }
 
     def __str__(self):
-          return f"Staff(ID={self.staffID}, email={self.email})"
+          return f"Staff(userID={self.staffID}, firstname={self.firstName}, lastname={self.lastName}, email={self.email})"
