@@ -13,27 +13,22 @@ class CourseStaff(db.Model):
     course = db.relationship('Course', backref='course_staff')
     staff = db.relationship('Staff', backref='assigned_courses')
 
-    def __init__(self, courseCode, staffEmail):
+    def __init__(self, courseCode, staffID):
         self.courseCode = courseCode
-
-        # Fetching StaffID Using Email
-        staff = Staff.query.filter_by(email=staffEmail).first()
-        if staff is None:
-            raise ValueError(f"No Staff Found With email: {staffEmail}")
-        self.staffID = staff.staffID
+        self.staffID = staffID
 
     def get_json(self):
         return {
             "courseCode": self.courseCode,
             "staffID": self.staffID,
-            "staffEmail": self.staff.email
+            "staffEmail": self.staff.email if self.staff else None
         }
 
     def __str__(self):
-        return f"CourseStaff(courseCode='{self.courseCode}', staffEmail='{self.staff.email}')"
+        return f"CourseStaff(courseCode='{self.courseCode}', staffID='{self.staffID}', staffEmail='{self.staff.email if self.staff else 'No email'}')"
 
     def __repr__(self):
         return (
             f"CourseStaff(courseStaffID={self.courseStaffID}, courseCode='{self.courseCode}', "
-            f"staffID={self.staffID}, staffEmail='{self.staff.email}')"
+            f"staffID={self.staffID}, staffEmail='{self.staff.email if self.staff else 'No email'}')"
         )
