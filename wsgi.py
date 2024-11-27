@@ -1,5 +1,6 @@
 import click, sys, csv
 from flask import Flask
+from datetime import datetime
 from App.main import create_app
 from App.database import db, get_migrate
 from flask.cli import with_appcontext, AppGroup
@@ -49,7 +50,46 @@ def fetch_semester_command(semester_name, academic_year):
     else:
         print("ERROR: Failed To Fetch Requested Semester.")
 
-# @semester_cli.command('update_semester', help="Updates Information For An Existing Semester")
+@semester_cli.command('update_semester', help="Updates Information For An Existing Semester")
+@click.option('--semester_name', '-s', prompt="Enter Semester Name", help="Name Of The Semester")
+@click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
+@click.option('--new_semester_name', '-snew', default=None, help="New Semester Name (Optional)")
+@click.option('--new_academic_year', '-anew', default=None, help="New Academic Year (Optional)")
+@click.option('--start_date', '-st', default=None, type=click.DateTime(formats=["%Y-%m-%d"]), help="New Start Date (Optional)")
+@click.option('--end_date', '-e', default=None, type=click.DateTime(formats=["%Y-%m-%d"]), help="New End Date (Optional)")
+def update_semester_command(semester_name, academic_year, new_semester_name, new_academic_year, start_date, end_date):
+    semester_to_update = Semester.query.filter_by(semesterName=semester_name, academicYear=academic_year).first()
+
+    if not semester_to_update:
+        print(f"ERROR: Semester '{semester_name}' for Academic Year '{academic_year}' Not Found.")
+        return
+
+    new_semester_name = new_semester_name or input(f"Enter New Semester Name (Current: {semester_to_update.semesterName}): ") or semester_to_update.semesterName
+    new_academic_year = new_academic_year or input(f"Enter New Academic Year (Current: {semester_to_update.academicYear}): ") or semester_to_update.academicYear
+    start_date = start_date or (input(f"Enter New Start Date (Current: {semester_to_update.startDate}): ") or semester_to_update.startDate)
+    end_date = end_date or (input(f"Enter New End Date (Current: {semester_to_update.endDate}): ") or semester_to_update.endDate)
+
+    if isinstance(start_date, str):
+        start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+    if isinstance(end_date, str):
+        end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+
+    updated_semester = update_semester(
+        semesterName=semester_name,
+        academicYear=academic_year,
+        new_semesterName=new_semester_name,
+        new_academicYear=new_academic_year,
+        startDate=start_date,
+        endDate=end_date
+    )
+
+    if updated_semester is None:
+        print("ERROR: Failed To Update The Semester.")
+    elif "Error Message" in updated_semester:
+        print(f"ERROR: {updated_semester['Error Message']}")
+    else:
+        print(f"SUCCESS: Semester '{semester_name}' Updated Successfully! Updated Details: {updated_semester['Semester Updated']}")
+
 # @semester_cli.command('list_semesters', help="Lists All Semesters")
 # @semester_cli.command('list_year_semesters', help="Lists All Semesters Based On Academic Year")
 # @semester_cli.command('list_semester_courses', help="List All Courses For A Specific Semester")

@@ -27,6 +27,10 @@ def add_semester(semesterName, academicYear, startDate, endDate):
 
 def update_semester(semesterName, academicYear, new_semesterName=None, new_academicYear=None, startDate=None, endDate=None):
     try:
+        errors = validate_dates(academicYear, startDate, endDate)
+        if errors:
+            return {"Error Message": errors}
+
         semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
         if not semester:
             return {"Error Message": f"Semester {semesterName} For {academicYear} Not Found"}
@@ -42,7 +46,7 @@ def update_semester(semesterName, academicYear, new_semesterName=None, new_acade
 
         db.session.commit()
 
-        return {"Semester Updated": semester.get_json()}
+        return {"Semester Updated": semester}
 
     except Exception as e:
         print(f"Error While Updating Semester: {e}")
