@@ -86,7 +86,7 @@ def update_staff(staffEmail, firstName=None, lastName=None, password=None, email
             # Checking If Email Is Unique
             if email and Staff.query.filter_by(email=email).first() != staff_member:
                 if Staff.query.filter_by(email=email).count() > 0:
-                    return {"error":"Email address is already in use by another staff member. Please choose a different email address."}
+                    return {"error":"Email Already In Use"}
                 staff_member.email = email
 
         db.session.commit()
@@ -99,10 +99,9 @@ def update_staff(staffEmail, firstName=None, lastName=None, password=None, email
 # Delete A Staff Member 
 def delete_staff(staffEmail):
     try:
-        # Return Message If Staff Member Not Found 
         staff_member = Staff.query.filter_by(email=staffEmail).first()
         if not staff_member:
-            return "Error: Staff member not found"
+            return None
 
         # Delete Course Associations
         CourseStaff.query.filter_by(staffID=staff_member.staffID).delete()
