@@ -135,25 +135,30 @@ class StaffUnitTest(unittest.TestCase):
         assert allStaff[2].email == "vincent.willson@gmail.com"
         '''
     
-    '''
+    
     #UNIT TEST  -#16: Remove a Staff from a Course
     def test_unit_16_remove_staff_from_course(self):
         newStaff1 = register_staff("Bob", "Cain", "bobpass", "bob.cain@gmail.com")
 
-        #addCourseToStaff = add_course_staff() #ISSUE WITH THIS FUNCTION
+        addCourseToStaff = add_staff_to_course("bob.cain@gmail.com" , "COMP 1601")
 
-        removeStaff = remove_staff_from_course("bob.cain@gmail.com", courseCode)
-    '''
+        removeStaff = remove_staff_from_course("bob.cain@gmail.com", "COMP 1601")
 
-    '''
+        print("Removed from Course:" , removeStaff) #Testing Output
+    
+
+    
     #UNIT TEST -#17: Check if a Staff is Assigned to a Course
     def test_unit_17_is_staff_assigned_to_course(self):
         newStaff1 = register_staff("Dot", "Ella", "dotpass", "dot.ella@gmail.com")
 
-        #addCourseToStaff = add_course_staff() #ISSUE WITH THIS FUNCTION
+        addCourseToStaff = add_staff_to_course("dot.ella@gmail.com", "COMP 1601") 
 
-        isAssigned = is_staff_assigned_to_course("dot.ella@gmail.com", courseCode)
-    '''
+        isAssigned = is_staff_assigned_to_course("dot.ella@gmail.com", "COMP 1601")
+
+        #print("Staff Assigned Courses:" , isAssigned) #Testing Output
+
+    
 
     #UNIT TEST -#18: Return Staff and their Assigned Courses
     def test_unit_18_get_staff_with_courses(self):
@@ -163,6 +168,6 @@ class StaffUnitTest(unittest.TestCase):
 
         getStaffCourses = get_staff_with_courses("fiona.gray@gmail.com")
 
-        print("Staff Info:" , getStaffCourses) #Testing Output
+        #print("Staff Info:" , getStaffCourses) #Testing Output
         
     
