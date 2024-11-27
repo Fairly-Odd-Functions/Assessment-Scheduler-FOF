@@ -137,3 +137,13 @@ class UserUnitTest(unittest.TestCase):
         staff = validate_Admin("sammy.dan@gmail.com", "sammypass")
 
         #print("Valid Admin : ", staff) #Testing Output
+
+
+    #UNIT TEST - #26: Get User
+    def test_unit_26_get_user(self):
+        user = create_user("Dean", "Sil", "deanpass", "dean.sil@gmail.com", "admin")
+        assert user.email == "dean.sil@gmail.com"
+
+        getUser = get_user("dean.sil@gmail.com", "deanpass")
+
+        #print("Get Admin : ", getUser) #Testing Output
