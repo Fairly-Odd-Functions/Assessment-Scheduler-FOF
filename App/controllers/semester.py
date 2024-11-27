@@ -1,8 +1,13 @@
 from App.database import db
 from App.models import Semester, CourseOffering
+from App.services.semester import validate_dates
 
 def add_semester(semesterName, academicYear, startDate, endDate):
     try:
+        errors = validate_dates(academicYear, startDate, endDate)
+        if errors:
+            return {"Error Message": errors}
+
         if not semesterName or not academicYear or not startDate or not endDate:
             return {"Error Message": "All fields are required"}
 

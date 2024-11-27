@@ -16,6 +16,36 @@ def init():
     print('Database Initialized!')
 
 """
+Semester Commands 
+Written by Jalene Armstrong (Jalene A) - Task 07.2.2. Semester Group Commands Implementation
+"""
+semester_cli = AppGroup('semester', help='Semester Object Commands')
+
+@semester_cli.command('add_semester', help="Creates Adds A New Semester")
+@click.option('--semester_name', '-n', prompt="Enter Semester Name", help="Name Of The Semester")
+@click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
+@click.option('--start_date', '-s', prompt="Enter Start Date (YYYY-MM-DD)", type=click.DateTime(formats=["%Y-%m-%d"]), help="Start Date Of The Semester")
+@click.option('--end_date', '-e', prompt="Enter End Date (YYYY-MM-DD)", type=click.DateTime(formats=["%Y-%m-%d"]), help="End Date Of The Semester")
+def add_semester_command(semester_name, academic_year, start_date, end_date):
+    new_semester = add_semester(semester_name, academic_year, start_date, end_date)
+
+    if new_semester and "New Semester Added" in new_semester:
+            print(f"SUCCESS: New semester '{semester_name}' Added For {academic_year}.")
+    elif new_semester and "Error Message" in new_semester:
+        print(f"ERROR: {new_semester['Error Message']}")
+    else:
+        print("ERROR: Something Went Wrong. Please Try Again.")
+
+# @semester_cli.command('get_semester', help="Gets Details For A Specific Semester")
+# @semester_cli.command('update_semester', help="Updates Information For An Existing Semester")
+# @semester_cli.command('list_semesters', help="Lists All Semesters")
+# @semester_cli.command('list_year_semesters', help="Lists All Semesters Based On Academic Year")
+# @semester_cli.command('list_semester_courses', help="List All Courses For A Specific Semester")
+
+app.cli.add_command(semester_cli)
+
+
+"""
 Admin Commands 
 Written by Jalene Armstrong (Jalene A) - Task 07.2.3. Admin Group Commands Implementation
 """
