@@ -98,17 +98,22 @@ def update_staff(staffEmail, firstName=None, lastName=None, password=None, email
 
 # Delete A Staff Member 
 def delete_staff(staffEmail):
-    staff_member = Staff.query.filter_by(email=staffEmail).first()
-    if not staff_member:
-        return None
+    try:
+        staff_member = Staff.query.filter_by(email=staffEmail).first()
+        if not staff_member:
+            return None
 
-    # Delete Course Associations
-    CourseStaff.query.filter_by(staffID=staff_member.staffID).delete()
+        # Delete Course Associations
+        CourseStaff.query.filter_by(staffID=staff_member.staffID).delete()
 
-    db.session.delete(staff_member)
-    db.session.commit()
+        db.session.delete(staff_member)
+        db.session.commit()
 
-    return staff_member
+        return "Staff member deleted successfully"
+    
+    except Exception as e:
+        db.session.rollback()
+        return f"Error deleting staff member: {str(e)}"
 
 # Get Staff By Email
 def get_staff_by_email(staffEmail):

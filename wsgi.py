@@ -26,65 +26,52 @@ staff_cli = AppGroup('staff', help='Staff object commands')
 
 # COMMAND #1 - ADD STAFF
 @staff_cli.command('add', help='Add a new staff member')
-def add_staff():
+@click.option('--firstname', prompt='Enter First Name', required=True)
+@click.option('--lastname', prompt='Enter the Last Name', required=True)
+@click.option('--email', prompt='Enter Email', required=True)
+@click.option('--password', prompt='Enter Password', required=True)
+def add_staff(firstname, lastname, email, password):
     
-    firstName = input("Enter First Name: ")
-    lastName = input("Enter Last Name: ")
-
-    staffID = input("Enter Password (StafID e.g. 816012345): ")
-
-    # Validate the staff ID
-    while len(staffID) != 9 or not staffID.isdigit():
-        staffID = input("Invalid staff ID. Please enter a 9-digit staff ID (e.g. 816012345): ")
-
-    password = staffID  # Set the password to the give staff ID (Default password)
-
-    email = input("Enter Email: ")
-
-    newstaff = register_staff(firstName, lastName, password, email)
-
-    if newstaff:
-        print(f"\nNew Staff Member '{newstaff.firstName} {newstaff.lastName}' Added! \n")
+    #Adding staff
+    newStaff = register_staff(firstname, lastname, password, email)
+    
+    if newStaff:
+        print(f"\nNew Staff Member '{newStaff.firstName} {newStaff.lastName}' Added! \n")
     else:
-        print("\n Staff Member Already Exists! \n")
+        print("\nStaff Member Already Exists! \n")
 
 # COMMAND #2 - UPDATE STAFF
-@staff_cli.command('update', help='Update a staff member details')
-def update_staff():
+@staff_cli.command('update', help='Update a staff member')
+@click.option('--staffemail', prompt='Enter the staff email', required=True)
+def update_staff(staffemail):
     
-    #Prompting for staff
-    staffEmail = input("Enter Staff Email: ")
-
-    #Retrieving staff
-    staff = get_staff_by_email(staffEmail)
-    if not staff:
-        print("\nStaff Member Does Not Exist!\n")
+    staff_member = Staff.query.filter_by(email=staffemail).first()
+    if not staff_member:
+        print("\nStaff member not found!\n")
         return
     
-    #Displaying staff details
-    print("\nCurrent Staff Member Details:")
-    print(staff)
+    firstname = click.prompt('Enter the new first name', default=staff_member.firstName)
+    lastname = click.prompt('Enter the new last name', default=staff_member.lastName)
+    email = click.prompt('Enter the new email', default=staff_member.email)
+    password = click.prompt('Enter the new password', confirmation_prompt=True, default='')
 
-    #Prompting for new details
-    print("\nEnter New Details... \n")    
-    firstName = input("Update First Name: ")
-    lastName = input("Update Last Name: ")
-    password = input("Update Password: ")
-    email = input("Update Email: ")
-
-    #Updating staff
-    updated_staff = update_staff(staffEmail, firstName, lastName, password, email)
-
-    #Displaying diferent results of the update
-    if updated_staff != staff:
-        print(updated_staff)
-
-    elif updated_staff == staff:
-        print("\n No Changes Were Made \n")
-
+    updatedStaff = update_staff(staffemail, firstName=firstname, lastName=lastname, password=password, email=email)
+    
+    if updatedStaff:
+        print(f"\nStaff Member '{updatedStaff.firstName} {updatedStaff.lastName}' Updated! \n")
     else:
-        print("\n Error! \n")
-        print(updated_staff["error"])
+        print(updatedStaff['error'])
+
+# COMMAND #3 - DELETE STAFF
+@staff_cli.command('delete', help='Delete a staff member')
+@click.option('--staff_email', prompt='Enter the staff email', required=True)
+def delete_staff(staff_email):
+
+    #Deleting staff
+    result = delete_staff(staff_email)
+    print(result)
+
+    
 
 app.cli.add_command(staff_cli)
 
