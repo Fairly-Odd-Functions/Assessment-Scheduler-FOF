@@ -56,7 +56,8 @@ class AdminUnitTest(unittest.TestCase):
     
     #UNIT TEST - #1: Create Admin
     def test_unit_01_create_admin(self):
-        admin = Admin ("Jane", "Doe", "janepass", "jane.doe@gmail.com")
+
+        admin = create_admin("Jane", "Doe", "janepass", "jane.doe@gmail.com")
         assert admin.email == "jane.doe@gmail.com"
 
         #print("Admin Info:", admin) #Testing Output
