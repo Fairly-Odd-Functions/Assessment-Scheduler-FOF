@@ -17,6 +17,11 @@ def init():
     print('Database Initialized!')
 
 """
+Programme Commands 
+Written by Jalene Armstrong (Jalene A) - Task 07.2.1. Programme Group Commands Implementation
+"""
+
+"""
 Semester Commands 
 Written by Jalene Armstrong (Jalene A) - Task 07.2.2. Semester Group Commands Implementation
 """
