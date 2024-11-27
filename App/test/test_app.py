@@ -52,11 +52,39 @@ def empty_db():
 '''
 
 class AdminUnitTest(unittest.TestCase):
-
+    
     #UNIT TEST - #1: Create Admin
     def test_unit_01_create_admin(self):
         admin = Admin ("Jane", "Doe", "janepass", "jane.doe@gmail.com")
         assert admin.email == "jane.doe@gmail.com"
+
+        #print("Admin Info:", admin) //Testing Output
+
+    
+    #UNIT TEST - #2: Get All Admin Users
+    def test_unit_02_get_all_admin_users(self):
+        adminUser1 = Admin ("John", "Doe", "johnpass", "john.doe@gmail.com")
+        adminUser2 = Admin ("Katie", "White", "katiepass", "katie.white@gmail.com")
+
+        '''Testing Output
+        db.session.add(adminUser1)
+        db.session.add(adminUser2)
+        db.session.commit()
+        '''
+
+        admins = get_all_admin_users()    
+
+        '''Testing Output
+        print("Admins: ", admins)
+
+        assert len(admins) == 2
+        assert admins[0].email == "john.doe@gmail.com"
+        assert admins[1].email == "katie.white@gmail.com"
+        '''
+
+       
+       
+
 
 
     
