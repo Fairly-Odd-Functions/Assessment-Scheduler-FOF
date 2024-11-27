@@ -36,7 +36,19 @@ def add_semester_command(semester_name, academic_year, start_date, end_date):
     else:
         print("ERROR: Something Went Wrong. Please Try Again.")
 
-# @semester_cli.command('get_semester', help="Gets Details For A Specific Semester")
+@semester_cli.command('fetch_semester', help="Gets Details For A Specific Semester")
+@click.option('--semester_name', '-n', prompt="Enter Semester Name", help="Name Of The Semester")
+@click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
+def fetch_semester_command(semester_name, academic_year):
+    fetched_semester = get_semester(semesterName=semester_name, academicYear=academic_year)
+
+    if isinstance(fetched_semester, dict) and "Error Message" in fetched_semester:
+        print(f"ERROR: {fetched_semester['Error Message']}")
+    elif isinstance(fetched_semester, Semester):
+        print(f"Semester Details: {fetched_semester}")
+    else:
+        print("ERROR: Failed To Fetch Requested Semester.")
+
 # @semester_cli.command('update_semester', help="Updates Information For An Existing Semester")
 # @semester_cli.command('list_semesters', help="Lists All Semesters")
 # @semester_cli.command('list_year_semesters', help="Lists All Semesters Based On Academic Year")

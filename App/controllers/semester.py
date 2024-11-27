@@ -1,6 +1,6 @@
 from App.database import db
 from App.models import Semester, CourseOffering
-from App.services.semester import validate_dates
+from App.services.semester import *
 
 def add_semester(semesterName, academicYear, startDate, endDate):
     try:
@@ -9,11 +9,11 @@ def add_semester(semesterName, academicYear, startDate, endDate):
             return {"Error Message": errors}
 
         if not semesterName or not academicYear or not startDate or not endDate:
-            return {"Error Message": "All fields are required"}
+            return {"Error Message": "All Fields Are Required"}
 
         existingSemester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
         if existingSemester:
-            return {"Error Message": f"Semester {semesterName} for {academicYear} already exists"}
+            return {"Error Message": f"Semester {semesterName} For {academicYear} Already Exists"}
 
         new_semester = Semester(semesterName=semesterName, academicYear=academicYear, startDate=startDate, endDate=endDate)
         db.session.add(new_semester)
@@ -29,7 +29,7 @@ def update_semester(semesterName, academicYear, new_semesterName=None, new_acade
     try:
         semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
         if not semester:
-            return {"Error Message": f"Semester {semesterName} for {academicYear} not found"}
+            return {"Error Message": f"Semester {semesterName} For {academicYear} Not Found"}
 
         if new_semesterName:
             semester.semesterName = new_semesterName
@@ -45,20 +45,24 @@ def update_semester(semesterName, academicYear, new_semesterName=None, new_acade
         return {"Semester Updated": semester.get_json()}
 
     except Exception as e:
-        print(f"Error while updating semester: {e}")
+        print(f"Error While Updating Semester: {e}")
         db.session.rollback()
         return None
 
 def get_semester(semesterName, academicYear):
     try:
+        errors = validate_academic_year(academicYear)
+        if errors:
+            return {"Error Message": errors}
+
         semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
         if semester:
-            return semester.get_json()
+            return semester
         else:
-            return {"Error Message": f"Semester {semesterName} for {academicYear} not found"}
+            return {"Error Message": f"Semester {semesterName} For {academicYear} Not Found"}
 
     except Exception as e:
-        print(f"Error while fetching semester: {e}")
+        print(f"Error While Fetching Semester: {e}")
         return None
 
 def get_semesters_by_academic_year(academicYear):
