@@ -1,14 +1,13 @@
-import click, sys, csv
+import click, sys, csv, pytest
 from flask import Flask
 from App.main import create_app
-from App.database import db, get_migrate
+from App.database import db, create_db, get_migrate
 from flask.cli import with_appcontext, AppGroup
-from App.models import Staff, Course, Assessment, Programme, Admin
-from App.controllers import (
-    initialize
-)
+from App.models import User, Staff, Course, Assessment, Programme, Admin
+from App.controllers import *
 
 app = create_app()
+migrate = get_migrate(app)
 
 # Command 01 : Creates And Initializes The Database
 @app.cli.command("init", help="Creates And Initializes The Database")
@@ -122,3 +121,12 @@ def load_course_data():
       db.session.commit() #save all changes OUTSIDE the loop
     print('database intialized')
 """
+test = AppGroup('test', help='Testing Commands')
+
+@test.command("user", help="Run User Tests")
+@click.argument("type", default="all")
+def user_tests_command(type):
+  if type == "int":
+    sys.exit(pytest.main(["-k", "UserIntegrationTests"]))
+
+app.cli.add_command(test)
