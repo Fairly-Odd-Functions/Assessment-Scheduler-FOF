@@ -75,7 +75,7 @@ def get_semester(semesterName, academicYear):
 
 def list_semesters():
     try:
-        semesters = Semester.query.order_by(Semester.semesterName, Semester.academicYear, Semester.startDate).all()
+        semesters = Semester.query.order_by(Semester.academicYear, Semester.startDate).all()
         if not semesters:
             return {"Error Message": "No Semesters Found."}
         return semesters
@@ -86,7 +86,7 @@ def list_semesters():
 
 def list_semesters_json():
     try:
-        semesters = Semester.query.order_by(Semester.semesterName, Semester.academicYear, Semester.startDate).all()
+        semesters = Semester.query.order_by(Semester.academicYear, Semester.startDate).all()
         if not semesters:
             return {"Error Message": "No Semesters Found."}
 
@@ -99,12 +99,14 @@ def list_semesters_json():
 
 def get_semesters_by_academic_year(academicYear):
     try:
+        errors = validate_academic_year(academicYear)
+        if errors:
+            return {"Error Message": errors}
+
         semesters = Semester.query.filter_by(academicYear=academicYear).all()
         if not semesters:
             return {"Semesters for Academic Year": []}
-
-        semesters_json = [semester.get_json() for semester in semesters]
-        return {"Semesters for Academic Year": semesters_json}
+        return semesters
 
     except Exception as e:
         print(f"Error while fetching semesters: {e}")
