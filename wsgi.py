@@ -28,6 +28,9 @@ semester_cli = AppGroup('semester', help='Semester Object Commands')
 @click.option('--start_date', '-s', prompt="Enter Start Date (YYYY-MM-DD)", type=click.DateTime(formats=["%Y-%m-%d"]), help="Start Date Of The Semester")
 @click.option('--end_date', '-e', prompt="Enter End Date (YYYY-MM-DD)", type=click.DateTime(formats=["%Y-%m-%d"]), help="End Date Of The Semester")
 def add_semester_command(semester_name, academic_year, start_date, end_date):
+    start_date = start_date.date()
+    end_date = end_date.date()
+
     new_semester = add_semester(semester_name, academic_year, start_date, end_date)
 
     if new_semester and "New Semester Added" in new_semester:
@@ -90,7 +93,14 @@ def update_semester_command(semester_name, academic_year, new_semester_name, new
     else:
         print(f"SUCCESS: Semester '{semester_name}' Updated Successfully! Updated Details: {updated_semester['Semester Updated']}")
 
-# @semester_cli.command('list_semesters', help="Lists All Semesters")
+@semester_cli.command('list_semesters', help="Retrieve And Lists All Semesters In The Database")
+@click.argument("format", default="json")
+def list_semesters_command(format):
+    if format == 'string':
+        print(list_semesters())
+    else:
+        print(list_semesters_json())
+
 # @semester_cli.command('list_year_semesters', help="Lists All Semesters Based On Academic Year")
 # @semester_cli.command('list_semester_courses', help="List All Courses For A Specific Semester")
 

@@ -13,7 +13,11 @@ def add_semester(semesterName, academicYear, startDate, endDate):
 
         existingSemester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
         if existingSemester:
-            return {"Error Message": f"Semester {semesterName} For {academicYear} Already Exists"}
+            return {"Error Message": f"Semester: {semesterName} For {academicYear} Already Exists"}
+
+        existingSemesterDate = Semester.query.filter_by(academicYear=academicYear, startDate=startDate, endDate=endDate).first()
+        if existingSemesterDate:
+            return {"Error Message": f"Semester Date: {startDate} - {endDate} Already Exists For {existingSemesterDate.semesterName} - {existingSemesterDate.academicYear}"}
 
         new_semester = Semester(semesterName=semesterName, academicYear=academicYear, startDate=startDate, endDate=endDate)
         db.session.add(new_semester)
@@ -68,6 +72,30 @@ def get_semester(semesterName, academicYear):
     except Exception as e:
         print(f"Error While Fetching Semester: {e}")
         return None
+
+def list_semesters():
+    try:
+        semesters = Semester.query.order_by(Semester.semesterName, Semester.academicYear, Semester.startDate).all()
+        if not semesters:
+            return {"Error Message": "No Semesters Found."}
+        return semesters
+
+    except Exception as e:
+        print(f"Error While Fetching Semesters: {e}")
+        return {"Error Message": "An Error Occurred While Fetching Semesters."}
+
+def list_semesters_json():
+    try:
+        semesters = Semester.query.order_by(Semester.semesterName, Semester.academicYear, Semester.startDate).all()
+        if not semesters:
+            return {"Error Message": "No Semesters Found."}
+
+        semester_list = [semester.get_json() for semester in semesters]
+        return {"Semesters": semester_list}
+
+    except Exception as e:
+        print(f"Error While Fetching Semesters: {e}")
+        return {"Error Message": "An Error Occurred While Fetching Semesters."}
 
 def get_semesters_by_academic_year(academicYear):
     try:
