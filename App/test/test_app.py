@@ -77,6 +77,7 @@ class StaffUnitTest(unittest.TestCase):
 
         #print("Staff Courses:" , courseStaff) #Testing Output
 
+
     #UNIT TEST -#12: Update Staff
     def test_unit_12_update_staff(self):
         newStaff = Staff("Ollie", "Pon", "olliepass", "ollie.pon@gmail.com")
@@ -86,7 +87,19 @@ class StaffUnitTest(unittest.TestCase):
 
         updateStaff = update_staff("ollie.pon@gmail.com", "Que", "Rick", "quepass", "“que.rick@gmail.com")
 
-        print("Updated Staff Info:" , updateStaff) #Testing Output
+        #print("Updated Staff Info:" , updateStaff) #Testing Output
+
+    #UNIT TEST -#13: Delete Staff
+    def test_unit_13_delete_staff(self):
+        newStaff = Staff("Sam", "Tev", "sampass", "sam.tev@gmail.com")
+        db.session.add(newStaff)
+        db.session.commit()
+        assert newStaff.email == "sam.tev@gmail.com"
+
+        deleteStaff = delete_staff("sam.tev@gmail.com")
+
+        print("Deleted Staff:" , deleteStaff) #Testing Output
+
 
 
 
