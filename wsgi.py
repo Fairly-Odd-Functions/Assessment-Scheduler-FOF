@@ -20,7 +20,7 @@ def init():
 
 '''
 |   Staff Group Commands
-|   These are a list of commands used to perform operations involving existing staff
+|   Written by RynniaRyan (Rynnia.R) - Task 07.1.1. Staff Group Commands Implementation
 '''
 staff_cli = AppGroup('staff', help='Staff object commands')
 
@@ -127,6 +127,27 @@ def remove_staff_from_course(staffemail, coursecode, semestername, academicyear)
         result = remove_course_staff(coursecode, semestername, academicyear, staff.staffID)
         print(result)
         print()
+    else:
+        print()
+        print("Staff not found")
+        print()
+
+
+# COMMAND #8 - VIEW STAFF ASSIGNED COURSE/S
+@staff_cli.command('get-courses', help='View staff with their assigned course/s')
+@click.option('--staffemail', prompt='Enter Staff Email', required=True)
+def view_staff_courses(staffemail):
+    
+    staff = get_staff_by_email(staffemail)
+
+    if staff:
+        print()
+        result = get_staff_courses(staffemail)
+
+        if result:
+            print(result)
+        else:
+           print(f"\nThere are Currently No Courses Found For '{staff.firstName} {staff.lastName}'\n")
     else:
         print()
         print("Staff not found")

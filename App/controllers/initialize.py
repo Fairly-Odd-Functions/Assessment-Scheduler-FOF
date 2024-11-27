@@ -13,15 +13,15 @@ def initialize():
         # Create Default Staff User
         rick = Staff(firstName="Rick", lastName="Rickson", password="rickpass", email="rick.rickson@mail.com")
 
-        #TESTING CODE: Add Staff Course
-        from datetime import date
-        from App.models import Course, Semester
-        course = Course(courseCode="COMP911", courseTitle="Intro to Mental Health", courseCredits="0", courseDescription="Help Me", courseLevel="1")        
-        semester = Semester(semesterName="Semester 1", academicYear="2024/2025", startDate=date(2024, 10, 12), endDate=date(2025, 10, 12))
+        # #TESTING CODE: Add Staff Course
+        # from datetime import date
+        # from App.models import Course, Semester
+        # course = Course(courseCode="COMP911", courseTitle="Intro to Mental Health", courseCredits="0", courseDescription="Help Me", courseLevel="1")        
+        # semester = Semester(semesterName="Semester 1", academicYear="2024/2025", startDate=date(2024, 10, 12), endDate=date(2025, 10, 12))
 
-        db.session.add(course)
-        db.session.add(semester)
-        db.session.commit()
+        # db.session.add(course)
+        # db.session.add(semester)
+        # db.session.commit()
 
 
         db.session.add(rick)

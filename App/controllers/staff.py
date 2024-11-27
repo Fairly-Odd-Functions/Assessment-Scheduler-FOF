@@ -155,6 +155,6 @@ def get_staff_with_courses(staffEmail):
 
     courses = [item.courseCode for item in staff_member.assigned_courses]
     return {
-        "Staff": staff_member.get_json(),
+        "Staff": staff_member,
         "Courses": courses
     }
