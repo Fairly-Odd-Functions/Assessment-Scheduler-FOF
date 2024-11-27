@@ -26,6 +26,22 @@ def init():
 '''
 staff_cli = AppGroup('staff', help='Staff object commands')
 
+# COMMAND #1 - ADD STAFF
+@staff_cli.command('add', help='Add a new staff member')
+def add_staff():
+    
+    staffID = input("Enter Staff ID: ")
+    firstName = input("Enter First Name: ")
+    lastName = input("Enter Last Name: ")
+    email = input("Enter Email: ")
+
+    newstaff = register_staff(staffID, firstName, lastName, email)
+
+    if newstaff:
+        print(f"\n New Staff Member '{newstaff.firstName} {newstaff.lastName}'Added! \n")
+    else:
+        print("\n Staff Member Already Exists! \n")
+
 
 """
 TO BE REFACTORED ~ JaleneA
