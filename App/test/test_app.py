@@ -4,18 +4,6 @@ from App.main import create_app
 from App.database import db, create_db
 #from App.views.auth import login
 from App.models import User 
-from App.controllers import ( #User Controller
-    create_user,
-    get_all_admin_users,
-    get_all_staff_users,
-    get_all_admin_users_json,
-    get_all_staff_users_json,
-    validate_Staff,
-    validate_Admin,
-    get_user,
-    get_userID,
-)
-
 
 LOGGER = logging.getLogger(__name__)
 
