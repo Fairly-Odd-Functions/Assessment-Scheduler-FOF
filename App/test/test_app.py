@@ -52,7 +52,7 @@ class StaffUnitTest(unittest.TestCase):
         #print("New Course Staff Info:" , newCourseStaff)
     '''
 
-    #UINIT TEST -#10: add_multiple_courses_to_staff - I
+    #UNIT TEST -#10: Add Multiple Courses to a Staff 
     def test_unit_10_add_multiple_courses_to_staff(self):
         newStaff = Staff("Klim", "Lane", "kilmpass", "klim.lane@gmail.com")
         db.session.add(newStaff)
@@ -61,5 +61,19 @@ class StaffUnitTest(unittest.TestCase):
 
         addCourses = add_multiple_courses_to_staff("klim.lane@gmail.com",["COMP 200", "COMP 300"])
 
+        #print("Staff Info:" , addCourses) #Testing Output
 
-        print("Staff Info:" , addCourses) #Testing Output
+
+    #UNIT TEST -#11: Get Staff Assigned Courses
+    def test_unit_11_get_staff_courses(self):
+        newStaff = Staff("Millie", "Nike", "milliepass", "millie.nike@gmail.com")
+        db.session.add(newStaff)
+        db.session.commit()
+        assert newStaff.email == "millie.nike@gmail.com"
+
+        assignStaffCourses = add_multiple_courses_to_staff("millie.nike@gmail.com",["COMP 100", "COMP 200"])
+
+        courseStaff = get_staff_courses("millie.nike@gmail.com")
+
+        #print("Staff Courses:" , courseStaff) #Testing Output
+
