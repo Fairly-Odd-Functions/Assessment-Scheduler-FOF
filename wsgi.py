@@ -62,7 +62,14 @@ def update_programme_command(programme_title, new_programme_title, new_programme
     else:
         print(f"SUCCESS: Semester '{programme_title}' Updated Successfully!")
 
-# @programme_cli.command('list_programmes', help="Retrieve And Lists All Programmes In The Database")
+@programme_cli.command('list_programmes', help="Retrieve And Lists All Programmes In The Database")
+@click.argument("format", default="json")
+def list_programmes_command(format):
+    if format == 'string':
+        print(list_programmes())
+    else:
+        print(list_programmes_json())
+
 # @programme_cli.command('list_programme_courses', help="List All Courses For A Specific Programme")
 
 app.cli.add_command(programme_cli)
