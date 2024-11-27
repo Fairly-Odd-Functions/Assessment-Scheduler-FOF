@@ -28,4 +28,16 @@ class StaffUnitTest(unittest.TestCase):
         assert newStaff.email == "greg.holder@gmail.com"
 
         #print("Staff Info:" , newStaff) #Testing Output
+
+    #UNIT TEST - #9: Staff JSON
+    def test_unit_09_staff_json(self):
+        newStaff = Staff ("Sam", "Jane", "sampass", "sam.jane@gmail.com")
+
+        staff_json = newStaff.get_json()
+        self.assertDictEqual({"first_name": "Sam",
+                              "last_name": "Jane",
+                              "email": "sam.jane@gmail.com"}, staff_json)
+        
+        #print("Staff Info: ", staff_json)
+
     
