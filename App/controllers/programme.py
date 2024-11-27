@@ -83,7 +83,7 @@ def list_programme_courses(programmeTitle):
         if not programme:
             return {"Error Message": f"There Is No Programme With Title: {programmeTitle} In The Database"}
         
-        programme_courses = CourseProgramme.query.filter_by(programmeTitle=programme.programmeTitle).all()
+        programme_courses = CourseProgramme.query.filter_by(programmeID=programme.programmeID).all()
         if not programme_courses:
             return {"Error Message": f"No Courses Found For Programme: {programme.programmeTitle}"}
         return programme_courses

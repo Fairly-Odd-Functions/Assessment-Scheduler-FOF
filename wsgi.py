@@ -36,7 +36,7 @@ def create_programme_command(programme_title, programme_desc):
         print("ERROR: Something Went Wrong. Please Try Again.")
 
 @programme_cli.command('update_programme', help="Updates Information For An Existing Programme")
-@click.option('--programme_title', '-pt', prompt="Enter Programme Title", help="Title Of The Programme")
+@click.option('--programme_tirtle', '-pt', prompt="Enter Programme Title", help="Title Of The Programme")
 @click.option('--new_programme_title', '-ptnew', default=None, help="New Programme Title (Optional)")
 @click.option('--new_programme_desc', '-pdnew', default=None, help="New Programme Description (Optional)")
 def update_programme_command(programme_title, new_programme_title, new_programme_desc):
@@ -70,7 +70,10 @@ def list_programmes_command(format):
     else:
         print(list_programmes_json())
 
-# @programme_cli.command('list_programme_courses', help="List All Courses For A Specific Programme")
+@programme_cli.command('list_programme_courses', help="List All Courses For A Specific Programme")
+@click.option('--programme_title', '-pt', prompt="Enter Programme Title", help="Title Of The Programme")
+def list_programme_courses_command(programme_title):
+    print(list_programme_courses(programme_title))
 
 app.cli.add_command(programme_cli)
 
