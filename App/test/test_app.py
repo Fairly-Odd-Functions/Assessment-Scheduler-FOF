@@ -117,3 +117,23 @@ class UserUnitTest(unittest.TestCase):
         assert staff[0]['email'] == "willow.xym@gmail.com"
         assert staff[1]['email'] == "yahem.zim@gmail.com"
         '''  
+
+
+    #UNIT TEST - #24: Validate Staff Users
+    def test_unit_24_validate_Staff(self):
+        user = create_user("Mark", "Sandy", "markpass", "mark.sandy@gmail.com", "staff")
+        assert user.email == "mark.sandy@gmail.com"
+
+        staff = validate_Staff("mark.sandy@gmail.com", "markpass")
+
+        #print("Valid Staff : ", staff) #Testing Output
+
+    
+    #UNIT TEST - #25: Validate Admin Users
+    def test_unit_25_validate_Admin(self):
+        user = create_user("Sammy", "Dan", "sammypass", "sammy.dan@gmail.com", "admin")
+        assert user.email == "sammy.dan@gmail.com"
+
+        staff = validate_Admin("sammy.dan@gmail.com", "sammypass")
+
+        #print("Valid Admin : ", staff) #Testing Output
