@@ -39,3 +39,22 @@ class UserUnitTest(unittest.TestCase):
         assert user.email == "hope.ice@gmail.com"
 
         #print("User Info:", user) #Testing Output
+    
+
+    #UNIT TEST - #20: Get All Admin Users
+    def test_unit_20_get_all_admin_users(self):
+        user = create_user("Jake", "Kim", "jakepass", "jake.kim@gmail.com", "admin")
+        assert user.email == "jake.kim@gmail.com"
+
+        user = create_user("Laim", "Mike", "liampass", "liam.mike@gmail.com", "admin" )
+        assert user.email == "liam.mike@gmail.com"
+
+        admins = get_all_admin_users()    
+
+        #Testing Output
+        print("Admin Users: ", admins)
+
+        assert len(admins) == 2
+        assert admins[0].email == "jake.kim@gmail.com"
+        assert admins[1].email == "liam.mike@gmail.com"
+        
