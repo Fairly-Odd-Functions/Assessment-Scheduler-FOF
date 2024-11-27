@@ -83,9 +83,11 @@ def update_staff(staffEmail, firstName=None, lastName=None, password=None, email
         if password:
             staff_member.set_password(password)
         if email:
-            if Staff.query.filter_by(email=email).count() > 0:
-                return None
-            staff_member.email = email
+            # Checking If Email Is Unique
+            if email and Staff.query.filter_by(email=email).first() != staff_member:
+                if Staff.query.filter_by(email=email).count() > 0:
+                    return {"error":"Email Already In Use"}
+                staff_member.email = email
 
         db.session.commit()
         return staff_member

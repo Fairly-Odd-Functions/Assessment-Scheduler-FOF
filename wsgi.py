@@ -31,7 +31,7 @@ def add_staff():
     firstName = input("Enter First Name: ")
     lastName = input("Enter Last Name: ")
 
-    staffID = input("Enter Staff ID (4 digits, e.g. 816012345): ")
+    staffID = input("Enter Password (StafID e.g. 816012345): ")
 
     # Validate the staff ID
     while len(staffID) != 9 or not staffID.isdigit():
@@ -47,6 +47,44 @@ def add_staff():
         print(f"\nNew Staff Member '{newstaff.firstName} {newstaff.lastName}' Added! \n")
     else:
         print("\n Staff Member Already Exists! \n")
+
+# COMMAND #2 - UPDATE STAFF
+@staff_cli.command('update', help='Update a staff member details')
+def update_staff():
+    
+    #Prompting for staff
+    staffEmail = input("Enter Staff Email: ")
+
+    #Retrieving staff
+    staff = get_staff_by_email(staffEmail)
+    if not staff:
+        print("\nStaff Member Does Not Exist!\n")
+        return
+    
+    #Displaying staff details
+    print("\nCurrent Staff Member Details:")
+    print(staff)
+
+    #Prompting for new details
+    print("\nEnter New Details... \n")    
+    firstName = input("Update First Name: ")
+    lastName = input("Update Last Name: ")
+    password = input("Update Password: ")
+    email = input("Update Email: ")
+
+    #Updating staff
+    updated_staff = update_staff(staffEmail, firstName, lastName, password, email)
+
+    #Displaying diferent results of the update
+    if updated_staff != staff:
+        print(updated_staff)
+
+    elif updated_staff == staff:
+        print("\n No Changes Were Made \n")
+
+    else:
+        print("\n Error! \n")
+        print(updated_staff["error"])
 
 app.cli.add_command(staff_cli)
 
