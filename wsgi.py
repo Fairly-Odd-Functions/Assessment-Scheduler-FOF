@@ -135,4 +135,10 @@ def user_tests_command(type):
   if type == "int":
     sys.exit(pytest.main(["-k", "StaffIntegrationTests"]))
 
+@test.command("course", help="Run User Tests")
+@click.argument("type", default="all")
+def user_tests_command(type):
+  if type == "int":
+    sys.exit(pytest.main(["-k", "CourseIntegrationTests"]))
+
 app.cli.add_command(test)

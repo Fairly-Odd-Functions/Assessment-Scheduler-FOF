@@ -49,3 +49,30 @@ class StaffIntegrationTests(unittest.TestCase):
                             {"firstName" : "David",
                             "lastName" : "Johnson",
                             "email" : "davesquare@email.com"}], admin_users)
+
+class CourseIntegrationTests(unittest.TestCase):
+    def test_integration_06_add_course(self):
+        add_course("12345","Theory of Maths",3,"Introduction to the nature of numbers, functions and proofs fo University",1)
+        course = get_course("12345")
+        self.assertDictEqual({"courseCode" : "12345",
+                            "courseTitle" : "Theory of Maths",
+                            "courseCredits" : 3,
+                            "courseDescription" : "Introduction to the nature of numbers, functions and proofs fo University",
+                            "courseLevel" : 1}, course)
+                    
+    def test_integration_07_list_courses(self):
+        add_course("12300","Governance and Technology",4,"Welcome to the harmony of technology in the field of Government arts",2)
+        courses = list_courses()
+        self.assertListEqual([{"courseCode" : "12345",
+                            "courseTitle" : "Theory of Maths",
+                            "courseCredits" : 3,
+                            "courseDescription" : "Introduction to the nature of numbers, functions and proofs fo University",
+                            "courseLevel" : 1},
+                            
+                            {"courseCode" : "12300",
+                            "courseTitle" : "Governance and Technology",
+                            "courseCredits" : 4,
+                            "courseDescription" : "Welcome to the harmony of technology in the field of Government arts",
+                            "courseLevel" : 2}],courses)
+
+
