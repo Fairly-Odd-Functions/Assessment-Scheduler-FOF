@@ -106,8 +106,11 @@ def list_semesters_command(format):
 def list_year_semesters_command(academic_year):
     print(get_semesters_by_academic_year(academic_year))
 
-
-# @semester_cli.command('list_semester_courses', help="List All Courses For A Specific Semester")
+@semester_cli.command('list_semester_courses', help="List All Courses For A Specific Semester")
+@click.option('--semester_name', '-s', prompt="Enter Semester  Name", help="Name Of The Semester")
+@click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
+def list_semester_courses_command(semester_name, academic_year):
+    print(list_courses_for_semester(semester_name, academic_year))
 
 app.cli.add_command(semester_cli)
 

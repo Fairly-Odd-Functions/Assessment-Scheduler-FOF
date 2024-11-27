@@ -114,17 +114,19 @@ def get_semesters_by_academic_year(academicYear):
 
 def list_courses_for_semester(semesterName, academicYear):
     try:
+        errors = validate_academic_year(academicYear)
+        if errors:
+            return {"Error Message": errors}
+
         semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
         if not semester:
-            return {"Error Message": f"Semester {semesterName} for {academicYear} not found"}
+            return {"Error Message": f"Semester {semesterName} For {academicYear} Not Found"}
 
         course_offerings = CourseOffering.query.filter_by(semesterID=semester.semesterID).all()
         if not course_offerings:
-            return {"Error Message": f"No courses found for {semesterName} {academicYear}"}
-
-        courses = [offering.get_json() for offering in course_offerings]
-        return {"Courses for Semester": courses}
+            return {"Error Message": f"No Courses Found For {semesterName} {academicYear}"}
+        return course_offerings
 
     except Exception as e:
-        print(f"Error while fetching courses: {e}")
+        print(f"Error While Fetching Courses: {e}")
         return None
