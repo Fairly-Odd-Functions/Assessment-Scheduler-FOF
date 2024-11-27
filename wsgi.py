@@ -6,11 +6,8 @@ from App.main import create_app
 from App.database import db, get_migrate
 from flask.cli import with_appcontext, AppGroup
 from App.models import Staff, Course, Assessment, Programme, Admin
-from App.controllers import (
-    initialize
-from App.controllers import (
-    initialize
-)
+
+from App.controllers import *
  
 app = create_app()
 
@@ -19,6 +16,7 @@ app = create_app()
 def init():
     initialize()
     print('\n Database Intialized! \n')
+
 
 '''
 |   Staff Group Commands
@@ -30,18 +28,27 @@ staff_cli = AppGroup('staff', help='Staff object commands')
 @staff_cli.command('add', help='Add a new staff member')
 def add_staff():
     
-    staffID = input("Enter Staff ID: ")
     firstName = input("Enter First Name: ")
     lastName = input("Enter Last Name: ")
+
+    staffID = input("Enter Staff ID (4 digits, e.g. 816012345): ")
+
+    # Validate the staff ID
+    while len(staffID) != 9 or not staffID.isdigit():
+        staffID = input("Invalid staff ID. Please enter a 9-digit staff ID (e.g. 816012345): ")
+
+    password = staffID  # Set the password to the give staff ID (Default password)
+
     email = input("Enter Email: ")
 
-    newstaff = register_staff(staffID, firstName, lastName, email)
+    newstaff = register_staff(firstName, lastName, password, email)
 
     if newstaff:
-        print(f"\n New Staff Member '{newstaff.firstName} {newstaff.lastName}'Added! \n")
+        print(f"\nNew Staff Member '{newstaff.firstName} {newstaff.lastName}' Added! \n")
     else:
         print("\n Staff Member Already Exists! \n")
 
+app.cli.add_command(staff_cli)
 
 """
 TO BE REFACTORED ~ JaleneA
@@ -209,7 +216,7 @@ def load_course_data():
         db.session.add(new_course) 
       db.session.commit() #save all changes OUTSIDE the loop
     print('database intialized')
-"""
+
     with open('courses.csv') as file: #csv files are used for spreadsheets
       reader = csv.DictReader(file)
       for row in reader: 
