@@ -82,6 +82,7 @@ class AdminUnitTest(unittest.TestCase):
         assert admins[1].email == "katie.white@gmail.com"
         '''
 
+
     #UNIT TEST - #3: Get All Admin Users
     def test_unit_03_get_all_admin_users_json(self):
         adminUser1 = Admin ("Star", "Light", "starpass", "star.light@gmail.com")
@@ -105,6 +106,7 @@ class AdminUnitTest(unittest.TestCase):
         assert admin_json[1]['email'] == "sunflower.rose@gmail.com"
         '''
     
+
     #UNIT TEST - #4: Get All Admin Users
     def test_unit_04_update_admin(self):
         admin = Admin ("Bill", "John", "billpass", "bill.john@gmail.com")
@@ -116,6 +118,17 @@ class AdminUnitTest(unittest.TestCase):
         updateAdmin = update_admin("bill.john@gmail.com", "James", "Smith", "jamespass", "james.smith@gmail.com")
         assert updateAdmin.email == "james.smith@gmail.com"
 
-        print("Updated Admin Info:", updateAdmin) #Testing Output
-        
-        
+        #print("Updated Admin Info:", updateAdmin) #Testing Output
+
+
+    #UNIT TEST - #5: Delete an Admin
+    def test_unit_05_delete_admin(self):
+        admin = Admin ("Mario", "Blue", "mariopass", "mario.blue@gmail.com")
+        db.session.add(admin)
+        db.session.commit()
+
+        assert admin.email == "mario.blue@gmail.com"
+
+        deleteAdmin = delete_admin("mario.blue@gmail.com")
+
+        #print("Deleted Admin Info:", deleteAdmin) #Testing Output
