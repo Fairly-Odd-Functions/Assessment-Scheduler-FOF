@@ -32,25 +32,6 @@ def register_staff(firstName, lastName, password, email):
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}
-    
-
-# # Assign Staff To A Course
-# def add_course_staff(staffEmail, courseCode):
-#     # Fetch Relevant Staff Member
-#     staff_member = Staff.query.filter_by(email=staffEmail).first()
-#     if not staff_member:
-#         return None
-
-#     existing_course_staff = CourseStaff.query.filter_by(courseCode=courseCode, staffID=staff_member.staffID).first()
-#     if existing_course_staff:
-#         return existing_course_staff
-
-#     new_course_staff = CourseStaff(courseCode=courseCode, staffID=staff_member.staffID)
-
-#     db.session.add(new_course_staff)
-#     db.session.commit()
-
-    # return new_course_staff
 
 # ALT: Add Multiple Courses To A Staff Member
 def add_multiple_courses_to_staff(staffEmail, courseCodes):

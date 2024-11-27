@@ -105,12 +105,31 @@ def assign_staff_to_course(staffemail, coursecode, semestername, academicyear):
     staff = get_staff_by_email(staffemail)
 
     if staff:
-        staffID = staff.staffID
-        newCourseStaff = add_course_staff(coursecode, semestername, academicyear, staff.staffID)
+        result = add_course_staff(coursecode, semestername, academicyear, staff.staffID)
         print()
-        print(newCourseStaff)
+        print(result)
         print()
     else:
         print("Staff not found")
+
+# COMMAND #7 - REMOVE STAFF FROM A COURSE
+@staff_cli.command('remove-course', help='Remove a staff member from a course')
+@click.option('--staffemail', prompt='Enter Staff Email', required=True)
+@click.option('--coursecode', prompt='Enter Course Code', required=True)
+@click.option('--semestername', prompt='Enter Semester Name', required=True)
+@click.option('--academicyear', prompt='Enter Academic Year', required=True)
+def remove_staff_from_course(staffemail, coursecode, semestername, academicyear):
+      
+    staff = get_staff_by_email(staffemail)
+  
+    if staff:
+        print()
+        result = remove_course_staff(coursecode, semestername, academicyear, staff.staffID)
+        print(result)
+        print()
+    else:
+        print()
+        print("Staff not found")
+        print()
 
 app.cli.add_command(staff_cli)

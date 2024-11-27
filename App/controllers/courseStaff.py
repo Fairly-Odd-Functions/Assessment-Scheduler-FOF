@@ -45,7 +45,7 @@ def remove_course_staff(courseCode, semesterName, academicYear, staffID):
         if not staff:
             return {"Error": "Staff Not Found"}
 
-        course_staff = CourseStaff.query.filter_by(courseCode=courseCode, semesterID=semester.semesterID, staffID=staffID).first()
+        course_staff = CourseStaff.query.filter_by(courseCode=courseCode, staffID=staffID).first()
         if not course_staff:
             return {"Error": "Staff not assigned to this course in the given semester"}
 
