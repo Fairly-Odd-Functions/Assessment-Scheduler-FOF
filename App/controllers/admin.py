@@ -34,7 +34,7 @@ def update_admin(adminEmail, firstName=None, lastName=None, password=None, email
             admin.lastName = lastName
         if password:
             admin.set_password(password)
-        if email:
+        if email and email != admin.email:
             existing_admin = Admin.query.filter_by(email=email).first()
             if existing_admin:
                 return None
@@ -68,8 +68,3 @@ def get_admin_by_email(adminEmail):
     if not admin:
         return None
     return admin
-
-# Get All Admins
-def get_all_admins():
-    admin_list = Admin.query.all()
-    return admin_list
