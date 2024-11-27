@@ -98,8 +98,18 @@ class StaffUnitTest(unittest.TestCase):
 
         deleteStaff = delete_staff("sam.tev@gmail.com")
 
-        print("Deleted Staff:" , deleteStaff) #Testing Output
+        #print("Deleted Staff:" , deleteStaff) #Testing Output
 
 
+    #UNIT TEST -#14: Get Staff by Email
+    def test_unit_14_get_staff_by_email(self):
+        newStaff = Staff("Vincent", "Willson", "vincentpass", "vincent.willson@gmail.com")
+        db.session.add(newStaff)
+        db.session.commit()
+        assert newStaff.email == "vincent.willson@gmail.com"
+
+        findStaff = get_staff_by_email("vincent.willson@gmail.com")
+
+        print("Found Staff Info:" , findStaff) #Testing Ou
 
 
