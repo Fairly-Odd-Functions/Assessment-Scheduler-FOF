@@ -106,7 +106,7 @@ def assign_staff_to_course(staffemail, coursecode, semestername, academicyear):
 
     if staff:
         staffID = staff.staffID
-        newCourseStaff = add_course_staff(coursecode, semestername, academicyear, staffID)
+        newCourseStaff = add_course_staff(coursecode, semestername, academicyear, staff.staffID)
         print()
         print(newCourseStaff)
         print()

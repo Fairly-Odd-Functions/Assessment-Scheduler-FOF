@@ -16,11 +16,11 @@ def add_course_staff(courseCode, semesterName, academicYear, staffID):
         if not staff:
             return {"Error": "Staff Not Found"}
 
-        existing_assignment = CourseStaff.query.filter_by(courseCode=courseCode, semesterID=semester.semesterID, staffID=staffID).first()
+        existing_assignment = CourseStaff.query.filter_by(courseCode=courseCode, staffID=staffID).first()
         if existing_assignment:
             return {"Message": "This staff member is already assigned to this course in the given semester"}
 
-        new_course_staff = CourseStaff(courseCode=courseCode, semesterID=semester.semesterID, staffID=staffID)
+        new_course_staff = CourseStaff(courseCode=courseCode, staffID=staffID)
         db.session.add(new_course_staff)
         db.session.commit()
 
