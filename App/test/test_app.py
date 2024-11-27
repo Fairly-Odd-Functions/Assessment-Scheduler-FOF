@@ -110,6 +110,25 @@ class StaffUnitTest(unittest.TestCase):
 
         findStaff = get_staff_by_email("vincent.willson@gmail.com")
 
-        print("Found Staff Info:" , findStaff) #Testing Ou
+        #print("Found Staff Info:" , findStaff) #Testing Output
+
+    #UNIT TEST  -#15: Geat All Staff
+    def test_unit_15_get_all_staff(self):
+        newStaff1 = register_staff("Xion", "Yam", "xionpass", "xion.yam@gmail.com")
+        newStaff2 = register_staff("Zion", "Adam", "zionpass", "zion.adam@gmail.com")
+        newStaff3 = register_staff("Vincent", "Willson", "vincentpass", "vincent.willson@gmail.com")
 
 
+        allStaff = get_all_staff()    
+
+        
+        #Testing Output
+        '''
+        print("Admins: ", allStaff)
+
+        assert len(allStaff) == 3
+        assert allStaff[0].email == "xion.yam@gmail.com"
+        assert allStaff[1].email == "zion.adam@gmail.com"
+        assert allStaff[2].email == "vincent.willson@gmail.com"
+        '''
+    
