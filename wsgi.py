@@ -64,7 +64,7 @@ def update_staff_profile(staffemail):
 
 # COMMAND #3 - DELETE STAFF
 @staff_cli.command('delete', help='Delete a staff member')
-@click.option('--staffemail', prompt='Enter the staff email', required=True)
+@click.option('--staffemail', prompt='Enter Staff email', required=True)
 def delete_staff_profile(staffemail):
 
     result = delete_staff(staffemail)
@@ -80,6 +80,19 @@ def list_staff():
             print(staff)
     else:
         print("No Staff Members Found")
+
+# COMMAND #5 - SEARCH STAFF PROFILE
+@staff_cli.command('search', help='Search for a staff member')
+@click.option('--staffemail', prompt='Enter Staff Email', required=True)
+def search_staff_profile(staffemail):
+    
+    staff = get_staff_by_email(staffemail)
+    if staff:
+        print()
+        print(staff)
+        print()
+    else:
+        print("\nStaff member not found!\n")
     
 
 app.cli.add_command(staff_cli)
