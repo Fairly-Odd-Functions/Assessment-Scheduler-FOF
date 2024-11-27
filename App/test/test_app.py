@@ -6,7 +6,7 @@ from App.database import db, create_db
 from App.models import Staff
 from App.controllers import ( #Staff Controller
     register_staff,
-    add_course_staff, 
+   # add_course_staff, 
     add_multiple_courses_to_staff,
     get_staff_courses,
     update_staff,
@@ -17,6 +17,9 @@ from App.controllers import ( #Staff Controller
     is_staff_assigned_to_course,
     get_staff_with_courses,
 )
+from App.controllers.staff import add_course_staff as add_staff_to_course #I was having some issues with this function, when I c
+                                                                            # add_course_staff it was giving me the function from 
+                                                                            #courseStaff instead of from user
 
 
 LOGGER = logging.getLogger(__name__)
@@ -43,14 +46,15 @@ class StaffUnitTest(unittest.TestCase):
 
         #print("Staff Info:" , newStaff) #Testing Output
     
-    '''
-    #UNIT TEST - #9: Register Staff ISSUE- TWO FUNCTIONS HAVE THE SAME NAME
+    
+    #UNIT TEST - #9: Assign Staff to a Course 
     def test_unit_09_add_course_staff(self):
-        staff = Staff ("Iris", "Jack", "irispass", "iris.jack@gmail.com")
-        newCourseStaff = add_course_staff("greg.holder@gmail.com", "COMP 100")
+        newStaff = register_staff("Iris", "Jack", "irispass", "iris.jack@gmail.com")
+        assert newStaff.email == "iris.jack@gmail.com"
+        newCourseStaff = add_staff_to_course("iris.jack@gmail.com", "COMP 100")
 
         #print("New Course Staff Info:" , newCourseStaff)
-    '''
+    
 
     #UNIT TEST -#10: Add Multiple Courses to a Staff 
     def test_unit_10_add_multiple_courses_to_staff(self):
