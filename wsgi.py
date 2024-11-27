@@ -93,6 +93,24 @@ def search_staff_profile(staffemail):
         print()
     else:
         print("\nStaff member not found!\n")
+
+# COMMAND #6 - ASSIGN STAFF TO A COURSE
+@staff_cli.command('add-course', help='Assign a staff member to a course')
+@click.option('--staffemail', prompt='Enter Staff Email', required=True)
+@click.option('--coursecode', prompt='Enter Course Code', required=True)
+@click.option('--semestername', prompt='Enter Semester Name', required=True)
+@click.option('--academicyear', prompt='Enter Academic Year', required=True)
+def assign_staff_to_course(staffemail, coursecode, semestername, academicyear):
     
+    staff = get_staff_by_email(staffemail)
+
+    if staff:
+        staffID = staff.staffID
+        newCourseStaff = add_course_staff(coursecode, semestername, academicyear, staffID)
+        print()
+        print(newCourseStaff)
+        print()
+    else:
+        print("Staff not found")
 
 app.cli.add_command(staff_cli)

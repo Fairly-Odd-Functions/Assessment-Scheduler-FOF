@@ -7,27 +7,32 @@ class CourseStaff(db.Model):
     courseStaffID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     courseCode = db.Column(db.String(9), db.ForeignKey('course.courseCode'), nullable=False)
     staffID = db.Column(db.Integer, db.ForeignKey('staff.staffID'), nullable=False)
+    semesterID = db.Column(db.Integer, db.ForeignKey('semester.semesterID'), nullable=False)
 
     # Relationships
     course = db.relationship('Course', backref='course_staff')
     staff = db.relationship('Staff', backref='assigned_courses')
+    semester = db.relationship('Semester', backref='courseStaff')
 
-    def __init__(self, courseCode, staffID):
+    def __init__(self, courseCode, semesterID, staffID):
         self.courseCode = courseCode
         self.staffID = staffID
+        self.semesterID = semesterID
 
     def get_json(self):
         return {
             "courseCode": self.courseCode,
             "staffID": self.staffID,
-            "staffEmail": self.staff.email if self.staff else None
+            "staffEmail": self.staff.email if self.staff else None,
+            #returning semester name and achedemic year
+            "semester period": f"{self.semester.semesterName} {self.semester.academicYear}"
         }
 
     def __str__(self):
-        return f"CourseStaff(courseCode='{self.courseCode}', staffID='{self.staffID}', staffEmail='{self.staff.email if self.staff else 'No email'}')"
+        return f"CourseStaff(courseCode='{self.courseCode}', staffID='{self.staffID}', staffEmail='{self.staff.email if self.staff else 'No email'}', semester='{self.semester.semesterName} {self.semester.academicYear}')"
 
     def __repr__(self):
         return (
             f"CourseStaff(courseStaffID={self.courseStaffID}, courseCode='{self.courseCode}', "
-            f"staffID={self.staffID}, staffEmail='{self.staff.email if self.staff else 'No email'}')"
+            f"staffID={self.staffID}, staffEmail='{self.staff.email if self.staff else 'No email'}', semester='{self.semester.semesterName} {self.semester.academicYear}')"
         )
