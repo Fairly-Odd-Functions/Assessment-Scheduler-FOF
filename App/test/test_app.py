@@ -13,30 +13,7 @@ from App.controllers import ( #Admin Controller
     get_admin_by_email,
     get_all_admins,
 )
-from App.controllers import ( #Staff Controller
-    register_staff,
-    add_course_staff,
-    add_multiple_courses_to_staff,
-    get_staff_courses,
-    update_staff,
-    delete_staff,
-    get_staff_by_email,
-    get_all_staff,
-    remove_staff_from_course,
-    is_staff_assigned_to_course,
-    get_staff_with_courses,
-)
-from App.controllers import ( #User Controller
-    create_user,
-    get_all_admin_users,
-    get_all_staff_users,
-    get_all_admin_users_json,
-    get_all_staff_users_json,
-    validate_Staff,
-    validate_Admin,
-    get_user,
-    get_userID,
-)
+
 
 LOGGER = logging.getLogger(__name__)
 
