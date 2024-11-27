@@ -132,3 +132,14 @@ class AdminUnitTest(unittest.TestCase):
         deleteAdmin = delete_admin("mario.blue@gmail.com")
 
         #print("Deleted Admin Info:", deleteAdmin) #Testing Output
+
+    #UNIT TEST - #6: Get Admin by Email
+    def test_unit_06_delete_admin(self):
+        admin = Admin ("Sam", "Yellow", "sampass", "sam.yellow@gmail.com")
+        db.session.add(admin)
+        db.session.commit()
+        assert admin.email == "sam.yellow@gmail.com"
+
+        getAdmin = get_admin_by_email("sam.yellow@gmail.com")
+
+        #print("Found Admin Info:", getAdmin) #Testing Output
