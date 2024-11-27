@@ -42,18 +42,18 @@ def add_staff(firstname, lastname, email, password):
 
 # COMMAND #2 - UPDATE STAFF
 @staff_cli.command('update', help='Update a staff member')
-@click.option('--staffemail', prompt='Enter the staff email', required=True)
-def update_staff(staffemail):
+@click.option('--staffemail', prompt='Enter Staff Email to Edit', required=True)
+def update_staff_profile(staffemail):
     
     staff_member = Staff.query.filter_by(email=staffemail).first()
     if not staff_member:
         print("\nStaff member not found!\n")
         return
     
-    firstname = click.prompt('Enter the new first name', default=staff_member.firstName)
-    lastname = click.prompt('Enter the new last name', default=staff_member.lastName)
-    email = click.prompt('Enter the new email', default=staff_member.email)
-    password = click.prompt('Enter the new password', confirmation_prompt=True, default='')
+    firstname = input('\nEdit First Name (press Enter to keep the current value): ') or None
+    lastname = input('Edit Last Name (press Enter to keep the current value): ') or None
+    email = input('Edit Email (press Enter to keep the current value): ') or None
+    password = input('Edit password (press Enter to keep the current value): ') or None
 
     updatedStaff = update_staff(staffemail, firstName=firstname, lastName=lastname, password=password, email=email)
     
@@ -64,12 +64,11 @@ def update_staff(staffemail):
 
 # COMMAND #3 - DELETE STAFF
 @staff_cli.command('delete', help='Delete a staff member')
-@click.option('--staff_email', prompt='Enter the staff email', required=True)
-def delete_staff(staff_email):
+@click.option('--staffemail', prompt='Enter the staff email', required=True)
+def delete_staff_profile(staffemail):
 
-    #Deleting staff
-    result = delete_staff(staff_email)
-    print(result)
+    result = delete_staff(staffemail)
+    print("\n" + result)
 
     
 
