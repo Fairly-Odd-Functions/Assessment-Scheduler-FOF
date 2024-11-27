@@ -40,11 +40,12 @@ from App.controllers import ( #User Controller
 
 LOGGER = logging.getLogger(__name__)
 
-@pytest.fixture(autouse=True, scope="module")
+@pytest.fixture(autouse=True, scope="function") #was "module" changed to "function"
 def empty_db():
     app = create_app({'TESTING': True, 'SQLALCHEMY_DATABASE_URI': 'sqlite:///test.db'})
     create_db()
     yield app.test_client()
+    db.session.remove() #new line
     db.drop_all()
 
 '''
@@ -112,9 +113,9 @@ class AdminUnitTest(unittest.TestCase):
         admin = Admin ("Bill", "John", "billpass", "bill.john@gmail.com")
         db.session.add(admin)
         db.session.commit()
-
+        
         assert admin.email == "bill.john@gmail.com"
-
+        
         updateAdmin = update_admin("bill.john@gmail.com", "James", "Smith", "jamespass", "james.smith@gmail.com")
         assert updateAdmin.email == "james.smith@gmail.com"
 
@@ -143,3 +144,24 @@ class AdminUnitTest(unittest.TestCase):
         getAdmin = get_admin_by_email("sam.yellow@gmail.com")
 
         #print("Found Admin Info:", getAdmin) #Testing Output
+
+    #UNIT TEST - #7: Get All Admins
+    def test_unit_07_get_all_admins(self):
+        adminUser1 = Admin ("Adam", "Bane", "adampass", "adam.bane@gmail.com")
+        adminUser2 = Admin ("Carly", "Due", "carlypass", "carly.due@gmail.com")
+        adminUser3 = Admin ("Ella", "Fisher", "ellapass", "ella.fisher@gmail.com")
+        db.session.add(adminUser1)
+        db.session.add(adminUser2)
+        db.session.add(adminUser3)
+        db.session.commit()
+  
+        admins = get_all_admins() 
+
+        #Testing Output
+        #print("All Admins: ", admins)
+
+        assert len(admins) == 3
+        assert admins[0].email == "adam.bane@gmail.com"
+        assert admins[1].email == "carly.due@gmail.com"
+        assert admins[2].email == "ella.fisher@gmail.com"
+        
