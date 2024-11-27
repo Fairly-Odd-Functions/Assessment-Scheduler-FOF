@@ -3,10 +3,10 @@ import os, tempfile, pytest, logging, unittest
 from App.main import create_app
 from App.database import db, create_db
 #from App.views.auth import login
-from App.models import Admin, Staff, User 
+from App.models import Staff
 from App.controllers import ( #Staff Controller
     register_staff,
-    add_course_staff,
+    add_course_staff, 
     add_multiple_courses_to_staff,
     get_staff_courses,
     update_staff,
@@ -42,3 +42,24 @@ class StaffUnitTest(unittest.TestCase):
         assert newStaff.email == "greg.holder@gmail.com"
 
         #print("Staff Info:" , newStaff) #Testing Output
+    
+    '''
+    #UNIT TEST - #9: Register Staff ISSUE- TWO FUNCTIONS HAVE THE SAME NAME
+    def test_unit_09_add_course_staff(self):
+        staff = Staff ("Iris", "Jack", "irispass", "iris.jack@gmail.com")
+        newCourseStaff = add_course_staff("greg.holder@gmail.com", "COMP 100")
+
+        #print("New Course Staff Info:" , newCourseStaff)
+    '''
+
+    #UINIT TEST -#10: add_multiple_courses_to_staff - I
+    def test_unit_10_add_multiple_courses_to_staff(self):
+        newStaff = Staff("Klim", "Lane", "kilmpass", "klim.lane@gmail.com")
+        db.session.add(newStaff)
+        db.session.commit()
+        assert newStaff.email == "klim.lane@gmail.com"
+
+        addCourses = add_multiple_courses_to_staff("klim.lane@gmail.com",["COMP 200", "COMP 300"])
+
+
+        print("Staff Info:" , addCourses) #Testing Output
