@@ -20,6 +20,25 @@ def init():
 Programme Commands 
 Written by Jalene Armstrong (Jalene A) - Task 07.2.1. Programme Group Commands Implementation
 """
+programme_cli = AppGroup('programme', help='Programme Object Commands')
+
+@programme_cli.command('create_programme', help="Creates & Adds A New Programme To The Database")
+@click.option('--programme_title', '-pt', prompt="Enter Programme Title", help="Title Of Programme")
+@click.option('--programme_desc', '-pd', prompt="Enter Programme Description", help="Description Of The Programme")
+def create_programme_command(programme_title, programme_desc):
+    new_programme = create_programme(programme_title, programme_desc)
+
+    if new_programme and "Message" in new_programme and new_programme["Message"] == "Programme Created Successfully":
+            print(f"SUCCESS: New Programme '{programme_title}' Added Successfully!.")
+    elif new_programme and "Error Message" in new_programme:
+        print(f"ERROR: {new_programme['Error Message']}")
+    else:
+        print("ERROR: Something Went Wrong. Please Try Again.")
+
+# @programme_cli.command('edit_programme', help="Updates Information For An Existing Programme")
+# @programme_cli.command('list_programme_courses', help="List All Courses For A Specific Programme")
+
+app.cli.add_command(programme_cli)
 
 """
 Semester Commands 
