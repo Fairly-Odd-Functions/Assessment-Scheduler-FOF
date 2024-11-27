@@ -147,3 +147,13 @@ class UserUnitTest(unittest.TestCase):
         getUser = get_user("dean.sil@gmail.com", "deanpass")
 
         #print("Get Admin : ", getUser) #Testing Output
+
+    
+    #UNIT TEST - #27: Get User ID using their Email
+    def test_unit_27_get_userID(self):
+        user = create_user("Lara", "Silk", "larapass", "“lara.silk@gmail.com", "staff")
+        assert user.email == "“lara.silk@gmail.com"
+
+        getUserID = get_userID("“lara.silk@gmail.com")
+
+        #print("Get User ID : ", getUserID) #Testing Output
