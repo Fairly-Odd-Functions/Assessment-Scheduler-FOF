@@ -27,7 +27,7 @@ staff_cli = AppGroup('staff', help='Staff object commands')
 # COMMAND #1 - ADD STAFF
 @staff_cli.command('add', help='Add a new staff member')
 @click.option('--firstname', prompt='Enter First Name', required=True)
-@click.option('--lastname', prompt='Enter the Last Name', required=True)
+@click.option('--lastname', prompt='Enter Last Name', required=True)
 @click.option('--email', prompt='Enter Email', required=True)
 @click.option('--password', prompt='Enter Password', required=True)
 def add_staff(firstname, lastname, email, password):
@@ -38,7 +38,7 @@ def add_staff(firstname, lastname, email, password):
     if newStaff:
         print(f"\nNew Staff Member '{newStaff.firstName} {newStaff.lastName}' Added! \n")
     else:
-        print("\nStaff Member Already Exists! \n")
+        print("\nError: Email or password already in use!\n")
 
 # COMMAND #2 - UPDATE STAFF
 @staff_cli.command('update', help='Update a staff member')
@@ -70,6 +70,16 @@ def delete_staff_profile(staffemail):
     result = delete_staff(staffemail)
     print("\n" + result)
 
+# COMMAND #4 - LIST ALL STAFF
+@staff_cli.command('list', help='List all staff members')
+def list_staff():
+    
+    staffMembers = get_all_staff()
+    if staffMembers:
+        for staff in staffMembers:
+            print(staff)
+    else:
+        print("No Staff Members Found")
     
 
 app.cli.add_command(staff_cli)
