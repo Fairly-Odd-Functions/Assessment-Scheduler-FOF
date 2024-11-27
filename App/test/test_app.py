@@ -77,3 +77,16 @@ class StaffUnitTest(unittest.TestCase):
 
         #print("Staff Courses:" , courseStaff) #Testing Output
 
+    #UNIT TEST -#12: Update Staff
+    def test_unit_12_update_staff(self):
+        newStaff = Staff("Ollie", "Pon", "olliepass", "ollie.pon@gmail.com")
+        db.session.add(newStaff)
+        db.session.commit()
+        assert newStaff.email == "ollie.pon@gmail.com"
+
+        updateStaff = update_staff("ollie.pon@gmail.com", "Que", "Rick", "quepass", "“que.rick@gmail.com")
+
+        print("Updated Staff Info:" , updateStaff) #Testing Output
+
+
+
