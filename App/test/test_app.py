@@ -80,3 +80,21 @@ class UserUnitTest(unittest.TestCase):
         assert staff[1].email == "peter.quick@gmail.com"
         '''   
 
+    #UNIT TEST - #22: Get All Admin Users JSON
+    def test_unit_22_get_all_admin_users_json(self):
+        user = create_user("Rese", "Tim", "resepass", "rese.tim@gmail.com", "admin")
+        assert user.email == "rese.tim@gmail.com"
+
+        user = create_user("Uma", "Vick", "umapass", "uma.vick@gmail.com", "admin" )
+        assert user.email == "uma.vick@gmail.com"
+
+        admins = get_all_admin_users_json()    
+
+        #Testing Output
+        '''
+        print("Admin Users: ", admins)
+
+        assert len(admins) == 2
+        assert admins[0]['email'] == "rese.tim@gmail.com"
+        assert admins[1]['email'] == "uma.vick@gmail.com"
+        '''
