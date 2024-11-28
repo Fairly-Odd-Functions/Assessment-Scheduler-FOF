@@ -4,9 +4,10 @@ from .admin import *
 from .staff import *
 from .course import *
 from .semester import *
+from .programme import *
 from .initialize import *
 from .courseStaff import *
-from .courseOffering import *
 from .clashDetection import *
+from .courseOffering import *
 from .courseProgramme import *
 from .courseAssessment import *
