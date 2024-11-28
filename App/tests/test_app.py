@@ -22,7 +22,9 @@ class UserIntegrationTests(unittest.TestCase):
     #     assert response is not None
 
     # def test_integration_02_authenticate_user_invalid(self):
-    #     new_user = create_user()
+    #     user = get_user("rob22@email.com", "robpass")
+    #     response = login_user(user)
+    #     assert response is None
 
     def test_integration_02_get_user(self):
         new_user = create_user("Jenny", "Voe", "voepass", "voe55@email.com", "staff")
