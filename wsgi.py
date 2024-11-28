@@ -42,5 +42,21 @@ def create_course(coursecode, coursetitle, coursecredits, coursedescription, cou
         print("\nError: An error occurred while adding the course\n")
         print()
 
+# COMMAND #2 : SEARCH FOR A COURSE
+@course_cli.command('search', help='Search For A Course')
+@click.option('--coursecode', '-c', prompt='Enter Course Code', required=True)
+def search_course(coursecode):
+    
+    course= get_course(coursecode)
+
+    if course:
+        print()
+        print(course)
+        print()
+    else:
+        print()
+        print("\nError: An error occurred while searching for the course\n")
+        print()
+
 
 app.cli.add_command(course_cli)
