@@ -73,7 +73,6 @@ def update_course(coursecode):
             print(f"\nError: An error occurred while updating course {coursecode}\n")
             print()
 
-
 # COMMAND #3 : SEARCH FOR A COURSE
 @course_cli.command('search', help='Search For A Course')
 @click.option('--coursecode', '-c', prompt='Enter Course Code', required=True)
@@ -90,6 +89,19 @@ def search_course(coursecode):
         print("\nError: An error occurred while searching for the course\n")
         print()
 
+# COMMAND #4 : VIEW ALL COURSES
+@course_cli.command('list-all', help='View All Courses')
+def get_all_courses():
+    
+    courses = list_courses()
 
+    if courses:
+        print()
+        print(courses)
+        print()
+    else:
+        print()
+        print("\nError: An error occurred while obtaining all courses\n")
+        print()
 
 app.cli.add_command(course_cli)
