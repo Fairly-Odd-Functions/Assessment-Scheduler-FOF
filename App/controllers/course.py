@@ -28,11 +28,17 @@ def list_courses():
     courses = Course.query.all()
     return [course.get_json() for course in courses] 
 
-def get_course(courseCode):
+def get_course_by_code(courseCode):
     course = Course.query.filter_by(courseCode=courseCode).first()
     if not course:
         return {"Error": "Course Not Found"}
     return course.get_json()
+
+def get_course(courseCode):
+    course = Course.query.filter_by(courseCode=courseCode).first()
+    if not course:
+        return {"Error": "Course Not Found"}
+    return course
 
 def edit_course(courseCode, new_courseTitle=None, new_courseCredits=None, new_courseDescription=None, new_courseLevel=None):
     try:
