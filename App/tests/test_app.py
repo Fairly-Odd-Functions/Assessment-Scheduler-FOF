@@ -22,6 +22,7 @@ def empty_db():
     Task 08.1.1. Admin Unit Tests Implementation
     Task 08.1.2. Staff Unit Tests Implementation
     Task 08.1.3. User Unit Tests Implementation
+    Task 08.1.4. Course Unit Tests Implementation
 '''
 
 class AdminUnitTest(unittest.TestCase):
@@ -72,6 +73,23 @@ class UserUnitTest(unittest.TestCase):
         password = "janepass"
         staff = User("Jane", "Doe", "janepass", "jane.doeh@gmail.com", "staff")
         assert staff.check_password(password)
+
+class CourseUnitTest(unittest.TestCase):
+
+    # UNIT TEST - #8: Create Course
+    def test_unit_08_create_course(self):
+        newCourse = Course("COMP 1601", "Computer Programming I", 3 , "A level one programming course", 1)
+        assert newCourse.courseCode == "COMP 1601"
+
+    # UNIT TEST - #9: Course JSON
+    def test_unit_09_course_json(self):
+        newCourse = Course("COMP 1602", "Computer Programming II", 3 , "A level one programming course", 1)
+        course_json = newCourse.get_json()
+        self.assertDictEqual({"courseCode": "COMP 1602",
+                              "courseTitle": "Computer Programming II",
+                              "courseCredits": 3,
+                              "courseDescription": "A level one programming course",
+                              "courseLevel" : 1}, course_json)
 
 '''
     Integration Tests
