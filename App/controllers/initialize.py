@@ -40,6 +40,18 @@ def initialize():
         # db.session.add(course)
         # programme_course = CourseProgramme(programmeID=1, courseCode=course.courseCode,)
         # db.session.add(programme_course)
+        
+        # TESTING CODE: Create A Course, Add Assessment To Course
+        # from datetime import date
+        # from App.models import Course, Semester,Assessment,courseAssessment
+        # course = Course(courseCode="COMP911", courseTitle="Intro to Mental Health", courseCredits="0", courseDescription="Help Me", courseLevel="1")        
+        # semester = Semester(semesterName="Semester 1", academicYear="2024/2025", startDate=date(2024, 10, 12), endDate=date(2025, 10, 12))
+        # assessment = Assessment(assessmentTitle="CourseWork#1", assessmentType="Midterm", startDate=date(2024, 10, 12), dueDate=date(2024, 10, 12))
+        
+        # db.session.add(assessment)
+        # db.session.add(course)
+        # db.session.add(semester)
+        # db.session.commit()
 
         db.session.add(rick)
         db.session.add(bob)
