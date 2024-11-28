@@ -1,84 +1,89 @@
 from App.database import db
-from App.models import Course, Staff, CourseStaff, Semester
+from App.models import Course, Staff, CourseStaff, Semester, CourseOffering
 
 # Add Staff To A Course In A Given Semester
 def add_course_staff(courseCode, semesterName, academicYear, staffID):
     try:
+        staff = Staff.query.filter_by(staffID=staffID).first()
         course = Course.query.filter_by(courseCode=courseCode).first()
+        semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
+        course_offering = CourseOffering.query.filter_by(courseCode=course.courseCode, semesterID=semester.semesterID).first()
+
         if not course:
             return {"Error": "Course Not Found"}
-
-        semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
         if not semester:
             return {"Error": "Semester Not Found"}
-
-        staff = Staff.query.filter_by(staffID=staffID).first()
         if not staff:
             return {"Error": "Staff Not Found"}
+        if not course_offering:
+            return {"Error": "Course Offering Not Found For The Given Semester"}
 
-        existing_assignment = CourseStaff.query.filter_by(courseCode=courseCode, semesterID=semester.semesterID, staffID=staffID).first()
-        if existing_assignment:
-            return {"Message": "This staff member is already assigned to this course in the given semester"}
+        already_assigned_staff = CourseStaff.query.filter_by(courseCode=courseCode, courseOfferingID=course_offering.offeringID, staffID=staffID).first()
+        if already_assigned_staff:
+            return {"Message": "Staff Member Is Already Assigned To Course."}
 
-        new_course_staff = CourseStaff(courseCode=courseCode, semesterID=semester.semesterID, staffID=staffID)
+        new_course_staff = CourseStaff(courseCode=courseCode, courseOfferingID=course_offering.offeringID, staffID=staffID)
         db.session.add(new_course_staff)
         db.session.commit()
-
         return {"Message": "Staff successfully assigned to the course", "CourseStaff": new_course_staff.get_json()}
+
     except Exception as e:
         db.session.rollback()
-        print(f"Error while adding staff to course: {e}")
-        return {"Error": "An error occurred while assigning staff to the course"}
+        print(f"Error While Adding Staff To Course: {e}")
+        return {"Error": "An Error Occurred While Assigning Staff To The Course"}
 
 # Remove Staff From A Course In A Given Semester
 def remove_course_staff(courseCode, semesterName, academicYear, staffID):
     try:
+        staff = Staff.query.filter_by(staffID=staffID).first()
         course = Course.query.filter_by(courseCode=courseCode).first()
+        semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
+        course_offering = CourseOffering.query.filter_by(courseCode=course.courseCode, semesterID=semester.semesterID).first()
+
         if not course:
             return {"Error": "Course Not Found"}
-
-        semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
         if not semester:
             return {"Error": "Semester Not Found"}
-
-        staff = Staff.query.filter_by(staffID=staffID).first()
         if not staff:
             return {"Error": "Staff Not Found"}
+        if not course_offering:
+            return {"Error": "Course Offering Not Found For The Given Semester"}
 
-        course_staff = CourseStaff.query.filter_by(courseCode=courseCode, semesterID=semester.semesterID, staffID=staffID).first()
-        if not course_staff:
-            return {"Error": "Staff not assigned to this course in the given semester"}
+        assigned_staff = CourseStaff.query.filter_by(courseCode=courseCode, courseOffering=course_offering.offeringID, staffID=staffID).first()
+        if not assigned_staff:
+            return {"Error": "Staff Not Assigned To This Course In The Given Semester"}
 
-        db.session.delete(course_staff)
+        db.session.delete(assigned_staff)
         db.session.commit()
+        return {"Message": "Staff Successfully Removed From The Course"}
 
-        return {"Message": "Staff successfully removed from the course"}
     except Exception as e:
         db.session.rollback()
-        print(f"Error while removing staff from course: {e}")
-        return {"Error": "An error occurred while removing staff from the course"}
+        print(f"Error While Removing Staff From Course: {e}")
+        return {"Error": "An Error Occurred While Removing Staff From The Course"}
 
 # Get Staff Assigned To A Course In A Given Semester
 def get_course_staff(courseCode, semesterName, academicYear):
     try:
-        # Fetch the course
         course = Course.query.filter_by(courseCode=courseCode).first()
+        semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
+        course_offering = CourseOffering.query.filter_by(courseCode=course.courseCode, semesterID=semester.semesterID).first()
+
         if not course:
             return {"Error": "Course Not Found"}
-
-        # Ensure the semester exists
-        semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
         if not semester:
             return {"Error": "Semester Not Found"}
+        if not course_offering:
+            return {"Error": "Course Offering Not Found For The Given Semester"}
 
-        # Fetch staff assigned to this course in the given semester
-        course_staff = CourseStaff.query.filter_by(courseCode=courseCode).join(Semester).filter(Semester.semesterID == semester.semesterID).all()
+        course_staff = CourseStaff.query.filter_by(courseOfferingID=course_offering.offeringID).all()
         if not course_staff:
-            return {"Message": "No staff assigned to this course in the given semester"}
+            return {"Message": "There Are No Staff Assigned To This Course In The Given Semester"}
 
         return {
             "CourseStaff": [staff.get_json() for staff in course_staff]
         }
+
     except Exception as e:
-        print(f"Error while fetching course staff: {e}")
-        return {"Error": "An error occurred while fetching course staff"}
+        print(f"Error While Fetching Course Staff: {e}")
+        return {"Error": "An Error Occurred While Fetching Course Staff"}
