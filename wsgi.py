@@ -6,6 +6,7 @@ from flask.cli import with_appcontext, AppGroup
 from App.models import Staff, Course, Assessment, Programme, Admin
 
 from App.controllers import *
+from datetime import datetime
  
 # This commands file allow you to create convenient CLI commands for testing controllers!!
 app = create_app()
@@ -39,7 +40,7 @@ def create_course(coursecode, coursetitle, coursecredits, coursedescription, cou
         print()
     else:
         print()
-        print("\nError: An error occurred while adding the course\n")
+        print(f"\nError: An error occurred while adding course {coursecode}\n")
         print()
 
 # COMMAND #2 : EDIT A COURSE
@@ -102,6 +103,23 @@ def get_all_courses():
     else:
         print()
         print("\nError: An error occurred while obtaining all courses\n")
+        print()
+
+# COMMAND #5 : ADD ASSESSMENT TO A COURSE
+@course_cli.command('add-assessment', help='Add Assessment To A Course')
+@click.option('--coursecode', '-c', prompt='Enter Course Code', required=True)
+@click.option('--assessmentcode', '-a', prompt='Enter Assessment Code', required=True)
+def add_assessment_to_course(coursecode, assessmentcode):
+
+    result = add_course_assessment(coursecode, assessmentcode)
+
+    if result:
+        print()
+        print(result)
+        print()
+    else:
+        print()
+        print(f"\nError: An error occurred while assigning assessment to {coursecode}\n")
         print()
 
 app.cli.add_command(course_cli)

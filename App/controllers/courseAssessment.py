@@ -2,7 +2,7 @@ from App.database import db
 from App.models import Course, Assessment, CourseAssessment
 
 # Link New Course Assessment To Relevant Code
-def add_course_assessment(courseCode, assessmentID, startDate, dueDate):
+def add_course_assessment(courseCode, assessmentID):
     try:
         course = Course.query.get(courseCode)
         if not course:
@@ -15,8 +15,8 @@ def add_course_assessment(courseCode, assessmentID, startDate, dueDate):
         new_course_assessment = CourseAssessment(
             courseCode=courseCode,
             assessmentID=assessmentID,
-            startDate=startDate,
-            dueDate=dueDate
+            startDate=assessment.startDate,
+            dueDate=assessment.dueDate
         )
 
         db.session.add(new_course_assessment)
