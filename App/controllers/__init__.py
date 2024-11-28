@@ -5,6 +5,7 @@ from .staff import *
 from .course import *
 from .semester import *
 from .programme import *
+from .assessment import *
 from .initialize import *
 from .courseStaff import *
 from .clashDetection import *
