@@ -4,6 +4,7 @@ from .admin import *
 from .staff import *
 from .course import *
 from .semester import *
+from .assessment import *
 from .initialize import *
 from .courseStaff import *
 from .courseOffering import *
