@@ -121,24 +121,3 @@ def load_course_data():
       db.session.commit() #save all changes OUTSIDE the loop
     print('database intialized')
 """
-test = AppGroup('test', help='Testing Commands')
-
-@test.command("user", help="Run User Tests")
-@click.argument("type", default="all")
-def user_tests_command(type):
-  if type == "int":
-    sys.exit(pytest.main(["-k", "UserIntegrationTests"]))
-
-@test.command("course", help="Run Course Tests")
-@click.argument("type", default="all")
-def user_tests_command(type):
-  if type == "int":
-    sys.exit(pytest.main(["-k", "CourseIntegrationTests"]))
-
-@test.command("admin", help="Run Admin Tests")
-@click.argument("type", default="all")
-def user_tests_command(type):
-  if type == "int":
-    sys.exit(pytest.main(["-k", "AdminIntegrationTests"]))
-
-app.cli.add_command(test)
