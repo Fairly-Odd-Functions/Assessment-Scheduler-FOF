@@ -123,12 +123,6 @@ def load_course_data():
 """
 test = AppGroup('test', help='Testing Commands')
 
-@test.command("user", help="Run User Tests")
-@click.argument("type", default="all")
-def user_tests_command(type):
-  if type == "int":
-    sys.exit(pytest.main(["-k", "UserIntegrationTests"]))
-
 @test.command("staff", help="Run User Tests")
 @click.argument("type", default="all")
 def user_tests_command(type):
