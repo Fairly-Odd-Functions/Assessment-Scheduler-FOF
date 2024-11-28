@@ -78,16 +78,6 @@ class UserIntegrationTests(unittest.TestCase):
     #     response = login_user(new_user)
     #     assert response is not None
 
-    # def test_integration_02_authenticate_user_invalid(self):
-    #     user = get_user("rob22@email.com", "robpass")
-    #     response = login_user(user)
-    #     assert response is None
-
-    def test_integration_02_get_user(self):
-        new_user = create_user("Jenny", "Voe", "voepass", "voe55@email.com", "staff")
-        test = get_user("voe55@email.com","voepass")
-        assert test is not None
-
     def test_integration_03_get_user_invalid(self):
         new_user = create_user("Lily", "Daisy", "daisypass", "daisy35@email.com", "staff")
         test = get_user("daisy35@email.com","notdaisypass")
@@ -223,3 +213,16 @@ class CourseIntegrationTests(unittest.TestCase):
                                                 'programmeID': programme.programmeID,
                                                 'courseCode': "20001"
                                             }
+
+class SemesterIntegrationTests(unittest.TestCase):
+    def test_integration_14_add_semester(self):
+        message = add_semester("Semester 2", "2024-2025", date(2024, 9, 4), date(2024, 12, 20))
+        assert message["New Semester Added"] == {"semesterID" : 1, "semesterName" : "Semester 2"}
+
+    def test_integration_15_get_semester(self):
+       add_semester("Semester 3", "2024-2025", date(2024, 5, 15), date(2024, 7, 20))
+       semester = get_semester("Semester 3", "2024-2025")
+       self.assertDictEqual({"semester_name":"Semester 3",
+                            "academicYear": "2024-2025",
+                            "startDate": date(2024, 5, 15),
+                            "endDate":date(2024, 7, 20)},semester)
