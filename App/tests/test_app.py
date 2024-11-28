@@ -22,6 +22,10 @@ def empty_db():
     Task 08.1.1. Admin Unit Tests Implementation
     Task 08.1.2. Staff Unit Tests Implementation
     Task 08.1.3. User Unit Tests Implementation
+    Task 08.1.4 Course Unit Tests Implementation
+    Task 08.1.5 Semester Unit Tests Implementation
+    Task 08.1.6 Programme Unit Tests Implementation
+    Task 08.1.7 Assessment Unit Tests Implementation
 '''
 
 class AdminUnitTest(unittest.TestCase):
@@ -72,6 +76,32 @@ class UserUnitTest(unittest.TestCase):
         password = "janepass"
         staff = User("Jane", "Doe", "janepass", "jane.doeh@gmail.com", "staff")
         assert staff.check_password(password)
+
+    #UNIT TEST 8 & 9
+        
+    #UNIT TEST 10 & 11
+
+    #UNIT TEST 12 & 13
+
+class AssessmentUnitTest(unittest.TestCase):
+
+    # UNIT TEST - #14: Create Assessment
+    def test_unit_14_create_assessment(self):
+        newAssessment = Assessment("Assignment 1", "Assignment", "2024-09-02", "2024-09-16")
+        assert newAssessment.assessmentTitle == "Assignment 1"
+
+        print(newAssessment)
+
+    # UNIT TEST - #15: Assessment JSON
+    def test_unit_15_assessment_json(self):
+        newAssessment = Assessment("Assignment 2", "Assignment", date(2024, 5, 15), date(2024, 9,28))
+        assessment_json = newAssessment.get_json()
+        self.assertDictEqual({"assessmentID": newAssessment.assessmentID,
+                              "assessmentTitle": "Assignment 2",
+                              "assessmentType": "Assignment",
+                              "startDate": date(2024, 5, 15).isoformat(),
+                              "dueDate": date(2024, 9,28).isoformat()}, assessment_json)
+        print(assessment_json)
 
 '''
     Integration Tests
