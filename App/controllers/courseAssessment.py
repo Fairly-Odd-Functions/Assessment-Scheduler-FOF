@@ -11,8 +11,7 @@ def add_course_assessment(courseCode, assessmentID):
         assessment = Assessment.query.get(assessmentID)
         if not assessment:
             return {"Error": "Assessment with this assessmentID does not exist"}
-        
-        #Used to check if course and assessment are already associated
+
         existing_association = CourseAssessment.query.filter_by(courseCode=courseCode, assessmentID=assessmentID).first()
         if existing_association:
             return {"Error": "Assessment is already associated with this course"}

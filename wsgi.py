@@ -1,28 +1,26 @@
 import click, sys, csv
 sys.dont_write_bytecode = True
-
 from flask import Flask
-from datetime import datetime
-from App.main import create_app
-from App.database import db, get_migrate
-from App.main import create_app
-from App.database import db, get_migrate
-from flask.cli import with_appcontext, AppGroup
 from App.models import *
 from App.controllers import *
 from datetime import datetime
+from App.main import create_app
+from App.database import db, get_migrate
+from flask.cli import with_appcontext, AppGroup
  
+ 
+# This commands file allow you to create convenient CLI commands for testing controllers!!
+
 # This commands file allow you to create convenient CLI commands for testing controllers!!
 app = create_app()
 migrate = get_migrate(app)
 
-# This command creates and initializes the database
+# This Command Creates And Initializes The Database
 @app.cli.command("init", help="Creates And Initializes The Database")
 def init():
     initialize()
     print('Database Initialized!')
 
-    
 '''
 |   Staff Group Commands
 |   Written by RynniaRyan (Rynnia.R) - Task 07.1.1. Staff Group Commands Implementation
@@ -36,10 +34,8 @@ staff_cli = AppGroup('staff', help='Staff object commands')
 @click.option('--email', prompt='Enter Email', required=True)
 @click.option('--password', prompt='Enter Password', required=True)
 def add_staff(firstname, lastname, email, password):
-    
-    #Adding staff
     newStaff = register_staff(firstname, lastname, password, email)
-    
+
     if newStaff:
         print(f"\nNew Staff Member '{newStaff.firstName} {newStaff.lastName}' Added! \n")
     else:
@@ -49,19 +45,18 @@ def add_staff(firstname, lastname, email, password):
 @staff_cli.command('update', help='Update a staff member')
 @click.option('--staffemail', prompt='Enter Staff Email to Edit', required=True)
 def update_staff_profile(staffemail):
-    
     staff_member = Staff.query.filter_by(email=staffemail).first()
     if not staff_member:
         print("\nStaff member not found!\n")
         return
-    
+
     firstname = input('\nEdit First Name (press Enter to keep the current value): ') or None
     lastname = input('Edit Last Name (press Enter to keep the current value): ') or None
     email = input('Edit Email (press Enter to keep the current value): ') or None
     password = input('Edit password (press Enter to keep the current value): ') or None
 
     updatedStaff = update_staff(staffemail, firstName=firstname, lastName=lastname, password=password, email=email)
-    
+
     if updatedStaff:
         print(f"\nStaff Member '{updatedStaff.firstName} {updatedStaff.lastName}' Updated! \n")
     else:
@@ -71,14 +66,12 @@ def update_staff_profile(staffemail):
 @staff_cli.command('delete', help='Delete a staff member')
 @click.option('--staffemail', prompt='Enter Staff email', required=True)
 def delete_staff_profile(staffemail):
-
     result = delete_staff(staffemail)
     print("\n" + result)
 
 # COMMAND #4 - LIST ALL STAFF
 @staff_cli.command('list', help='List all staff members')
 def list_staff():
-    
     staffMembers = get_all_staff()
     if staffMembers:
         for staff in staffMembers:
@@ -90,12 +83,9 @@ def list_staff():
 @staff_cli.command('search', help='Search for a staff member')
 @click.option('--staffemail', prompt='Enter Staff Email', required=True)
 def search_staff_profile(staffemail):
-    
     staff = get_staff_by_email(staffemail)
     if staff:
-        print()
-        print(staff)
-        print()
+        print(f"{staff}")
     else:
         print("\nStaff member not found!\n")
 
@@ -106,14 +96,11 @@ def search_staff_profile(staffemail):
 @click.option('--semestername', prompt='Enter Semester Name', required=True)
 @click.option('--academicyear', prompt='Enter Academic Year', required=True)
 def assign_staff_to_course(staffemail, coursecode, semestername, academicyear):
-    
     staff = get_staff_by_email(staffemail)
 
     if staff:
         result = add_course_staff(coursecode, semestername, academicyear, staff.staffID)
-        print()
-        print(result)
-        print()
+        print(f"{result}")
     else:
         print("Staff not found")
 
@@ -124,38 +111,29 @@ def assign_staff_to_course(staffemail, coursecode, semestername, academicyear):
 @click.option('--semestername', prompt='Enter Semester Name', required=True)
 @click.option('--academicyear', prompt='Enter Academic Year', required=True)
 def remove_staff_from_course(staffemail, coursecode, semestername, academicyear):
-      
     staff = get_staff_by_email(staffemail)
-  
+
     if staff:
-        print()
         result = remove_course_staff(coursecode, semestername, academicyear, staff.staffID)
-        print(result)
-        print()
+        print(f"{result}")
     else:
-        print()
         print("Staff not found")
-        print()
 
 # COMMAND #8 - VIEW STAFF ASSIGNED COURSE/S
 @staff_cli.command('get-courses', help='View staff with their assigned course/s')
 @click.option('--staffemail', prompt='Enter Staff Email', required=True)
 def view_staff_courses(staffemail):
-    
     staff = get_staff_by_email(staffemail)
 
     if staff:
-        print()
         result = get_staff_courses(staffemail)
 
         if result:
-            print(result)
+            print(f"{result}")
         else:
            print(f"\nThere are Currently No Courses Found For '{staff.firstName} {staff.lastName}'\n")
     else:
-        print()
         print("Staff not found")
-        print()
 
 app.cli.add_command(staff_cli)
 
@@ -174,29 +152,21 @@ course_cli = AppGroup('course', help='Course object commands')
 @click.option('--coursedescription', '-d', prompt='Enter Course Description', required=True)
 @click.option('--courselevel', '-l', prompt='Enter Course Level', required=True)
 def create_course(coursecode, coursetitle, coursecredits, coursedescription, courselevel):
-    
     result = add_course(coursecode, coursetitle, coursecredits, coursedescription, courselevel)
 
     if result:
-        print()
-        print(result)
-        print()
+        print(f"{result}")
     else:
-        print()
         print(f"\nError: An error occurred while adding course {coursecode}\n")
-        print()
 
 # COMMAND #2 : EDIT A COURSE
 @course_cli.command('edit', help='Edit A Course')
 @click.option('--coursecode', '-c', prompt='Enter Course Code To Edit', required=True)
 def update_course(coursecode):
-
     response = get_course_by_code(coursecode)
 
     if 'Error' in response:
-        print()
-        print(response)
-        print()
+        print(f"{response}")
         return
     else:
         print(f"\nEnter New Course Details For {coursecode}. . .")
@@ -209,94 +179,65 @@ def update_course(coursecode):
         result = edit_course(coursecode, coursetitle, coursecredits, coursedescription, courselevel)
 
         if result:
-            print()
-            print(result)
-            print()
+            print(f"{result}")
         else:
-            print()
             print(f"\nError: An error occurred while updating course {coursecode}\n")
-            print()
 
 # COMMAND #3 : SEARCH FOR A COURSE
 @course_cli.command('search', help='Search For A Course')
 @click.option('--coursecode', '-c', prompt='Enter Course Code', required=True)
 def search_course(coursecode):
-    
     course= get_course_by_code(coursecode)
 
     if course:
-        print()
-        print(course)
-        print()
+        print(f"{course}")
     else:
-        print()
         print("\nError: An error occurred while searching for the course\n")
-        print()
 
 # COMMAND #4 : VIEW ALL COURSES
 @course_cli.command('list-all', help='View All Courses')
 def get_all_courses():
-    
     courses = list_courses()
 
     if courses:
-        print()
-        print(courses)
-        print()
+        print(f"{courses}")
     else:
-        print()
         print("\nError: An error occurred while obtaining all courses\n")
-        print()
 
 # COMMAND #5 : ADD ASSESSMENT TO A COURSE
 @course_cli.command('add-assessment', help='Add Assessment To A Course')
 @click.option('--coursecode', '-c', prompt='Enter Course Code', required=True)
 @click.option('--assessmentcode', '-a', prompt='Enter Assessment Code', required=True)
 def add_assessment_to_course(coursecode, assessmentcode):
-
     result = add_course_assessment(coursecode, assessmentcode)
 
     if result:
-        print()
-        print(result)
-        print()
+        print(f"{result}")
     else:
-        print()
         print(f"\nError: An error occurred while assigning assessment to {coursecode}\n")
-        print()
 
 # COMMAND #6 : REMOVE ASSESSMENT FROM A COURSE
 @course_cli.command('remove-assessment', help='Remove Assessment From A Course')
 @click.option('--coursecode', '-c', prompt='Enter Course Code', required=True)
 @click.option('--courseassessmentcode', '-c', prompt='Enter Course Assessment Code', required=True)
 def remove_assessment_from_course(coursecode,courseassessmentcode):
-
     result = delete_course_assessment(courseassessmentcode)
 
     if result:
-        print()
-        print(result)
-        print()
+        print(f"{result}")
     else:
-        print()
         print(f"\nError: An error occurred while removing assessment from {coursecode}\n")
-        print()
 
 # COMMAND #7 : VIEW ALL ASSESSMENTS FOR A COURSE
 @course_cli.command('list-assessments', help='View All Assessments For A Course')
 @click.option('--coursecode', '-c', prompt='Enter Course Code', required=True)
 def get_all_assessments_for_course(coursecode):
-    
     assessments = list_course_assessments(coursecode)
 
     if assessments:
-        print()
-        print(assessments)
-        print()
+        print(f"\n{assessments}\n")
     else:
-        print()
         print("\nError: An error occurred while obtaining all assessments for the course\n")
-        print()
 
 app.cli.add_command(course_cli)
 
@@ -316,7 +257,6 @@ assessment_cli = AppGroup('assessment', help='Assessment Object Commands')
 @click.option('--due_date', '-e', prompt="Enter Due Date (YYYY-MM-DD HH:MM:SS)", 
               type=click.DateTime(formats=["%Y-%m-%d %H:%M:%S"]), help="End Date Of The Assessment")
 def create_assessment_command(assessment_title, assessment_type, start_date, due_date):
-
     new_assessment = create_assessment(assessment_title, assessment_type, start_date, due_date)
 
     if new_assessment and "Message" in new_assessment and new_assessment["Message"] == "Assessment Created Successfully":
@@ -367,7 +307,7 @@ def create_programme_command(programme_title, programme_desc):
         print("ERROR: Something Went Wrong. Please Try Again.")
 
 @programme_cli.command('update_programme', help="Updates Information For An Existing Programme")
-@click.option('--programme_tirtle', '-pt', prompt="Enter Programme Title", help="Title Of The Programme")
+@click.option('--programme_title', '-pt', prompt="Enter Programme Title", help="Title Of The Programme")
 @click.option('--new_programme_title', '-ptnew', default=None, help="New Programme Title (Optional)")
 @click.option('--new_programme_desc', '-pdnew', default=None, help="New Programme Description (Optional)")
 def update_programme_command(programme_title, new_programme_title, new_programme_desc):
@@ -377,8 +317,12 @@ def update_programme_command(programme_title, new_programme_title, new_programme
         print(f"ERROR: Programmme '{programme_title}' Does Not Exist.")
         return
 
-    new_programme_title = new_programme_title or input(f"Enter New Programme Name (Current: {programme_to_update.programmeTitle}): ") or programme_to_update.programmeTitle
-    new_programme_desc = new_programme_desc or input(f"Enter New Programme Description: ") or programme_to_update.programmeDescription
+    new_programme_title = new_programme_title or input(f"Enter New Programme Name (Current: {programme_to_update.programmeTitle} | Press ENTER To Skip): ") or programme_to_update.programmeTitle
+    new_programme_desc = new_programme_desc or input(f"Enter New Programme Description (Press ENTER To Skip): ") or programme_to_update.programmeDescription
+
+    if new_programme_title == programme_to_update.programmeTitle and new_programme_desc == programme_to_update.programmeDescription:
+        print(f"No Changes Made To Programme: '{new_programme_title}")
+        return
 
     updated_programme = update_programme(
         programmeTitle=programme_title,
@@ -391,7 +335,7 @@ def update_programme_command(programme_title, new_programme_title, new_programme
     elif "Error Message" in updated_programme:
         print(f"ERROR: {updated_programme['Error Message']}")
     else:
-        print(f"SUCCESS: Semester '{programme_title}' Updated Successfully!")
+        print(f"SUCCESS: Programme Updated Successfully!\nUpdated Details: {updated_programme['Programme']}")
 
 @programme_cli.command('list_programmes', help="Retrieve And Lists All Programmes In The Database")
 @click.argument("format", default="json")
@@ -460,10 +404,10 @@ def update_semester_command(semester_name, academic_year, new_semester_name, new
         print(f"ERROR: Semester '{semester_name}' for Academic Year '{academic_year}' Not Found.")
         return
 
-    new_semester_name = new_semester_name or input(f"Enter New Semester Name (Current: {semester_to_update.semesterName}): ") or semester_to_update.semesterName
-    new_academic_year = new_academic_year or input(f"Enter New Academic Year (Current: {semester_to_update.academicYear}): ") or semester_to_update.academicYear
-    start_date = start_date or (input(f"Enter New Start Date (Current: {semester_to_update.startDate}): ") or semester_to_update.startDate)
-    end_date = end_date or (input(f"Enter New End Date (Current: {semester_to_update.endDate}): ") or semester_to_update.endDate)
+    new_semester_name = new_semester_name or input(f"Enter New Semester Name (Current: {semester_to_update.semesterName} | Press ENTER To Skip): ") or semester_to_update.semesterName
+    new_academic_year = new_academic_year or input(f"Enter New Academic Year (Current: {semester_to_update.academicYear} | Press ENTER To Skip): ") or semester_to_update.academicYear
+    start_date = start_date or (input(f"Enter New Start Date (Current: {semester_to_update.startDate} | Press ENTER To Skip): ") or semester_to_update.startDate)
+    end_date = end_date or (input(f"Enter New End Date (Current: {semester_to_update.endDate} | Press ENTER To Skip): ") or semester_to_update.endDate)
 
     if isinstance(start_date, str):
         start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
@@ -484,7 +428,7 @@ def update_semester_command(semester_name, academic_year, new_semester_name, new
     elif "Error Message" in updated_semester:
         print(f"ERROR: {updated_semester['Error Message']}")
     else:
-        print(f"SUCCESS: Semester '{semester_name}' Updated Successfully! Updated Details: {updated_semester['Semester Updated']}")
+        print(f"SUCCESS: Semester '{semester_name}' Updated Successfully!\nUpdated Details: {updated_semester['Semester Updated']}")
 
 @semester_cli.command('list_semesters', help="Retrieve And Lists All Semesters In The Database")
 @click.argument("format", default="json")
@@ -580,13 +524,13 @@ def update_admin_command(current_email, firstname, lastname, password, email):
         return
 
     if not firstname:
-        firstname = input(f"Enter New First Name (Current: {admin_to_update.firstName}): ") or admin_to_update.firstName
+        firstname = input(f"Enter New First Name (Current: {admin_to_update.firstName} |Press ENTER To Skip): ") or admin_to_update.firstName
     if not lastname:
-        lastname = input(f"Enter New Last Name (Current: {admin_to_update.lastName}): ") or admin_to_update.lastName
+        lastname = input(f"Enter New Last Name (Current: {admin_to_update.lastName} | Press ENTER To Skip): ") or admin_to_update.lastName
     if not password:
-        password = input("Enter New Password: ") or admin_to_update.password
+        password = input("Enter New Password (Press ENTER To Skip):" ) or admin_to_update.password
     if not email:
-        email = input(f"Enter New Email (Current: {admin_to_update.email}): ") or admin_to_update.email
+        email = input(f"Enter New Email (Current: {admin_to_update.email} | Press ENTER To Skip): ") or admin_to_update.email
 
     if email != admin_to_update.email:
         existing_admin = Admin.query.filter_by(email=email).first()

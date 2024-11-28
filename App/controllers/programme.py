@@ -61,7 +61,7 @@ def update_programme(programmeTitle, new_title=None, new_description=None):
         if not programme:
             return {"Error Message": f"There Is No Programme With Title: {programmeTitle} In The Database"}
 
-        if new_title:
+        if new_title and new_title != programme.programmeTitle:
             existingProgramme = Programme.query.filter_by(programmeTitle=new_title).first()
             if existingProgramme:
                 return {"Error Message": f"A Programme With Title '{new_title}' Already Exists."}

@@ -4,9 +4,13 @@ from App.services.semester import *
 
 def add_semester(semesterName, academicYear, startDate, endDate):
     try:
-        errors = validate_dates(academicYear, startDate, endDate)
-        if errors:
-            return {"Error Message": errors}
+        date_errors = validate_dates(startDate, endDate)
+        year_errors = validate_academic_year(academicYear)
+        if date_errors or year_errors:
+            if date_errors:
+                return {"Error Message": date_errors}
+            else:
+                return {"Error Message": year_errors}
 
         if not semesterName or not academicYear or not startDate or not endDate:
             return {"Error Message": "All Fields Are Required"}
