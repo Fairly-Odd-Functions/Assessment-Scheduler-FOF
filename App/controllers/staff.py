@@ -1,42 +1,37 @@
 from App.database import db
 from App.models import Staff, CourseStaff
 
-# Register A New Staff Account
+# Register A New Staff Account [Edited by Rynnia]
 def register_staff(firstName, lastName, password, email):
-    # Check If Email Is Already Used | aka. Staff Is Already Registered
-    email_check = db.session.query(Staff).filter(Staff.email == email).count()
+    
+    try:
+        # Check If Email Is Already Used
+        email_check = db.session.query(Staff).filter(Staff.email == email).count()
 
-    if email_check == 0:
-        new_staff = Staff (
-            firstName=firstName,
-            lastName=lastName,
-            password=password,
-            email=email
-        )
+        # Check If Password Is Already In Use [Added check for duplicate password]
+        password_check = db.session.query(Staff).filter(Staff.password == password).count()
 
-        db.session.add(new_staff)
-        db.session.commit()
+        if email_check > 0:
+                return None
+        #[Added check for duplicate password]
+        elif password_check > 0:
+            return None 
+        else:
+            new_staff = Staff (
+                firstName=firstName,
+                lastName=lastName,
+                password=password,
+                email=email
+            )
 
-        return new_staff
-    return None
+            db.session.add(new_staff)
+            db.session.commit()
 
-# Assign Staff To A Course
-def add_course_staff(staffEmail, courseCode):
-    # Fetch Relevant Staff Member
-    staff_member = Staff.query.filter_by(email=staffEmail).first()
-    if not staff_member:
-        return None
-
-    existing_course_staff = CourseStaff.query.filter_by(courseCode=courseCode, staffID=staff_member.staffID).first()
-    if existing_course_staff:
-        return existing_course_staff
-
-    new_course_staff = CourseStaff(courseCode=courseCode, staffID=staff_member.staffID)
-
-    db.session.add(new_course_staff)
-    db.session.commit()
-
-    return new_course_staff
+            return new_staff
+        
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
 
 # ALT: Add Multiple Courses To A Staff Member
 def add_multiple_courses_to_staff(staffEmail, courseCodes):
@@ -68,7 +63,7 @@ def get_staff_courses(staffEmail):
     course_listing = CourseStaff.query.filter_by(staffID=staff_member.staffID).all()
     return [item.courseCode for item in course_listing]
 
-# Update Staff Information
+# Update Staff Information [Edited by Rynnia]
 def update_staff(staffEmail, firstName=None, lastName=None, password=None, email=None):
     try: 
         staff_member = Staff.query.filter_by(email=staffEmail).first()
@@ -83,9 +78,12 @@ def update_staff(staffEmail, firstName=None, lastName=None, password=None, email
         if password:
             staff_member.set_password(password)
         if email:
-            if Staff.query.filter_by(email=email).count() > 0:
-                return None
-            staff_member.email = email
+            # Checking If Email Is Unique
+            if email and Staff.query.filter_by(email=email).first() != staff_member:
+                if Staff.query.filter_by(email=email).count() > 0:
+                    #[Added a more appropriate error message]
+                    return {"error":"Email address is already in use by another staff member. Please choose a different email address."}
+                staff_member.email = email
 
         db.session.commit()
         return staff_member
@@ -94,19 +92,24 @@ def update_staff(staffEmail, firstName=None, lastName=None, password=None, email
         db.session.rollback()
         return {"error":str(e)}
 
-# Delete A Staff Member 
+# Delete A Staff Member  [Edited by Rynnia]
 def delete_staff(staffEmail):
-    staff_member = Staff.query.filter_by(email=staffEmail).first()
-    if not staff_member:
-        return None
+    try:
+        staff_member = Staff.query.filter_by(email=staffEmail).first()
+        if not staff_member:
+            return "Error: Staff member not found" #[Replaced return None with a more appropriate error message]
 
-    # Delete Course Associations
-    CourseStaff.query.filter_by(staffID=staff_member.staffID).delete()
+        # Delete Course Associations
+        CourseStaff.query.filter_by(staffID=staff_member.staffID).delete()
 
-    db.session.delete(staff_member)
-    db.session.commit()
+        db.session.delete(staff_member)
+        db.session.commit()
 
-    return staff_member
+        return "Staff member deleted successfully"
+    
+    except Exception as e:
+        db.session.rollback()
+        return f"Error deleting staff member: {str(e)}"
 
 # Get Staff By Email
 def get_staff_by_email(staffEmail):
@@ -152,6 +155,6 @@ def get_staff_with_courses(staffEmail):
 
     courses = [item.courseCode for item in staff_member.assigned_courses]
     return {
-        "Staff": staff_member.get_json(),
+        "Staff": staff_member,
         "Courses": courses
     }
