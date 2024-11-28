@@ -122,4 +122,22 @@ def add_assessment_to_course(coursecode, assessmentcode):
         print(f"\nError: An error occurred while assigning assessment to {coursecode}\n")
         print()
 
+# COMMAND #6 : REMOVE ASSESSMENT FROM A COURSE
+@course_cli.command('remove-assessment', help='Remove Assessment From A Course')
+@click.option('--coursecode', '-c', prompt='Enter Course Code', required=True)
+@click.option('--courseassessmentcode', '-c', prompt='Enter Course Assessment Code', required=True)
+def remove_assessment_from_course(coursecode,courseassessmentcode):
+
+    result = delete_course_assessment(courseassessmentcode)
+
+    if result:
+        print()
+        print(result)
+        print()
+    else:
+        print()
+        print(f"\nError: An error occurred while removing assessment from {coursecode}\n")
+        print()
+
+
 app.cli.add_command(course_cli)

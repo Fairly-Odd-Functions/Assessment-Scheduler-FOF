@@ -55,6 +55,19 @@ def get_course_assessment(courseAssessmentID):
         print(f"Error while fetching course assessment: {e}")
         return {"Error": "An error occurred while fetching the course assessment"}
 
+#Get Specific courseAssesment object via courseCode and assessmentID
+def get_course_assessment_by_code_and_id(courseCode, assessmentID):
+    try:
+        course_assessment = CourseAssessment.query.filter_by(courseCode=courseCode, assessmentID=assessmentID).first()
+        
+        if not course_assessment:
+            return {"Error": "CourseAssessment not found"}
+        return course_assessment
+
+    except Exception as e:
+        print(f"Error while fetching course assessment: {e}")
+        return {"Error": "An error occurred while fetching the course assessment"}
+
 # Unlink CourseAssessment From Course | Deletes The Associated Assessment As Well
 def delete_course_assessment(courseAssessmentID):
     try:
