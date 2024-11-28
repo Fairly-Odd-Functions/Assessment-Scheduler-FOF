@@ -139,5 +139,20 @@ def remove_assessment_from_course(coursecode,courseassessmentcode):
         print(f"\nError: An error occurred while removing assessment from {coursecode}\n")
         print()
 
+# COMMAND #7 : VIEW ALL ASSESSMENTS FOR A COURSE
+@course_cli.command('list-assessments', help='View All Assessments For A Course')
+@click.option('--coursecode', '-c', prompt='Enter Course Code', required=True)
+def get_all_assessments_for_course(coursecode):
+    
+    assessments = list_course_assessments(coursecode)
+
+    if assessments:
+        print()
+        print(assessments)
+        print()
+    else:
+        print()
+        print("\nError: An error occurred while obtaining all assessments for the course\n")
+        print()
 
 app.cli.add_command(course_cli)
