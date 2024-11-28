@@ -22,8 +22,26 @@ Written by Jalene Armstrong (Jalene A) - Task 07.1.3. Assessment Group Commands 
 
 assessment_cli = AppGroup('assessment', help='Assessment Object Commands')
 
-# @assessment_cli.command('create_assessment', help="Creates A New Assessment For A Particular Course")
-# @assessment_cli.command('fetch_assessment', help="Retrieve And Displays Requested Assessment")
+@assessment_cli.command('create_assessment', help="Creates A New Assessment For A Particular Course")
+@click.option('--assessment_title', '-at', prompt="Enter Assessment Title", help="Title Of Assessment")
+@click.option('--assessment_type', '-aty', prompt="Enter Assessment Type", help="Type Of Assessment")
+@click.option('--start_date', '-s', prompt="Enter Start Date (YYYY-MM-DD HH:MM:SS)", 
+              type=click.DateTime(formats=["%Y-%m-%d %H:%M:%S"]), help="Start Date Of The Assessment")
+@click.option('--due_date', '-e', prompt="Enter Due Date (YYYY-MM-DD HH:MM:SS)", 
+              type=click.DateTime(formats=["%Y-%m-%d %H:%M:%S"]), help="End Date Of The Assessment")
+def create_assessment_command(assessment_title, assessment_type, start_date, due_date):
+
+    new_assessment = create_assessment(assessment_title, assessment_type, start_date, due_date)
+
+    if new_assessment and "Message" in new_assessment and new_assessment["Message"] == "Assessment Created Successfully":
+            print(f"SUCCESS: New Assessment '{assessment_title}' Added Successfully!.")
+    elif new_assessment and "Error Message" in new_assessment:
+        print(f"ERROR: {new_assessment['Error Message']}")
+    else:
+        print("ERROR: Something Went Wrong. Please Try Again.")
+
+# @assessment_cli.command('by_title', help="Retrieve And Displays All Assessments Based On Title")
+# @assessment_cli.command('by_type', help="Retrieve And Displays All Assessments Based On Type")
 # @assessment_cli.command('list_all_assessments', help="Retrieves And List All Assessments In The Database")
 
 app.cli.add_command(assessment_cli)

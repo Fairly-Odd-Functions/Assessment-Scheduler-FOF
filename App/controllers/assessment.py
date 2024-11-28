@@ -8,7 +8,7 @@ def create_assessment(assessmentTitle, assessmentType, startDate, dueDate):
             return {"Error Message": "All Fields Are Required"}
 
         date_validity = validate_dates(startDate=startDate, dueDate=dueDate)
-        if "Error" in date_validity:
+        if "Error Message" in date_validity:
             return date_validity
 
         start_date = date_validity["startDate"]
