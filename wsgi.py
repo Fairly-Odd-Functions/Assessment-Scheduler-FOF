@@ -1,5 +1,6 @@
 import click, sys, csv
 from flask import Flask
+from datetime import datetime
 from App.main import create_app
 from App.database import db, get_migrate
 from flask.cli import with_appcontext, AppGroup
@@ -14,6 +15,105 @@ migrate = get_migrate(app)
 def init():
     initialize()
     print('Database Initialized!')
+
+"""
+Semester Commands 
+Written by Jalene Armstrong (Jalene A) - Task 07.2.2. Semester Group Commands Implementation
+"""
+semester_cli = AppGroup('semester', help='Semester Object Commands')
+
+@semester_cli.command('add_semester', help="Creates Adds A New Semester")
+@click.option('--semester_name', '-n', prompt="Enter Semester Name", help="Name Of The Semester")
+@click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
+@click.option('--start_date', '-s', prompt="Enter Start Date (YYYY-MM-DD)", type=click.DateTime(formats=["%Y-%m-%d"]), help="Start Date Of The Semester")
+@click.option('--end_date', '-e', prompt="Enter End Date (YYYY-MM-DD)", type=click.DateTime(formats=["%Y-%m-%d"]), help="End Date Of The Semester")
+def add_semester_command(semester_name, academic_year, start_date, end_date):
+    start_date = start_date.date()
+    end_date = end_date.date()
+
+    new_semester = add_semester(semester_name, academic_year, start_date, end_date)
+
+    if new_semester and "New Semester Added" in new_semester:
+            print(f"SUCCESS: New semester '{semester_name}' Added For {academic_year}.")
+    elif new_semester and "Error Message" in new_semester:
+        print(f"ERROR: {new_semester['Error Message']}")
+    else:
+        print("ERROR: Something Went Wrong. Please Try Again.")
+
+@semester_cli.command('fetch_semester', help="Gets Details For A Specific Semester")
+@click.option('--semester_name', '-n', prompt="Enter Semester Name", help="Name Of The Semester")
+@click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
+def fetch_semester_command(semester_name, academic_year):
+    fetched_semester = get_semester(semesterName=semester_name, academicYear=academic_year)
+
+    if isinstance(fetched_semester, dict) and "Error Message" in fetched_semester:
+        print(f"ERROR: {fetched_semester['Error Message']}")
+    elif isinstance(fetched_semester, Semester):
+        print(f"Semester Details: {fetched_semester}")
+    else:
+        print("ERROR: Failed To Fetch Requested Semester.")
+
+@semester_cli.command('update_semester', help="Updates Information For An Existing Semester")
+@click.option('--semester_name', '-s', prompt="Enter Semester Name", help="Name Of The Semester")
+@click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
+@click.option('--new_semester_name', '-snew', default=None, help="New Semester Name (Optional)")
+@click.option('--new_academic_year', '-anew', default=None, help="New Academic Year (Optional)")
+@click.option('--start_date', '-st', default=None, type=click.DateTime(formats=["%Y-%m-%d"]), help="New Start Date (Optional)")
+@click.option('--end_date', '-e', default=None, type=click.DateTime(formats=["%Y-%m-%d"]), help="New End Date (Optional)")
+def update_semester_command(semester_name, academic_year, new_semester_name, new_academic_year, start_date, end_date):
+    semester_to_update = Semester.query.filter_by(semesterName=semester_name, academicYear=academic_year).first()
+
+    if not semester_to_update:
+        print(f"ERROR: Semester '{semester_name}' for Academic Year '{academic_year}' Not Found.")
+        return
+
+    new_semester_name = new_semester_name or input(f"Enter New Semester Name (Current: {semester_to_update.semesterName}): ") or semester_to_update.semesterName
+    new_academic_year = new_academic_year or input(f"Enter New Academic Year (Current: {semester_to_update.academicYear}): ") or semester_to_update.academicYear
+    start_date = start_date or (input(f"Enter New Start Date (Current: {semester_to_update.startDate}): ") or semester_to_update.startDate)
+    end_date = end_date or (input(f"Enter New End Date (Current: {semester_to_update.endDate}): ") or semester_to_update.endDate)
+
+    if isinstance(start_date, str):
+        start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+    if isinstance(end_date, str):
+        end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+
+    updated_semester = update_semester(
+        semesterName=semester_name,
+        academicYear=academic_year,
+        new_semesterName=new_semester_name,
+        new_academicYear=new_academic_year,
+        startDate=start_date,
+        endDate=end_date
+    )
+
+    if updated_semester is None:
+        print("ERROR: Failed To Update The Semester.")
+    elif "Error Message" in updated_semester:
+        print(f"ERROR: {updated_semester['Error Message']}")
+    else:
+        print(f"SUCCESS: Semester '{semester_name}' Updated Successfully! Updated Details: {updated_semester['Semester Updated']}")
+
+@semester_cli.command('list_semesters', help="Retrieve And Lists All Semesters In The Database")
+@click.argument("format", default="json")
+def list_semesters_command(format):
+    if format == 'string':
+        print(list_semesters())
+    else:
+        print(list_semesters_json())
+
+@semester_cli.command('list_year_semesters', help="Retrieve And Lists All Semesters In The Database Based On Academic Year")
+@click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
+def list_year_semesters_command(academic_year):
+    print(get_semesters_by_academic_year(academic_year))
+
+@semester_cli.command('list_semester_courses', help="List All Courses For A Specific Semester")
+@click.option('--semester_name', '-s', prompt="Enter Semester  Name", help="Name Of The Semester")
+@click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
+def list_semester_courses_command(semester_name, academic_year):
+    print(list_courses_for_semester(semester_name, academic_year))
+
+app.cli.add_command(semester_cli)
+
 
 """
 Admin Commands 
