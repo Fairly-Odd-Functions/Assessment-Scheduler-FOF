@@ -3,12 +3,11 @@ from flask import Flask
 from App.main import create_app
 from App.database import db, get_migrate
 from flask.cli import with_appcontext, AppGroup
-from App.models import Staff, Course, Assessment, Programme, Admin
-from App.controllers import (
-    initialize
-)
+from App.controllers import *
+from App.models import *
 
 app = create_app()
+migrate = get_migrate(app)
 
 # Command 01 : Creates And Initializes The Database
 @app.cli.command("init", help="Creates And Initializes The Database")
@@ -17,108 +16,107 @@ def init():
     print('Database Initialized!')
 
 """
-TO BE REFACTORED ~ JaleneA
-
-# This command retrieves all staff objects
-@app.cli.command('get-users')
-def get_users():
-    staff = Staff.query.all()
-    for s in staff:
-      print(s.to_json())
-    print('end of staff objects')
-
-# This command creates all the Assessment objects
-@app.cli.command("asm")
-def load_Asm():
-    db.create_all()
-    asm1 = Assessment(category='EXAM')
-    db.session.add(asm1)
-    db.session.commit()
-
-    asm2 = Assessment(category='ASSIGNMENT')
-    db.session.add(asm2)
-    db.session.commit()
-
-    asm3 = Assessment(category='QUIZ')
-    db.session.add(asm3)
-    db.session.commit()
-
-    asm4 = Assessment(category='PROJECT')
-    db.session.add(asm4)
-    db.session.commit()
-
-    asm5 = Assessment(category='DEBATE')
-    db.session.add(asm5)
-    db.session.commit()
-
-    asm6 = Assessment(category='PRESENTATION')
-    db.session.add(asm6)
-    db.session.commit()
-
-    asm7 = Assessment(category='ORALEXAM')
-    db.session.add(asm7)
-    db.session.commit()
-
-    asm8 = Assessment(category='PARTICIPATION')
-    db.session.add(asm8)
-    db.session.commit()
-    print('All assessments added')
-
-# This command creates all the Programme objects
-@app.cli.command("pgr")
-def load_Pgr():
-    db.create_all()
-    pgr1 = Programme(p_name='Computer Science Major')
-    db.session.add(pgr1)
-    db.session.commit()
-
-    pgr2 = Programme(p_name='Computer Science Minor')
-    db.session.add(pgr2)
-    db.session.commit()
-
-    pgr3 = Programme(p_name='Computer Science Special')
-    db.session.add(pgr3)
-    db.session.commit()
-
-    pgr4 = Programme(p_name='Information Technology Major')
-    db.session.add(pgr4)
-    db.session.commit()
-
-    pgr5 = Programme(p_name='Information Technology Minor')
-    db.session.add(pgr5)
-    db.session.commit()
-
-    pgr6 = Programme(p_name='Information Technology Special')
-    db.session.add(pgr6)
-    db.session.commit()
-
-    print('All programmes added')
-
-# This command assigns courses to staff
-@app.cli.command("add-course")
-@click.argument("staff_ID")
-def assign_course(staff_ID):
-    bob = Staff.query.filter_by(u_ID=staff_ID).first()
-
-    if not bob:
-        print(f'Staff with ID: {staff_ID} not found!')
-        return
-      
-    bob.coursesAssigned = ["COMP1601", "COMP1602", "COMP1603"]
-    db.session.add(bob)
-    db.session.commit()
-    print(bob)
-    print('courses added')
-
-#load course data from csv file
-@app.cli.command("load-courses")
-def load_course_data():
-    with open('courses.csv') as file: #csv files are used for spreadsheets
-      reader = csv.DictReader(file)
-      for row in reader: 
-        new_course = Course(courseCode=row['courseCode'], courseTitle=row['courseTitle'], description=row['description'], 
-          level=row['level'], semester=row['semester'], preReqs=row['preReqs'], p_ID=row['p_ID'],)  #create object
-        db.session.add(new_course) 
-      db.session.commit() #save all changes OUTSIDE the loop
-    print('database intialized')
+Admin Commands 
+Written by Jalene Armstrong (Jalene A) - Task 07.2.3. Admin Group Commands Implementation
 """
+
+admin_cli = AppGroup('admin', help='Admin Object Commands')
+
+@admin_cli.command('create_admin', help="Creates An Admin Account")
+@click.option("--firstname", "-f", prompt="Enter Admin First Name", required=True, help="Admin First Name")
+@click.option("--lastname", "-l", prompt="Enter Admin Last Name", required=True, help="Admin Last Name")
+@click.option("--email", "-e", prompt="Enter Admin Email", required=True, help="Admin Email Address")
+@click.option("--password", "-p", prompt="Enter Admin Password", hide_input=True, confirmation_prompt=True, help="Admin Password")
+def create_admin_command(firstname, lastname, email, password):
+    existing_admin = Admin.query.filter_by(email=email).first()
+    if existing_admin:
+        print(f"ERROR: An Admin Account With Email - '{email}' Already Exists.")
+        return
+
+    new_admin = create_admin(firstname, lastname, password, email)
+    if new_admin:
+        print(f"SUCCESS: Admin - '{firstname} {lastname}' Created Successfully!")
+    else:
+        print(f"ERROR: Failed To Create Admin '{firstname} {lastname}'.")
+
+@admin_cli.command('register_staff', help="Registers A Staff Account To The System")
+@click.option("--firstname", "-f", prompt="Enter Staff First Name", required=True, help="Staff First Name")
+@click.option("--lastname", "-l", prompt="Enter Staff Last Name", required=True, help="Staff Last Name")
+@click.option("--email", "-e", prompt="Enter Staff Email", required=True, help="Staff Email Address")
+@click.option("--password", "-p", prompt="Enter Staff Default Password", hide_input=True, confirmation_prompt=True, help="Staff Password")
+def register_staff_command(firstname, lastname, email, password):
+    existing_staff = Staff.query.filter_by(email=email).first()
+    if existing_staff:
+        print(f"ERROR: A Staff Account With Email '{email}' Already Exists.")
+        return
+
+    new_staff = register_staff(firstname, lastname, email, password)
+    if new_staff:
+        print(f"SUCCESS: Staff '{firstname} {lastname}' Registered Successfully!")
+    else:
+        print(f"ERROR: Failed To Register Staff '{firstname} {lastname}'.")
+
+@admin_cli.command('delete_admin', help="Deletes An Admin Account")
+@click.option("--email", "-e", prompt="Enter Email Of Admin To Delete", required=True, help="Admin Email Address")
+def delete_admin_command(email):
+    admin = get_admin_by_email(email)
+    if not admin:
+        print(f"ERROR: Admin With Email '{email}' Not Found.")
+        return
+
+    print(f"Deleting Admin: {admin}")
+    result = delete_admin(email)
+    if isinstance(result, dict) and "error" in result:
+        print(f"ERROR: {result['error']}")
+    elif result:
+        print(f"SUCCESS: Admin with Email '{email}' Deleted Successfully!")
+    else:
+        print(f"ERROR: Failed To delete Admin With Email '{email}'.")
+
+@admin_cli.command('update_admin', help="Updates An Existing Admin Account")
+@click.option('--current_email', '-c', prompt="Enter Email Of Admin To Edit", help="Enter Current Admin Email", required=True)
+@click.option('--firstname', '-f', default=None, help="Enter New First Name (Optional)")
+@click.option('--lastname', '-l', default=None, help="Enter New Last Name (Optional)")
+@click.option('--password', '-p', default=None, help="Enter New Password (Optional)")
+@click.option('--email', '-e', default=None, help="Enter New Email (Optional)")
+def update_admin_command(current_email, firstname, lastname, password, email):
+
+    admin_to_update = get_admin_by_email(current_email)
+    if not admin_to_update:
+        print(f"ERROR: Admin With Email '{current_email}' Not Found.")
+        return
+
+    if not firstname:
+        firstname = input(f"Enter New First Name (Current: {admin_to_update.firstName}): ") or admin_to_update.firstName
+    if not lastname:
+        lastname = input(f"Enter New Last Name (Current: {admin_to_update.lastName}): ") or admin_to_update.lastName
+    if not password:
+        password = input("Enter New Password: ") or admin_to_update.password
+    if not email:
+        email = input(f"Enter New Email (Current: {admin_to_update.email}): ") or admin_to_update.email
+
+    if email != admin_to_update.email:
+        existing_admin = Admin.query.filter_by(email=email).first()
+        if existing_admin:
+            print(f"ERROR: The Email '{email}' Is Already In Use By Another Admin.")
+            return
+
+    updated_admin = update_admin(current_email, firstname, lastname, password, email)
+
+    if isinstance(updated_admin, dict) and 'error' in updated_admin:
+        print(f"ERROR: {updated_admin['error']}")
+    elif updated_admin:
+        print(f"SUCCESS: Admin '{current_email}' Updated Successfully!")
+        print(updated_admin)
+    else:
+        print("ERROR: Failed To Update Admin. Ensure The Current Email Exists And New Email Isn't Already In Use.")
+
+@admin_cli.command('list_admins', help="Retrieve And Lists All Admins In The Database")
+@click.argument("format", default="json")
+def list_admins_command(format):
+    if format == 'string':
+        print(get_all_admin_users())
+    else:
+        print(get_all_admin_users_json())
+
+app.cli.add_command(admin_cli)
