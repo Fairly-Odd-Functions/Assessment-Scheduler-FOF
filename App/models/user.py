@@ -8,7 +8,7 @@ class User(db.Model):
     userID = db.Column(db.Integer, unique=True, primary_key=True) 
     firstName = db.Column(db.String(120), nullable=False) 
     lastName = db.Column(db.String(120), nullable=False)
-    password = db.Column(db.String(120), nullable=False)
+    password = db.Column(db.String(120), nullable=False, unique = True) #[Added unique constraint by Rynnia]
     email = db.Column(db.String(120), nullable=False, unique = True)
 
     # Distinguishes between different user types ('admin', 'staff')

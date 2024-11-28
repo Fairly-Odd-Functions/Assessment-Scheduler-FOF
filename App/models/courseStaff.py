@@ -12,7 +12,7 @@ class CourseStaff(db.Model):
     course = db.relationship('Course', backref='course_staff')
     staff = db.relationship('Staff', backref='assigned_courses')
 
-    def __init__(self, courseCode, staffID):
+    def __init__(self, courseCode,staffID):
         self.courseCode = courseCode
         self.staffID = staffID
 
@@ -20,7 +20,7 @@ class CourseStaff(db.Model):
         return {
             "courseCode": self.courseCode,
             "staffID": self.staffID,
-            "staffEmail": self.staff.email if self.staff else None
+            "staffEmail": self.staff.email if self.staff else None,
         }
 
     def __str__(self):
