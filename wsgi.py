@@ -40,8 +40,22 @@ def create_assessment_command(assessment_title, assessment_type, start_date, due
     else:
         print("ERROR: Something Went Wrong. Please Try Again.")
 
-# @assessment_cli.command('by_title', help="Retrieve And Displays All Assessments Based On Title")
-# @assessment_cli.command('by_type', help="Retrieve And Displays All Assessments Based On Type")
-# @assessment_cli.command('list_all_assessments', help="Retrieves And List All Assessments In The Database")
+@assessment_cli.command('by_title', help="Retrieve And Displays All Assessments Based On Title")
+@click.option('--assessment_title', '-at', prompt="Enter Assessment Title", help="Title Of Assessment")
+def fetch_assessment_by_title_command(assessment_title):
+    print(get_assessments_by_title(assessment_title))
+
+@assessment_cli.command('by_type', help="Retrieve And Displays All Assessments Based On Type")
+@click.option('--assessment_type', '-aty', prompt="Enter Assessment Type", help="Type Of Assessment")
+def fetch_assessment_by_type_command(assessment_type):
+    print(get_assessments_by_type(assessment_type))
+
+@assessment_cli.command('list_all', help="Retrieves And List All Assessments In The Database")
+@click.option('--format', '-f', prompt="Enter Desired Output Format : String or JSON", help="Output Format Of Choice : String Or JSON")
+def list_all_assessments_command(format):
+    if format.lower() == 'string':
+        print(list_assessments())
+    else:
+        print(list_assessments_json())
 
 app.cli.add_command(assessment_cli)

@@ -28,7 +28,7 @@ def get_assessments_by_title(assessmentTitle):
     try:
         assessments = Assessment.query.filter_by(assessmentTitle=assessmentTitle).all()
         if assessments:
-            return assessments
+            return {"Assessments": [assessment.get_json() for assessment in assessments]}
         else:
             return {"Error Message": f"There Are No Assessments With Title: {assessmentTitle} In The Database"}
 
@@ -63,7 +63,7 @@ def list_assessments_json():
     try:
         assessments = Assessment.query.all()
         if assessments:
-            return [assessments.get_json() for assessment in assessments]
+            return {"Assessments": [assessment.get_json() for assessment in assessments]}
         else:
             return {"Message": "No Assessments Found"}
 
