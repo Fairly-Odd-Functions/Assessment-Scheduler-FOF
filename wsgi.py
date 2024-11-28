@@ -7,7 +7,8 @@ from App.models import Staff, Course, Assessment, Programme, Admin
 from App.controllers import (
     initialize
 )
-
+ 
+# This commands file allow you to create convenient CLI commands for testing controllers!!
 app = create_app()
 
 # Command 01 : Creates And Initializes The Database
