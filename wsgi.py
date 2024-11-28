@@ -17,6 +17,67 @@ def init():
     print('Database Initialized!')
 
 """
+Programme Commands 
+Written by Jalene Armstrong (Jalene A) - Task 07.2.1. Programme Group Commands Implementation
+"""
+programme_cli = AppGroup('programme', help='Programme Object Commands')
+
+@programme_cli.command('create_programme', help="Creates & Adds A New Programme To The Database")
+@click.option('--programme_title', '-pt', prompt="Enter Programme Title", help="Title Of Programme")
+@click.option('--programme_desc', '-pd', prompt="Enter Programme Description", help="Description Of The Programme")
+def create_programme_command(programme_title, programme_desc):
+    new_programme = create_programme(programme_title, programme_desc)
+
+    if new_programme and "Message" in new_programme and new_programme["Message"] == "Programme Created Successfully":
+            print(f"SUCCESS: New Programme '{programme_title}' Added Successfully!.")
+    elif new_programme and "Error Message" in new_programme:
+        print(f"ERROR: {new_programme['Error Message']}")
+    else:
+        print("ERROR: Something Went Wrong. Please Try Again.")
+
+@programme_cli.command('update_programme', help="Updates Information For An Existing Programme")
+@click.option('--programme_tirtle', '-pt', prompt="Enter Programme Title", help="Title Of The Programme")
+@click.option('--new_programme_title', '-ptnew', default=None, help="New Programme Title (Optional)")
+@click.option('--new_programme_desc', '-pdnew', default=None, help="New Programme Description (Optional)")
+def update_programme_command(programme_title, new_programme_title, new_programme_desc):
+    programme_to_update = get_programme_by_title(programmeTitle=programme_title)
+
+    if not programme_to_update:
+        print(f"ERROR: Programmme '{programme_title}' Does Not Exist.")
+        return
+
+    new_programme_title = new_programme_title or input(f"Enter New Programme Name (Current: {programme_to_update.programmeTitle}): ") or programme_to_update.programmeTitle
+    new_programme_desc = new_programme_desc or input(f"Enter New Programme Description: ") or programme_to_update.programmeDescription
+
+    updated_programme = update_programme(
+        programmeTitle=programme_title,
+        new_title=new_programme_title,
+        new_description=new_programme_desc
+    )
+
+    if updated_programme is None:
+        print("ERROR: Failed To Update The Semester.")
+    elif "Error Message" in updated_programme:
+        print(f"ERROR: {updated_programme['Error Message']}")
+    else:
+        print(f"SUCCESS: Semester '{programme_title}' Updated Successfully!")
+
+@programme_cli.command('list_programmes', help="Retrieve And Lists All Programmes In The Database")
+@click.argument("format", default="json")
+def list_programmes_command(format):
+    if format == 'string':
+        print(list_programmes())
+    else:
+        print(list_programmes_json())
+
+@programme_cli.command('list_programme_courses', help="List All Courses For A Specific Programme")
+@click.option('--programme_title', '-pt', prompt="Enter Programme Title", help="Title Of The Programme")
+def list_programme_courses_command(programme_title):
+    print(list_programme_courses(programme_title))
+
+app.cli.add_command(programme_cli)
+
+"""
 Semester Commands 
 Written by Jalene Armstrong (Jalene A) - Task 07.2.2. Semester Group Commands Implementation
 """
