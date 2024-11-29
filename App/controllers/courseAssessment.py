@@ -2,7 +2,7 @@ from App.database import db
 from App.models import Course, Assessment, CourseAssessment
 
 # Link New Course Assessment To Relevant Code
-def add_course_assessment(courseCode, assessmentID, startDate, dueDate):
+def add_course_assessment(courseCode, assessmentID):
     try:
         course = Course.query.get(courseCode)
         if not course:
@@ -12,11 +12,15 @@ def add_course_assessment(courseCode, assessmentID, startDate, dueDate):
         if not assessment:
             return {"Error": "Assessment with this assessmentID does not exist"}
 
+        existing_association = CourseAssessment.query.filter_by(courseCode=courseCode, assessmentID=assessmentID).first()
+        if existing_association:
+            return {"Error": "Assessment is already associated with this course"}
+
         new_course_assessment = CourseAssessment(
             courseCode=courseCode,
             assessmentID=assessmentID,
-            startDate=startDate,
-            dueDate=dueDate
+            startDate=assessment.startDate,
+            dueDate=assessment.dueDate
         )
 
         db.session.add(new_course_assessment)
@@ -50,6 +54,19 @@ def get_course_assessment(courseAssessmentID):
         if not course_assessment:
             return {"Error": "CourseAssessment not found"}
         return {"CourseAssessment": course_assessment.get_json()}
+
+    except Exception as e:
+        print(f"Error while fetching course assessment: {e}")
+        return {"Error": "An error occurred while fetching the course assessment"}
+
+#Get Specific courseAssesment object via courseCode and assessmentID
+def get_course_assessment_by_code_and_id(courseCode, assessmentID):
+    try:
+        course_assessment = CourseAssessment.query.filter_by(courseCode=courseCode, assessmentID=assessmentID).first()
+        
+        if not course_assessment:
+            return {"Error": "CourseAssessment not found"}
+        return course_assessment
 
     except Exception as e:
         print(f"Error while fetching course assessment: {e}")

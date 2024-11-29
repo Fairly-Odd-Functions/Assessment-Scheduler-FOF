@@ -7,8 +7,8 @@ class Assessment(db.Model):
     assessmentID = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     assessmentTitle = db.Column(db.String(120),nullable=False)
     assessmentType = db.Column(db.String(120),nullable=False)
-    startDate = db.Column(db.Date, nullable=True)
-    dueDate = db.Column(db.Date, nullable=True)
+    startDate = db.Column(db.DateTime, nullable=True)
+    dueDate = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, assessmentTitle, assessmentType, startDate=None, dueDate=None):
             self.assessmentTitle = assessmentTitle
