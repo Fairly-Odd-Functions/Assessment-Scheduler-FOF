@@ -75,7 +75,6 @@ class UserUnitTest(unittest.TestCase):
         assert staff.check_password(password)
 
 class CourseUnitTest(unittest.TestCase):
-
     # UNIT TEST - #8: Create Course
     def test_unit_08_create_course(self):
         newCourse = Course("COMP 1601", "Computer Programming I", 3 , "A level one programming course", 1)
@@ -90,6 +89,21 @@ class CourseUnitTest(unittest.TestCase):
                               "courseCredits": 3,
                               "courseDescription": "A level one programming course",
                               "courseLevel" : 1}, course_json)
+
+class SemesterUnitTest(unittest.TestCase):
+    # UNIT TEST - #10: Create Semester
+    def test_unit_10_create_semester(self):
+        newSemester = Semester("Semester 1", "2024/2025", "2024-09-02", "2024-12-20")
+        assert newSemester.academicYear == "2024/2025"
+
+    # UNIT TEST - #11: Semester JSON
+    def test_unit_11_semester_json(self):
+        newSemester = Semester("Semester 2", "2024/2025", "2025-01-02", "2025-05-20")
+        semester_json = newSemester.get_json()
+        self.assertDictEqual({"semester_name": "Semester 2",
+                              "academicYear": "2024/2025",
+                              "startDate": "2025-01-02",
+                              "endDate": "2025-05-20"}, semester_json)
 
 '''
     Integration Tests
