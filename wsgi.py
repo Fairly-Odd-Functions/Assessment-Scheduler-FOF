@@ -1,5 +1,4 @@
 import click, sys, csv, pytest
-sys.dont_write_bytecode = True
 from flask import Flask
 from App.models import *
 from App.controllers import *
