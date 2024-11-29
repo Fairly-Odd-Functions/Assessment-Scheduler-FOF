@@ -21,7 +21,7 @@ class CourseStaff(db.Model):
             "courseStaffID": self.courseStaffID,
             "courseOffering": {
                 "courseCode": self.course_offering.courseCode if self.course_offering else None,
-                "courseName": self.course_offering.course.courseName if self.course_offering and self.course_offering.course else None,
+                "courseTitle": self.course_offering.course.courseTitle if self.course_offering and self.course_offering.course else None,
                 "semester": self.course_offering.semester.semesterName if self.course_offering and self.course_offering.semester else None,
                 "academicYear": self.course_offering.semester.academicYear if self.course_offering and self.course_offering.semester else None,
                 "startDate": self.course_offering.semester.startDate if self.course_offering and self.course_offering.semester else None,
@@ -37,7 +37,7 @@ class CourseStaff(db.Model):
     def __str__(self):
         course_details = (
             f"courseCode='{self.course_offering.courseCode}', "
-            f"courseName='{self.course_offering.course.courseName if self.course_offering and self.course_offering.course else 'No course name'}', "
+            f"courseTitle='{self.course_offering.course.courseTitle if self.course_offering and self.course_offering.course else 'No course name'}', "
             f"semester='{self.course_offering.semester.semesterName if self.course_offering and self.course_offering.semester else 'No semester'}', "
             f"academicYear='{self.course_offering.semester.academicYear if self.course_offering and self.course_offering.semester else 'No year'}'"
         )
@@ -52,7 +52,7 @@ class CourseStaff(db.Model):
         return (
             f"CourseStaff(courseStaffID={self.courseStaffID}, "
             f"courseCode='{self.course_offering.courseCode if self.course_offering else 'No course code'}', "
-            f"courseName='{self.course_offering.course.courseName if self.course_offering and self.course_offering.course else 'No course name'}', "
+            f"courseTitle='{self.course_offering.course.courseTitle if self.course_offering and self.course_offering.course else 'No course name'}', "
             f"semester='{self.course_offering.semester.semesterName if self.course_offering and self.course_offering.semester else 'No semester'}', "
             f"academicYear='{self.course_offering.semester.academicYear if self.course_offering and self.course_offering.semester else 'No year'}', "
             f"staffID={self.staffID}, "

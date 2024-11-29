@@ -52,6 +52,25 @@ def remove_course_offering(courseCode, semesterName, academicYear):
         print(f"Error while removing course offering: {e}")
         return {"Error": "An error occurred while removing the course offering"}
 
+# Get A Specific Course Offering Based On Academic Year & Semester
+def get_course_offering(courseCode, semesterName,academicYear):
+    try:
+        course = Course.query.filter_by(courseCode=courseCode).first()
+        if not course:
+            return {"Error": "Course Not Found"}
+        semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
+        if not semester:
+            return {"Error": "Semester Not Found"}
+
+        course_offering = CourseOffering.query.filter_by(courseCode=courseCode, semesterID=semester.semesterID).first()
+        if not course_offering:
+            return {"Message": f"Course Offering Not Found For {courseCode} In Academic Year {academicYear}"}
+        return course_offering
+
+    except Exception as e:
+        print(f"Error while fetching course offering: {e}")
+        return {"Error": "An error occurred while fetching course offering"}
+
 # Get All Course Offerings Based On Academic Year
 def get_course_offerings(courseCode, academicYear):
     try:

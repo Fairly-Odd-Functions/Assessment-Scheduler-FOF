@@ -1,6 +1,7 @@
+import pytest, logging, unittest
+from flask import current_app
 from datetime import date
 from App.main import create_app
-import pytest, logging, unittest
 from App.database import db, create_db
 
 from App.models import *
@@ -154,10 +155,11 @@ class AssessmentUnitTest(unittest.TestCase):
 '''
 
 class UserIntegrationTests(unittest.TestCase):
-    # def test_integration_01_authenticate_user_valid(self):
-    #     new_user = create_user("Robert", "Watson", "robpass", "rob22@email.com", "staff")
-    #     response = login_user(new_user)
-    #     assert response is not None
+    def test_integration_01_authenticate_user_valid(self):
+        new_user = create_user("Robert", "Watson", "robpass", "rob22@email.com", "staff")
+        with current_app.test_request_context():
+            response = login_user(new_user)
+            assert response is not None
 
     def test_integration_02_get_user_invalid(self):
         create_user("Lily", "Daisy", "daisypass", "daisy35@email.com", "staff")
@@ -209,11 +211,12 @@ class CourseIntegrationTests(unittest.TestCase):
     def test_integration_07_add_course(self):
         add_course("12345","Theory of Maths",3,"Introduction to the nature of numbers, functions and proofs fo University",1)
         course = get_course("12345")
-        self.assertDictEqual({"courseCode" : "12345",
-                            "courseTitle" : "Theory of Maths",
-                            "courseCredits" : 3,
-                            "courseDescription" : "Introduction to the nature of numbers, functions and proofs fo University",
-                            "courseLevel" : 1}, course)
+        self.assertIsNotNone(course, "Course should exist")
+        self.assertEqual(course.courseCode, "12345")
+        self.assertEqual(course.courseTitle, "Theory of Maths")
+        self.assertEqual(course.courseCredits, 3)
+        self.assertEqual(course.courseDescription, "Introduction to the nature of numbers, functions and proofs fo University")
+        self.assertEqual(course.courseLevel, 1)
 
     def test_integration_08_list_courses(self):
         add_course("12345","Theory of Maths",3,"Introduction to the nature of numbers, functions and proofs fo University",1)
@@ -236,14 +239,14 @@ class CourseIntegrationTests(unittest.TestCase):
         assessment = Assessment("Governance and Culture Course Work Exam 1", "Course Work Exam", None, None)
         db.session.add(assessment)
         db.session.commit()
-        message = add_course_assessment("12310", 1, None, None)
+        message = add_course_assessment("12310", 1)
         assert message["Message"] == "Course and Assessment successfully associated"
         assert message["CourseAssessment"] == {"courseAssessmentID": 1,
                                 "courseCode": "12310",
                                  "assessmentID": assessment.assessmentID,
                                  "startDate": None,
                                  "dueDate": None}
-    
+
     def test_integration_10_list_course_assessment(self):
         add_course("12310","Governance and Culture",4,"Welcome to the study of cultural influence in the Government",3)
         assessment1 = Assessment("Governance and Culture Course Work Exam 1", "Course Work Exam", None, None)
@@ -251,8 +254,8 @@ class CourseIntegrationTests(unittest.TestCase):
         db.session.add(assessment1)
         db.session.add(assessment2)
         db.session.commit()
-        add_course_assessment(courseCode="12310", assessmentID=1, startDate=None, dueDate=None)
-        add_course_assessment(courseCode="12310", assessmentID=2, startDate=None, dueDate=None)
+        add_course_assessment(courseCode="12310", assessmentID=1)
+        add_course_assessment(courseCode="12310", assessmentID=2)
         message = list_course_assessments("12310")
         print(message)
         assert message["CourseAssessments"] == [{"courseAssessmentID": 1,
@@ -269,32 +272,47 @@ class CourseIntegrationTests(unittest.TestCase):
 
     def test_integration_11_add_course_offering(self):
         add_course("13542","Database Design",3,"Welcome to the study of designing databases",2)
-        add_semester("Semester 1", "2024-2025", date(2024, 9, 4), date(2024, 12, 20))
-        message = add_course_offering("13542","Semester 1","2024-2025",0)
+        add_semester("Semester 1", "2024/2025", date(2024, 9, 4), date(2024, 12, 20))
+        message = add_course_offering("13542","Semester 1","2024/2025", 0)
+        print(message)
         assert message["Message"] == "Course offering added successfully"
         assert message["CourseOffering"] == {"offeringID": 1,
                                              "courseCode": "13542",
                                              "semesterID": 1,
                                              "semester": {"semester_name":"Semester 1",
-                                                          "academicYear": "2024-2025",
+                                                          "academicYear": "2024/2025",
                                                           "startDate": date(2024, 9, 4),
                                                           "endDate": date(2024, 12, 20)},
                                              "totalStudentsEnrolled": 0}
 
-    """
-    NB: The courseStaff Model & Controller Has An Update 
-    So When That's Approved This'll Be Refactored - JaleneA
-
     def test_integration_12_add_course_staff(self):
         add_course("13512","UI Fundamentals", 3, "Learn the basics of User Interface in Society",3)
-        add_semester("Semester 1", "2024-2025", date(2024, 9, 4), date(2024, 12, 20))
+        add_semester("Semester 1", "2024/2025", date(2024, 9, 4), date(2024, 12, 20))
+        new_course = get_course("13512")
+        new_semester = get_semester("Semester 1", "2024/2025")
+
+        add_course_offering(new_course.courseCode, new_semester.semesterName, new_semester.academicYear, 100)
+
         new_staff = register_staff("John", "Williams", "johnpass", "john22@email.com")
-        message = add_course_staff("13512", "Semester 1", "2024-2025", new_staff.staffID)
+        message = add_course_staff(new_course.courseCode, new_semester.semesterName, new_semester.academicYear, new_staff.staffID)
+        print(message)
         assert message["Message"] == "Staff successfully assigned to the course"
-        assert message["CourseStaff"] == {"courseCode": "13512",
-                                          "staffID": new_staff.staffID,
-                                          "staffEmail": new_staff.email}
-    """
+        assert message["CourseStaff"] == {
+                                            "courseStaffID": 1,
+                                            "courseOffering": {
+                                                "courseCode": "13512",
+                                                "courseTitle": "UI Fundamentals",
+                                                "semester": "Semester 1",
+                                                "academicYear": "2024/2025",
+                                                "startDate": date(2024, 9, 4),
+                                                "endDate": date(2024, 12, 20)
+                                            },
+                                            "staff": {
+                                                "staffID": new_staff.staffID,
+                                                "staffName": "John Williams",
+                                                "staffEmail": "john22@email.com"
+                                            }
+                                        }
 
     def test_integration_13_add_course_to_programme(self):
         add_course("20001","UI Fundamentals 2", 6, "Learn the basics of User Interface in Society and beyound",4)
@@ -309,13 +327,13 @@ class CourseIntegrationTests(unittest.TestCase):
 
 class SemesterIntegrationTests(unittest.TestCase):
     def test_integration_14_add_semester(self):
-        message = add_semester("Semester 2", "2024-2025", date(2024, 9, 4), date(2024, 12, 20))
+        message = add_semester("Semester 2", "2024/2025", date(2024, 9, 4), date(2024, 12, 20))
         assert message["New Semester Added"] == {"semesterID" : 1, "semesterName" : "Semester 2"}
 
     def test_integration_15_get_semester(self):
-       add_semester("Semester 3", "2024-2025", date(2024, 5, 15), date(2024, 7, 20))
-       semester = get_semester("Semester 3", "2024-2025")
-       self.assertDictEqual({"semester_name":"Semester 3",
-                             "academicYear": "2024-2025",
-                             "startDate": date(2024, 5, 15),
-                             "endDate":date(2024, 7, 20)}, semester)
+       add_semester("Semester 3", "2024/2025", date(2024, 5, 15), date(2024, 7, 20))
+       semester = get_semester("Semester 3", "2024/2025")
+       self.assertEqual(semester.semesterName, "Semester 3")
+       self.assertEqual(semester.academicYear, "2024/2025")
+       self.assertEqual(semester.startDate, date(2024, 5, 15))
+       self.assertEqual(semester.endDate, date(2024, 7, 20))

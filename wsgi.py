@@ -1,4 +1,4 @@
-import click, sys, csv
+import click, sys, csv, pytest
 sys.dont_write_bytecode = True
 from flask import Flask
 from App.models import *
@@ -305,6 +305,24 @@ def create_programme_command(programme_title, programme_desc):
     else:
         print("ERROR: Something Went Wrong. Please Try Again.")
 
+@programme_cli.command('add_course', help='Add Course To Programme')
+@click.option('--programme_title', '-pt', prompt='Enter Programme Title', required=True)
+@click.option('--course_code', '-c', prompt='Enter Course Code', required=True)
+def add_course_to_programme_command(programme_title, course_code):
+    fetched_programme = get_programme_by_title(programmeTitle=programme_title)
+    if not fetched_programme:
+        print(f"ERROR: Programmme '{programme_title}' Does Not Exist.")
+        return
+
+    new_programme_course = add_course_to_programme(courseCode=course_code, programmeID=fetched_programme.get('programmeID'))
+
+    if new_programme_course is None:
+        print(f"ERROR: Failed To Add Course: '{course_code}' To Programme: '{programme_title}'.")
+    elif "Error" in new_programme_course:
+        print(f"ERROR: {new_programme_course['Error']}")
+    else:
+        print(f"SUCCESS: Programme Updated Successfully!\nUpdated Details: {new_programme_course['CourseProgramme']}")
+
 @programme_cli.command('update_programme', help="Updates Information For An Existing Programme")
 @click.option('--programme_title', '-pt', prompt="Enter Programme Title", help="Title Of The Programme")
 @click.option('--new_programme_title', '-ptnew', default=None, help="New Programme Title (Optional)")
@@ -556,3 +574,80 @@ def list_admins_command(format):
         print(get_all_admin_users_json())
 
 app.cli.add_command(admin_cli)
+
+'''
+Test Commands
+Written by Daniel Young (DaNJO-Y) - Integration (Task 08.2.1 - Task 08.2.5)
+Modified by Jalene Armstrong (JaleneA) - Unit & App (Task 09.1. Post-CLI and Post-Tests Cleanup)
+'''
+
+test = AppGroup('test', help='Testing Commands')
+
+@test.command("user", help="Run User Tests")
+@click.argument("type", default="all")
+def user_tests_command(type):
+    if type == "int":
+        sys.exit(pytest.main(["-k", "UserIntegrationTests"]))
+    elif type == "unit":
+        sys.exit(pytest.main(["-k", "UserUnitTest"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+@test.command("staff", help="Run Staff Tests")
+@click.argument("type", default="all")
+def user_tests_command(type):
+    if type == "int":
+        sys.exit(pytest.main(["-k", "StaffIntegrationTests"]))
+    elif type == "unit":
+        sys.exit(pytest.main(["-k", "StaffUnitTest"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+@test.command("admin", help="Run Admin Tests")
+@click.argument("type", default="all")
+def user_tests_command(type):
+    if type == "int":
+        sys.exit(pytest.main(["-k", "AdminIntegrationTests"]))
+    elif type == "unit":
+        sys.exit(pytest.main(["-k", "AdminUnitTest"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+@test.command("course", help="Run Course Tests")
+@click.argument("type", default="all")
+def user_tests_command(type):
+    if type == "int":
+        sys.exit(pytest.main(["-k", "CourseIntegrationTests"]))
+    elif type == "unit":
+        sys.exit(pytest.main(["-k", "CourseUnitTest"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+@test.command("semester", help="Run Semester Tests")
+@click.argument("type", default="all")
+def user_tests_command(type):
+    if type == "int":
+        sys.exit(pytest.main(["-k", "SemesterIntegrationTests"]))
+    elif type == "unit":
+        sys.exit(pytest.main(["-k", "SemesterUnitTest"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+# Unit Tests Only
+@test.command("programme", help="Run Programme Tests")
+@click.argument("type", default="all")
+def user_tests_command(type):
+    if type == "unit":
+        sys.exit(pytest.main(["-k", "ProgrammeUnitTest"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+@test.command("assessment", help="Run Assessment Tests")
+@click.argument("type", default="all")
+def user_tests_command(type):
+    if type == "unit":
+        sys.exit(pytest.main(["-k", "AssessmentUnitTest"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+app.cli.add_command(test)
