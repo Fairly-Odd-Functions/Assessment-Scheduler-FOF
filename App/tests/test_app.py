@@ -23,6 +23,9 @@ def empty_db():
     Task 08.1.2. Staff Unit Tests Implementation
     Task 08.1.3. User Unit Tests Implementation
     Task 08.1.4. Course Unit Tests Implementation
+    Task 08.1.5. Semester Unit Tests Implementation
+    Task 08.1.6. Program Unit Tests Implementation
+>>>>>>> origin/08.1.6-Program-Unit-Tests-Implementation
 '''
 
 class AdminUnitTest(unittest.TestCase):
@@ -90,6 +93,24 @@ class CourseUnitTest(unittest.TestCase):
                               "courseCredits": 3,
                               "courseDescription": "A level one programming course",
                               "courseLevel" : 1}, course_json)
+
+#UNIT TEST 8 & 9
+#UNIT TEST 10 & 11
+
+class ProgrammeUnitTest(unittest.TestCase):
+
+    # UNIT TEST - #12: Create Programme
+    def test_unit_12_create_programme(self):
+        newProgramme = Programme("Mathematics", "Learn all about numbers")
+        assert newProgramme.programmeTitle == "Mathematics"
+
+    # UNIT TEST - #13: Programme JSON
+    def test_unit_13_programme_json(self):
+        newProgramme = Programme("Finance", "Learn all about money")
+        programme_json = newProgramme.get_json()
+        self.assertDictEqual({"programmeID": newProgramme.programmeID,
+                              "programmeTitle": "Finance",
+                              "programmeDescription": "Learn all about money"}, programme_json)
 
 '''
     Integration Tests
