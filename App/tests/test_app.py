@@ -239,13 +239,15 @@ class CourseIntegrationTests(unittest.TestCase):
         db.session.commit()
         message = add_course_assessment("12310", 1, startDate=datetime(2024, 10, 12), startTime=time(9, 0), endDate=datetime(2024, 10, 12), endTime=time(12, 0))
         assert message["Message"] == "Course And Assessment Successfully Associated"
-        assert message["CourseAssessment"] == {"courseAssessmentID": 1,
-                                 "courseCode": "12310",
-                                 "assessmentID": assessment.assessmentID,
-                                 "startDate": "2024-10-12",
-                                 "startTime": "09:00:00",
-                                 "endDate": "2024-10-12",
-                                 "endTime": "12:00:00"}
+        assert message["CourseAssessment"] == {
+                                "courseAssessmentID": 1,
+                                "courseCode": "12310",
+                                "assessmentID": assessment.assessmentID,
+                                "startDate": "2024-10-12",
+                                "startTime": "09:00",
+                                "endDate": "2024-10-12",
+                                "endTime": "12:00",
+                                "clashRule": None}
 
     def test_integration_10_list_course_assessment(self):
         add_course("12310","Governance and Culture",4,"Welcome to the study of cultural influence in the Government",3)
@@ -263,9 +265,10 @@ class CourseIntegrationTests(unittest.TestCase):
                                  "courseCode": "12310",
                                  "assessmentID": 1,
                                  "startDate": "2024-10-12",
-                                 "startTime": "09:00:00",
+                                 "startTime": "09:00",
                                  "endDate": "2024-10-12",
-                                 "endTime": "12:00:00"
+                                 "endTime": "12:00",
+                                 "clashRule": None
                                  },
 
                                  {
@@ -273,9 +276,10 @@ class CourseIntegrationTests(unittest.TestCase):
                                  "courseCode": "12310",
                                  "assessmentID": 2,
                                  "startDate": "2025-10-12",
-                                 "startTime": "09:00:00",
+                                 "startTime": "09:00",
                                  "endDate": "2025-10-12",
-                                 "endTime": "12:00:00"
+                                 "endTime": "12:00",
+                                 "clashRule": None
                                  }]
 
     def test_integration_11_add_course_offering(self):
