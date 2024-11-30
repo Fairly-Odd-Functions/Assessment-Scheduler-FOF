@@ -151,7 +151,6 @@ course_cli = AppGroup('course', help='Course object commands')
 @click.option('--courselevel', '-l', prompt='Enter Course Level', required=True)
 def create_course(coursecode, coursetitle, coursecredits, coursedescription, courselevel):
     result = add_course(coursecode, coursetitle, coursecredits, coursedescription, courselevel)
-
     if result:
         print(f"{result}")
     else:
@@ -206,8 +205,21 @@ def get_all_courses():
 @course_cli.command('add-assessment', help='Add Assessment To A Course')
 @click.option('--coursecode', '-c', prompt='Enter Course Code', required=True)
 @click.option('--assessmentcode', '-a', prompt='Enter Assessment Code', required=True)
-def add_assessment_to_course(coursecode, assessmentcode):
-    result = add_course_assessment(coursecode, assessmentcode)
+
+# Start Date
+@click.option('--start_date', '-sd', prompt="Enter Start Date (YYYY-MM-DD)", 
+              type=click.DateTime(formats=["%Y-%m-%d"]), help="Start Date Of The Assessment")
+# Start Time
+@click.option('--start_time', '-st', prompt="Enter Start Time (HH:MM:SS)", 
+              type=click.DateTime(formats=["%H:%M:%S"]), help="Start Time Of The Assessment")
+# End Date
+@click.option('--end_date', '-ed', prompt="Enter End Date (YYYY-MM-DD)", 
+              type=click.DateTime(formats=["%Y-%m-%d"]), help="End Date Of The Assessment")
+# End Time
+@click.option('--end_time', '-et', prompt="Enter End Time (HH:MM:SS)", 
+              type=click.DateTime(formats=["%H:%M:%S"]), help="End Time Of The Assessment")
+def add_assessment_to_course(coursecode, assessmentcode, start_date, start_time, end_date, end_time):
+    result = add_course_assessment(coursecode, assessmentcode, start_date, start_time, end_date, end_time)
 
     if result:
         print(f"{result}")
@@ -250,12 +262,8 @@ assessment_cli = AppGroup('assessment', help='Assessment Object Commands')
 @assessment_cli.command('create_assessment', help="Creates A New Assessment For A Particular Course")
 @click.option('--assessment_title', '-at', prompt="Enter Assessment Title", help="Title Of Assessment")
 @click.option('--assessment_type', '-aty', prompt="Enter Assessment Type", help="Type Of Assessment")
-@click.option('--start_date', '-s', prompt="Enter Start Date (YYYY-MM-DD HH:MM:SS)", 
-              type=click.DateTime(formats=["%Y-%m-%d %H:%M:%S"]), help="Start Date Of The Assessment")
-@click.option('--due_date', '-e', prompt="Enter Due Date (YYYY-MM-DD HH:MM:SS)", 
-              type=click.DateTime(formats=["%Y-%m-%d %H:%M:%S"]), help="End Date Of The Assessment")
-def create_assessment_command(assessment_title, assessment_type, start_date, due_date):
-    new_assessment = create_assessment(assessment_title, assessment_type, start_date, due_date)
+def create_assessment_command(assessment_title, assessment_type):
+    new_assessment = create_assessment(assessment_title, assessment_type)
 
     if new_assessment and "Message" in new_assessment and new_assessment["Message"] == "Assessment Created Successfully":
             print(f"SUCCESS: New Assessment '{assessment_title}' Added Successfully!.")

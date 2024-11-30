@@ -128,20 +128,18 @@ class AssessmentUnitTest(unittest.TestCase):
 
     # UNIT TEST - #14: Create Assessment
     def test_unit_14_create_assessment(self):
-        newAssessment = Assessment("Assignment 1", "Assignment", "2024-09-02", "2024-09-16")
+        newAssessment = Assessment("Assignment 1", "Assignment")
         assert newAssessment.assessmentTitle == "Assignment 1"
 
         print(newAssessment)
 
     # UNIT TEST - #15: Assessment JSON
     def test_unit_15_assessment_json(self):
-        newAssessment = Assessment("Assignment 2", "Assignment", date(2024, 5, 15), date(2024, 9,28))
+        newAssessment = Assessment("Assignment 2", "Assignment")
         assessment_json = newAssessment.get_json()
         self.assertDictEqual({"assessmentID": newAssessment.assessmentID,
                               "assessmentTitle": "Assignment 2",
-                              "assessmentType": "Assignment",
-                              "startDate": date(2024, 5, 15).isoformat(),
-                              "dueDate": date(2024, 9,28).isoformat()}, assessment_json)
+                              "assessmentType": "Assignment"}, assessment_json)
         print(assessment_json)
 
 '''
@@ -236,39 +234,49 @@ class CourseIntegrationTests(unittest.TestCase):
 
     def test_integration_09_add_course_assessment(self):
         add_course("12310","Governance and Culture",4,"Welcome to the study of cultural influence in the Government",3)
-        assessment = Assessment("Governance and Culture Course Work Exam 1", "Course Work Exam", None, None)
+        assessment = Assessment("Governance and Culture Course Work Exam 1", "Course Work Exam")
         db.session.add(assessment)
         db.session.commit()
-        message = add_course_assessment("12310", 1)
-        assert message["Message"] == "Course and Assessment successfully associated"
+        message = add_course_assessment("12310", 1, startDate=datetime(2024, 10, 12), startTime=time(9, 0), endDate=datetime(2024, 10, 12), endTime=time(12, 0))
+        assert message["Message"] == "Course And Assessment Successfully Associated"
         assert message["CourseAssessment"] == {"courseAssessmentID": 1,
-                                "courseCode": "12310",
+                                 "courseCode": "12310",
                                  "assessmentID": assessment.assessmentID,
-                                 "startDate": None,
-                                 "dueDate": None}
+                                 "startDate": "2024-10-12",
+                                 "startTime": "09:00:00",
+                                 "endDate": "2024-10-12",
+                                 "endTime": "12:00:00"}
 
     def test_integration_10_list_course_assessment(self):
         add_course("12310","Governance and Culture",4,"Welcome to the study of cultural influence in the Government",3)
-        assessment1 = Assessment("Governance and Culture Course Work Exam 1", "Course Work Exam", None, None)
-        assessment2 = Assessment("Governance and Culture Course Work Exam 2", "Course Work Exam", None, None)
+        assessment1 = Assessment("Governance and Culture Course Work Exam 1", "Course Work Exam")
+        assessment2 = Assessment("Governance and Culture Course Work Exam 2", "Course Work Exam")
         db.session.add(assessment1)
         db.session.add(assessment2)
         db.session.commit()
-        add_course_assessment(courseCode="12310", assessmentID=1)
-        add_course_assessment(courseCode="12310", assessmentID=2)
+        add_course_assessment(courseCode="12310", assessmentID=1,  startDate=datetime(2024, 10, 12), startTime=time(9, 0), endDate=datetime(2024, 10, 12), endTime=time(12, 0))
+        add_course_assessment(courseCode="12310", assessmentID=2,  startDate=datetime(2025, 10, 12), startTime=time(9, 0), endDate=datetime(2025, 10, 12), endTime=time(12, 0))
         message = list_course_assessments("12310")
         print(message)
-        assert message["CourseAssessments"] == [{"courseAssessmentID": 1,
-                                "courseCode": "12310",
+        assert message["CourseAssessments"] == [{
+                                 "courseAssessmentID": 1,
+                                 "courseCode": "12310",
                                  "assessmentID": 1,
-                                 "startDate": None,
-                                 "dueDate": None},
+                                 "startDate": "2024-10-12",
+                                 "startTime": "09:00:00",
+                                 "endDate": "2024-10-12",
+                                 "endTime": "12:00:00"
+                                 },
 
-                                 {"courseAssessmentID": 2,
-                                "courseCode": "12310",
+                                 {
+                                 "courseAssessmentID": 2,
+                                 "courseCode": "12310",
                                  "assessmentID": 2,
-                                 "startDate": None,
-                                 "dueDate": None}]
+                                 "startDate": "2025-10-12",
+                                 "startTime": "09:00:00",
+                                 "endDate": "2025-10-12",
+                                 "endTime": "12:00:00"
+                                 }]
 
     def test_integration_11_add_course_offering(self):
         add_course("13542","Database Design",3,"Welcome to the study of designing databases",2)

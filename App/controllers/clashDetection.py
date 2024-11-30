@@ -30,11 +30,11 @@ def validate_by_degree(courseCode, start_date, end_date):
 # -> Checks all courses scheduled on the same day to see if the number of students 
 #    taking each of those courses exceeds the threshold, calculated based 
 #    on the percentage of overlapping student enrollment.m
-def validate_by_student_overlap(courseCode, startDate, dueDate, overlap_threshold):
+def validate_by_student_overlap(courseCode, startDate, endDate, overlap_threshold):
 
     overlaping_courses = CourseAssessment.query.filter(
-        (CourseAssessment.startDate <= dueDate) &
-        (CourseAssessment.dueDate >= startDate)
+        (CourseAssessment.startDate <= endDate) &
+        (CourseAssessment.endDate >= startDate)
     ).all()
 
     course_offering = CourseOffering.query.filter_by(courseCode=courseCode).first()
@@ -69,7 +69,7 @@ def validate_by_assessment_type(assessment, startDate, preparation_days):
 
     conflicting_assessments = CourseAssessment.query.filter(
         CourseAssessment.startDate <= startDate,
-        CourseAssessment.dueDate >= reserved_start_date
+        CourseAssessment.endDate >= reserved_start_date
     ).all()
 
     overlapped_assessments = []
@@ -80,7 +80,7 @@ def validate_by_assessment_type(assessment, startDate, preparation_days):
                 "courseCode": conflicting_assessment.courseCode,
                 "assessmentType": conflicting_assessment.type,
                 "startDate": conflicting_assessment.startDate,
-                "endDate": conflicting_assessment.dueDate
+                "endDate": conflicting_assessment.endDate
             })
         return {
             "status": "error", 
