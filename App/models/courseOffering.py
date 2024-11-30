@@ -14,15 +14,9 @@ class CourseOffering(db.Model):
     course = db.relationship('Course', backref='course_offerings')
     semester = db.relationship('Semester', backref='semester_offerings')
 
-    def __init__(self, courseCode, semesterName, academicYear, totalStudentsEnrolled=0):
+    def __init__(self, courseCode, semesterID, totalStudentsEnrolled=0):
         self.courseCode = courseCode
-
-        # Fetch Correct Semester Using semesterName & academicYear
-        semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
-        if not semester:
-            raise ValueError(f"No Semester Found With Name '{semesterName}' And Academic Year '{academicYear}'")
-        
-        self.semesterID = semester.semesterID
+        self.semesterID = semesterID
         self.totalStudentsEnrolled = totalStudentsEnrolled
 
     def get_json(self):

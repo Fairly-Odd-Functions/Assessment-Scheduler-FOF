@@ -285,7 +285,7 @@ class CourseIntegrationTests(unittest.TestCase):
     def test_integration_11_add_course_offering(self):
         add_course("13542","Database Design",3,"Welcome to the study of designing databases",2)
         add_semester("Semester 1", "2024/2025", date(2024, 9, 4), date(2024, 12, 20))
-        message = add_course_offering("13542","Semester 1","2024/2025", 0)
+        message = add_course_offering("13542",1, 0)
         print(message)
         assert message["Message"] == "Course offering added successfully"
         assert message["CourseOffering"] == {"offeringID": 1,
@@ -303,7 +303,7 @@ class CourseIntegrationTests(unittest.TestCase):
         new_course = get_course("13512")
         new_semester = get_semester("Semester 1", "2024/2025")
 
-        add_course_offering(new_course.courseCode, new_semester.semesterName, new_semester.academicYear, 100)
+        add_course_offering(new_course.courseCode, new_semester.semesterID, 100)
 
         new_staff = register_staff("John", "Williams", "johnpass", "john22@email.com")
         message = add_course_staff(new_course.courseCode, new_semester.semesterName, new_semester.academicYear, new_staff.staffID)

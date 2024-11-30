@@ -20,6 +20,17 @@ def create_programme(programmeTitle, programmeDescription):
         db.session.rollback()
         return {"Error Message": "Failed To Create Programme"}
 
+def get_programme_by_id(programmeID):
+    try:
+        programme = Programme.query.filter_by(programmeID=programmeID).first()
+        if programme:
+            return programme
+        else:
+            return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
 def get_programme_by_title(programmeTitle):
     try:
         programme = Programme.query.filter_by(programmeTitle=programmeTitle).first()

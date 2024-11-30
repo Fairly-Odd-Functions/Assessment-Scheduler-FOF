@@ -25,7 +25,6 @@ def validate_dates(startDate, endDate):
         return {"Error Message": errors}
     return {"startDate": startDate, "endDate": endDate}
 
-
 def validate_times(startTime, endTime):
     errors = []
 

@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, date
 from flask import jsonify
-from App.controllers.courseAssessment import add_course_assessment, get_course_assessment
+from App.controllers.courseAssessment import add_course_assessment
 from App.database import db
-from App.models import Admin, Staff, Course, Programme, CourseProgramme, Assessment, CourseAssessment
+from App.models import Admin, Staff, Course, Programme, CourseProgramme, Assessment, Semester, CourseOffering
 
 def initialize():
     try:
@@ -54,21 +54,27 @@ def initialize():
         # db.session.add(semester)
         # db.session.commit()
 
-        # Create The Programme & Courses | Add Them To The Database
+        # Create The Programme, Semester & Courses | Add Them To The Database
         programme = Programme(programmeTitle="B.Sc. Jalene Armstrong", programmeDescription="Whomp Whomp Whompy Whomp")
+        semester = Semester(semesterName="Semester 1", academicYear="2024/2025", startDate=date(2024, 10, 12), endDate=date(2025, 10, 12))
         course1 = Course(courseCode="COMP101", courseTitle="Intro to Mental Health", courseCredits="0", courseDescription="Help Me", courseLevel="1")
         course2 = Course(courseCode="COMP102", courseTitle="Intro to Mental Health", courseCredits="0", courseDescription="Help Me", courseLevel="1")
 
         db.session.add(programme)
+        db.session.add(semester)
         db.session.add(course1)
         db.session.add(course2)
         db.session.commit()
 
-        # Add The Courses To The Programme
+        # Add The Courses To The Programme Then To The Semester
         programme_course1 = CourseProgramme(programmeID=programme.programmeID, courseCode=course1.courseCode)
         programme_course2 = CourseProgramme(programmeID=programme.programmeID, courseCode=course2.courseCode)
+        semester_course1 = CourseOffering(courseCode=course1.courseCode, semesterID=semester.semesterID, totalStudentsEnrolled=120)
+        semester_course2 = CourseOffering(courseCode=course2.courseCode, semesterID=semester.semesterID, totalStudentsEnrolled=100)
         db.session.add(programme_course1)
         db.session.add(programme_course2)
+        db.session.add(semester_course1)
+        db.session.add(semester_course2)
 
         # Create The Assessments
         assessment1 = Assessment(assessmentTitle="Coursework Exam", assessmentType="Coursework Exam")
@@ -85,8 +91,18 @@ def initialize():
             startTime=datetime.strptime("09:00", "%H:%M"),
             endDate=datetime.strptime("2024-10-12", "%Y-%m-%d"),
             endTime=datetime.strptime("10:00", "%H:%M"),
-            clashRule="DEGREE"
+            clashRule="STUDENT_OVERLAP"
         )
+
+        # add_course_assessment(
+        #     courseCode="COMP102",
+        #     assessmentID=2,
+        #     startDate=datetime.strptime("2024-10-12", "%Y-%m-%d"),
+        #     startTime=datetime.strptime("09:30", "%H:%M"),
+        #     endDate=datetime.strptime("2024-10-12", "%Y-%m-%d"),
+        #     endTime=datetime.strptime("10:30", "%H:%M"),
+        #     clashRule="STUDENT_OVERLAP"
+        # )
 
         db.session.add(rick)
         db.session.add(bob)

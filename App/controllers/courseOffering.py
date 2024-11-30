@@ -2,13 +2,13 @@ from App.database import db
 from App.models import Course, Semester, CourseOffering
 
 # Link Course To Semester
-def add_course_offering(courseCode, semesterName, academicYear, totalStudentsEnrolled=0):
+def add_course_offering(courseCode, semesterID, totalStudentsEnrolled=0):
     try:
         course = Course.query.filter_by(courseCode=courseCode).first()
         if not course:
             return {"Error": "Course Not Found"}
 
-        semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
+        semester = Semester.query.get(semesterID)
         if not semester:
             return {"Error": "Semester Not Found"}
 
@@ -16,7 +16,7 @@ def add_course_offering(courseCode, semesterName, academicYear, totalStudentsEnr
         if existing_offering:
             return {"Message": "This course is already offered in this semester"}
 
-        new_offering = CourseOffering(courseCode=courseCode, semesterName=semesterName, academicYear=academicYear, totalStudentsEnrolled=totalStudentsEnrolled)
+        new_offering = CourseOffering(courseCode=courseCode, semesterID=semesterID, totalStudentsEnrolled=totalStudentsEnrolled)
         db.session.add(new_offering)
         db.session.commit()
 
@@ -28,17 +28,17 @@ def add_course_offering(courseCode, semesterName, academicYear, totalStudentsEnr
         return {"Error": "An error occurred while adding the course offering"}
 
 # Remove Course Offering Link If Course Is No Longer Offered
-def remove_course_offering(courseCode, semesterName, academicYear):
+def remove_course_offering(courseCode, semesterID):
     try:
         course = Course.query.filter_by(courseCode=courseCode).first()
         if not course:
             return {"Error": "Course Not Found"}
 
-        semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
+        semester = Semester.query.get(semesterID)
         if not semester:
             return {"Error": "Semester Not Found"}
 
-        offering = CourseOffering.query.filter_by(courseCode=courseCode, semesterID=semester.semesterID).first()
+        offering = CourseOffering.query.filter_by(courseCode=courseCode, semesterID=semesterID).first()
         if not offering:
             return {"Error": "Course offering not found for this semester"}
 
@@ -53,18 +53,18 @@ def remove_course_offering(courseCode, semesterName, academicYear):
         return {"Error": "An error occurred while removing the course offering"}
 
 # Get A Specific Course Offering Based On Academic Year & Semester
-def get_course_offering(courseCode, semesterName,academicYear):
+def get_course_offering(courseCode, semesterID):
     try:
         course = Course.query.filter_by(courseCode=courseCode).first()
         if not course:
             return {"Error": "Course Not Found"}
-        semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
+        semester = Semester.query.get(semesterID)
         if not semester:
             return {"Error": "Semester Not Found"}
 
-        course_offering = CourseOffering.query.filter_by(courseCode=courseCode, semesterID=semester.semesterID).first()
+        course_offering = CourseOffering.query.filter_by(courseCode=courseCode, semesterID=semesterID).first()
         if not course_offering:
-            return {"Message": f"Course Offering Not Found For {courseCode} In Academic Year {academicYear}"}
+            return {"Message": f"Course Offering Not Found For {courseCode} In Academic Year {semester.academicYear}"}
         return course_offering
 
     except Exception as e:
