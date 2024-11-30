@@ -16,6 +16,17 @@ def create_assessment(assessmentTitle, assessmentType):
         db.session.rollback()
         return {"Error Message": "Failed To Create Assessment"}
 
+def get_assessment_by_id(assessmentID):
+    try:
+        assessment = Assessment.query.filter_by(assessmentID=assessmentID).first()
+        if assessment:
+            return assessment
+        else:
+            return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
 def get_assessments_by_title(assessmentTitle):
     try:
         assessments = Assessment.query.filter_by(assessmentTitle=assessmentTitle).all()

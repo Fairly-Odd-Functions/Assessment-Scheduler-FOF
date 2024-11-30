@@ -1,7 +1,7 @@
-from App.controllers.clashDetection import validate_assessment_clash, validate_by_degree
+from App.controllers.clashDetection import validate_assessment_clash
 from App.database import db
 from App.services.assessment import *
-from App.models import Course, Assessment, CourseAssessment, ClashRules
+from App.models import Course, Assessment, CourseAssessment
 
 # Link New Course Assessment To Relevant Code
 def add_course_assessment(courseCode, assessmentID, startDate, startTime, endDate, endTime, clashRule=None):

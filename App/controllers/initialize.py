@@ -3,6 +3,7 @@ from flask import jsonify
 from App.controllers.courseAssessment import add_course_assessment
 from App.database import db
 from App.models import Admin, Staff, Course, Programme, CourseProgramme, Assessment, Semester, CourseOffering
+from App.models.courseAssessment import ClashRules, CourseAssessment
 
 def initialize():
     try:
@@ -55,54 +56,63 @@ def initialize():
         # db.session.commit()
 
         # Create The Programme, Semester & Courses | Add Them To The Database
-        programme = Programme(programmeTitle="B.Sc. Jalene Armstrong", programmeDescription="Whomp Whomp Whompy Whomp")
-        semester = Semester(semesterName="Semester 1", academicYear="2024/2025", startDate=date(2024, 10, 12), endDate=date(2025, 10, 12))
-        course1 = Course(courseCode="COMP101", courseTitle="Intro to Mental Health", courseCredits="0", courseDescription="Help Me", courseLevel="1")
-        course2 = Course(courseCode="COMP102", courseTitle="Intro to Mental Health", courseCredits="0", courseDescription="Help Me", courseLevel="1")
-
+        programme = Programme(programmeTitle="B.Sc. Test Programme", programmeDescription="Test Description")
         db.session.add(programme)
+        db.session.commit()
+
+        semester = Semester(semesterName="Semester 1", academicYear="2024/2025", startDate=date(2024, 10, 12), endDate=date(2025, 10, 12))
         db.session.add(semester)
+        db.session.commit()
+
+        course1 = Course(courseCode="COMP101", courseTitle="Intro to Mental Health", courseCredits="0", courseDescription="Help Me", courseLevel="1")
         db.session.add(course1)
+        db.session.commit()
+
+        course2 = Course(courseCode="COMP102", courseTitle="Intro to Mental Health", courseCredits="0", courseDescription="Help Me", courseLevel="1")
         db.session.add(course2)
         db.session.commit()
 
         # Add The Courses To The Programme Then To The Semester
         programme_course1 = CourseProgramme(programmeID=programme.programmeID, courseCode=course1.courseCode)
-        programme_course2 = CourseProgramme(programmeID=programme.programmeID, courseCode=course2.courseCode)
-        semester_course1 = CourseOffering(courseCode=course1.courseCode, semesterID=semester.semesterID, totalStudentsEnrolled=120)
-        semester_course2 = CourseOffering(courseCode=course2.courseCode, semesterID=semester.semesterID, totalStudentsEnrolled=100)
         db.session.add(programme_course1)
+        db.session.commit()
+
+        programme_course2 = CourseProgramme(programmeID=programme.programmeID, courseCode=course2.courseCode)
         db.session.add(programme_course2)
+        db.session.commit()
+
+        semester_course1 = CourseOffering(courseCode=course1.courseCode, semesterID=semester.semesterID, totalStudentsEnrolled=120)
         db.session.add(semester_course1)
+        db.session.commit()
+
+        semester_course2 = CourseOffering(courseCode=course2.courseCode, semesterID=semester.semesterID, totalStudentsEnrolled=100)
         db.session.add(semester_course2)
+        db.session.commit()
 
         # Create The Assessments
-        assessment1 = Assessment(assessmentTitle="Coursework Exam", assessmentType="Coursework Exam")
-        assessment2 = Assessment(assessmentTitle="Coursework Exam 2", assessmentType="Coursework Exam")
-        assessment3 = Assessment(assessmentTitle="Coursework Exam 3", assessmentType="Coursework Exam ")
+        assessment1 = Assessment(assessmentTitle="Coursework Exam", assessmentType="COURSEWORK")
         db.session.add(assessment1)
+        db.session.commit()
+
+        assessment2 = Assessment(assessmentTitle="Quiz 1", assessmentType="QUIZ")
         db.session.add(assessment2)
+        db.session.commit()
+
+        assessment3 = Assessment(assessmentTitle="Final", assessmentType="FINAL")
         db.session.add(assessment3)
+        db.session.commit()
 
-        add_course_assessment(
-            courseCode="COMP101",
-            assessmentID=1,
-            startDate=datetime.strptime("2024-10-12", "%Y-%m-%d"),
-            startTime=datetime.strptime("09:00", "%H:%M"),
-            endDate=datetime.strptime("2024-10-12", "%Y-%m-%d"),
-            endTime=datetime.strptime("10:00", "%H:%M"),
-            clashRule="STUDENT_OVERLAP"
-        )
-
-        # add_course_assessment(
-        #     courseCode="COMP102",
-        #     assessmentID=2,
-        #     startDate=datetime.strptime("2024-10-12", "%Y-%m-%d"),
-        #     startTime=datetime.strptime("09:30", "%H:%M"),
-        #     endDate=datetime.strptime("2024-10-12", "%Y-%m-%d"),
-        #     endTime=datetime.strptime("10:30", "%H:%M"),
-        #     clashRule="STUDENT_OVERLAP"
-        # )
+        course_assessment1 = CourseAssessment(
+                                courseCode=course1.courseCode, 
+                                assessmentID=assessment1.assessmentID,
+                                startDate=datetime.strptime("2024-10-10", "%Y-%m-%d"),
+                                endDate=datetime.strptime("2024-10-10", "%Y-%m-%d"),
+                                startTime=datetime.strptime("09:00", "%H:%M").time(),
+                                endTime=datetime.strptime("10:00", "%H:%M").time(),
+                                clashRule=ClashRules.ASSESSMENT_TYPE
+                            )
+        db.session.add(course_assessment1)
+        db.session.commit()
 
         db.session.add(rick)
         db.session.add(bob)

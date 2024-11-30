@@ -128,18 +128,17 @@ class AssessmentUnitTest(unittest.TestCase):
 
     # UNIT TEST - #14: Create Assessment
     def test_unit_14_create_assessment(self):
-        newAssessment = Assessment("Assignment 1", "Assignment")
+        newAssessment = Assessment("Assignment 1", AssessmentTypes.ASSIGNMENT)
         assert newAssessment.assessmentTitle == "Assignment 1"
-
         print(newAssessment)
 
     # UNIT TEST - #15: Assessment JSON
     def test_unit_15_assessment_json(self):
-        newAssessment = Assessment("Assignment 2", "Assignment")
+        newAssessment = Assessment("Assignment 2", AssessmentTypes.ASSIGNMENT)
         assessment_json = newAssessment.get_json()
         self.assertDictEqual({"assessmentID": newAssessment.assessmentID,
                               "assessmentTitle": "Assignment 2",
-                              "assessmentType": "Assignment"}, assessment_json)
+                              "assessmentType": "ASSIGNMENT"}, assessment_json)
         print(assessment_json)
 
 '''
@@ -234,7 +233,7 @@ class CourseIntegrationTests(unittest.TestCase):
 
     def test_integration_09_add_course_assessment(self):
         add_course("12310","Governance and Culture",4,"Welcome to the study of cultural influence in the Government",3)
-        assessment = Assessment("Governance and Culture Course Work Exam 1", "Course Work Exam")
+        assessment = Assessment("Governance and Culture Course Work Exam 1", AssessmentTypes.COURSEWORK)
         db.session.add(assessment)
         db.session.commit()
         message = add_course_assessment("12310", 1, startDate=datetime(2024, 10, 12), startTime=time(9, 0), endDate=datetime(2024, 10, 12), endTime=time(12, 0))
@@ -251,8 +250,8 @@ class CourseIntegrationTests(unittest.TestCase):
 
     def test_integration_10_list_course_assessment(self):
         add_course("12310","Governance and Culture",4,"Welcome to the study of cultural influence in the Government",3)
-        assessment1 = Assessment("Governance and Culture Course Work Exam 1", "Course Work Exam")
-        assessment2 = Assessment("Governance and Culture Course Work Exam 2", "Course Work Exam")
+        assessment1 = Assessment("Governance and Culture Course Work Exam 1", AssessmentTypes.COURSEWORK)
+        assessment2 = Assessment("Governance and Culture Course Work Exam 2", AssessmentTypes.COURSEWORK)
         db.session.add(assessment1)
         db.session.add(assessment2)
         db.session.commit()

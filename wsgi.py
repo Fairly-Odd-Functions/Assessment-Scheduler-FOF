@@ -299,12 +299,28 @@ assessment_cli = AppGroup('assessment', help='Assessment Object Commands')
 
 @assessment_cli.command('create', help="Creates A New Assessment For A Particular Course")
 @click.option('--assessment_title', '-at', prompt="Enter Assessment Title", help="Title Of Assessment")
-@click.option('--assessment_type', '-aty', prompt="Enter Assessment Type", help="Type Of Assessment")
-def create_assessment_command(assessment_title, assessment_type):
-    new_assessment = create_assessment(assessment_title, assessment_type)
+def create_assessment_command(assessment_title):
+
+    print("\nSelect Assessment Type:")
+    for idx, assessment_enum in enumerate(AssessmentTypes):
+        print(f"{idx + 1}. {assessment_enum.name} - {assessment_enum.value}")
+
+    while True:
+        try:
+            assessment_type_input = click.prompt("\nSelect Assessment Type (Enter Number)", type=int)
+            if 1 <= assessment_type_input <= len(AssessmentTypes):
+                selected_assessment_type = list(AssessmentTypes)[assessment_type_input - 1].name
+                selected_type = selected_assessment_type
+                break
+            else:
+                print("Invalid Selection! You Must Choose A Valid Assessment Type From The List.")
+        except ValueError:
+            print("Invalid Input! Please Enter A Number Corresponding To An Assessment Type.")
+
+    new_assessment = create_assessment(assessmentTitle=assessment_title, assessmentType=selected_type)
 
     if new_assessment and "Message" in new_assessment and new_assessment["Message"] == "Assessment Created Successfully":
-            print(f"SUCCESS: New Assessment '{assessment_title}' Added Successfully!.")
+            print(f"\nSUCCESS: New Assessment '{assessment_title}' - Type: {selected_type} Added Successfully!.")
     elif new_assessment and "Error Message" in new_assessment:
         print(f"ERROR: {new_assessment['Error Message']}")
     else:

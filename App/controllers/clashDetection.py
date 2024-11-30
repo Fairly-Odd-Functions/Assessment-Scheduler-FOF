@@ -1,8 +1,12 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta #Services
+from App.models import CourseAssessment, CourseOffering # Models
+
+# Controllers
 from App.controllers.course import get_degree_programme
-from App.controllers.courseProgramme import get_course_programme
 from App.controllers.programme import get_programme_by_id
-from App.models import CourseProgramme, CourseAssessment, CourseOffering
+from App.controllers.assessment import get_assessment_by_id
+from App.controllers.courseProgramme import get_course_programme
+from App.models.assessment import AssessmentTypes
 
 def validate_assessment_clash(new_course_assessment):
     clash_rule = new_course_assessment.clashRule
@@ -11,6 +15,10 @@ def validate_assessment_clash(new_course_assessment):
     start_time = new_course_assessment.startTime
     end_date = new_course_assessment.endDate
     end_time = new_course_assessment.endTime
+    assessmentID = new_course_assessment.assessmentID
+
+    assessment = get_assessment_by_id(assessmentID)
+    print(f"{assessment}")
 
     if clash_rule == "DEGREE":
         clash_validation_result = validate_by_degree(course_code, start_date, start_time, end_date, end_time)
@@ -23,10 +31,9 @@ def validate_assessment_clash(new_course_assessment):
             return clash_validation_result
 
     elif clash_rule == "ASSESSMENT_TYPE":
-        pass
-        # clash_validation_result = validate_by_assessment_type(course_code, start_date, start_time, end_date, end_time)
-        # if clash_validation_result["status"] == "error":
-        #     return clash_validation_result
+        clash_validation_result = validate_by_assessment_type(assessment, start_date, preparation_days=2)
+        if clash_validation_result["status"] == "error":
+            return clash_validation_result
 
     return {"status": "success", "message": "No clashes detected"}
 
@@ -130,31 +137,60 @@ def validate_by_student_overlap(courseCode, startDate, endDate, overlap_threshol
 # -> Checks if an assessment follows the required preparation time before it starts, 
 #    based on its assesment type.
 def validate_by_assessment_type(assessment, startDate, preparation_days):
+    print(f"Assessing: {assessment.assessmentType.name} on {startDate} with preparation_days={preparation_days}")
 
-    if assessment.type not in ["Exam", "Quiz", "Final"]:
-        return {"status": "error", "message": f"Unknown assessment type: {assessment.type}"}
+    if assessment.assessmentType.name not in [AssessmentTypes.COURSEWORK.name,
+                                              AssessmentTypes.FINAL.name,
+                                              AssessmentTypes.PRESENTATION.name,
+                                              AssessmentTypes.QUIZ.name]:
+        print(f"Error: Unknown AssessmentType: {assessment.assessmentType}")
+        return {"status": "error", "message": f"Unknown AssessmentType: {assessment.assessmentType}"}  # Safe Guard
 
     reserved_start_date = startDate - timedelta(days=preparation_days)
+    print(f"Reserved start date for preparation: {reserved_start_date}")
 
     conflicting_assessments = CourseAssessment.query.filter(
         CourseAssessment.startDate <= startDate,
         CourseAssessment.endDate >= reserved_start_date
     ).all()
+    
+    print(f"Conflicting assessments found: {len(conflicting_assessments)}")
 
     overlapped_assessments = []
-
     if conflicting_assessments:
         for conflicting_assessment in conflicting_assessments:
+            assessment = conflicting_assessment.assessment
+            if assessment:
+                assessment_type = assessment.assessmentType.name
+            else:
+                assessment_type = "Unknown"
+            
             overlapped_assessments.append({
                 "courseCode": conflicting_assessment.courseCode,
-                "assessmentType": conflicting_assessment.type,
+                "assessmentType": assessment_type,
                 "startDate": conflicting_assessment.startDate,
                 "endDate": conflicting_assessment.endDate
             })
+
+        error_message = (
+            f"\nAssessment Clash Found Due To Insufficient Preparation Time\n"
+            f"{'='*50}\n"
+            f"Conflicting Assessments:\n"
+        )
+
+        for clash in overlapped_assessments:
+            error_message += (
+                f"- Course: {clash['courseCode']}\n"
+                f"  Assessment Type: {clash['assessmentType']}\n"
+                f"  Start Date: {clash['startDate']}\n"
+                f"  End Date: {clash['endDate']}\n"
+                f"{'-'*50}\n"
+            )
+
         return {
             "status": "error", 
-            "message": "Assessment clash found due to insufficient preparation time",
-            "ConflictingAssessments": overlapped_assessments
+            "message": error_message
         }
     else:
-        return {"status": "success", "message": "No assessment clashes found"}
+        print("No assessment clashes found.")
+        return {"status": "success", "message": "No Assessment Clashes Found"}
