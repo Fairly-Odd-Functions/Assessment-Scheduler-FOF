@@ -1,10 +1,10 @@
+from App.controllers.clashDetection import validate_assessment_clash, validate_by_degree
 from App.database import db
 from App.services.assessment import *
-from App.models import Course, Assessment, CourseAssessment
-
+from App.models import Course, Assessment, CourseAssessment, ClashRules
 
 # Link New Course Assessment To Relevant Code
-def add_course_assessment(courseCode, assessmentID, startDate, startTime, endDate, endTime):
+def add_course_assessment(courseCode, assessmentID, startDate, startTime, endDate, endTime, clashRule=None):
     try:
         course = Course.query.get(courseCode)
         if not course:
@@ -33,18 +33,21 @@ def add_course_assessment(courseCode, assessmentID, startDate, startTime, endDat
             startDate=date_validation["startDate"],
             endDate=date_validation["endDate"],
             startTime=time_validation["startTime"],
-            endTime=time_validation["endTime"]
+            endTime=time_validation["endTime"],
+            clashRule=clashRule
         )
+
+        validation_result = validate_assessment_clash(new_course_assessment)
+        if validation_result["status"] == "error":
+            return validation_result
 
         db.session.add(new_course_assessment)
         db.session.commit()
-
         return {"Message": "Course And Assessment Successfully Associated",
                 "CourseAssessment": new_course_assessment.get_json()}
 
     except Exception as e:
         db.session.rollback()
-        print(f"Error While Adding Course Assessment: {e}")
         return {"Error": "An Error Occurred While Associating The Course With The Assessment"}
 
 # List All Assessments For A Specific Course (Throughout Time)
@@ -112,3 +115,12 @@ def delete_course_assessment(courseAssessmentID):
         db.session.rollback()
         print(f"Error While Deleting Course Assessment: {e}")
         return {"Error": "An Error Occurred While Deleting The Course Assessment"}
+
+# Get All Scheduled Assessments For A Specific Course Given A Date Range (Too Tired For Error Handling)
+def get_scheduled_assessments(courseCode, start_date, end_date):
+    assessments = CourseAssessment.query.filter(
+        CourseAssessment.courseCode == courseCode,
+        CourseAssessment.startDate >= start_date,
+        CourseAssessment.endDate <= end_date
+    ).all()
+    return assessments

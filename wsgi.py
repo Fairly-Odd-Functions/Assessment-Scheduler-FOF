@@ -17,7 +17,7 @@ migrate = get_migrate(app)
 @app.cli.command("init", help="Creates And Initializes The Database")
 def init():
     initialize()
-    print('Database Initialized!')
+    #print('Database Initialized!')
 
 '''
 |   Staff Group Commands
@@ -204,27 +204,64 @@ def get_all_courses():
 # COMMAND #5 : ADD ASSESSMENT TO A COURSE
 @course_cli.command('add-assessment', help='Add Assessment To A Course')
 @click.option('--coursecode', '-c', prompt='Enter Course Code', required=True)
-@click.option('--assessmentcode', '-a', prompt='Enter Assessment Code', required=True)
+@click.option('--year', '-y', prompt="Enter Year", type=int, help="Year For The Calendar", required=True)
+@click.option('--month', '-m', prompt="Enter Month", type=int, help="Month For The Calendar", required=True)
+def add_assessment_to_course(coursecode, year, month):
 
-# Start Date
-@click.option('--start_date', '-sd', prompt="Enter Start Date (YYYY-MM-DD)", 
-              type=click.DateTime(formats=["%Y-%m-%d"]), help="Start Date Of The Assessment")
-# Start Time
-@click.option('--start_time', '-st', prompt="Enter Start Time (HH:MM:SS)", 
-              type=click.DateTime(formats=["%H:%M:%S"]), help="Start Time Of The Assessment")
-# End Date
-@click.option('--end_date', '-ed', prompt="Enter End Date (YYYY-MM-DD)", 
-              type=click.DateTime(formats=["%Y-%m-%d"]), help="End Date Of The Assessment")
-# End Time
-@click.option('--end_time', '-et', prompt="Enter End Time (HH:MM:SS)", 
-              type=click.DateTime(formats=["%H:%M:%S"]), help="End Time Of The Assessment")
-def add_assessment_to_course(coursecode, assessmentcode, start_date, start_time, end_date, end_time):
-    result = add_course_assessment(coursecode, assessmentcode, start_date, start_time, end_date, end_time)
+    # STEP 1: Generate & Display The Schedule Calendar With Any Unavailable Dates Marked | service/assessment.py
+    print(f"\n{'Assessment Calendar':^50}")
+    print(f"{'-'*50}")
+    calendar_table = generate_calendar(year, month, coursecode)
+    print(calendar_table)
+
+    # STEP 2: Prompt For Scheduling Details
+    assessmentcode = click.prompt("\nEnter Assessment Code")
+    start_day = click.prompt("Enter Start Day", type=int)
+    start_time = click.prompt("Enter Start Time (HH:MM)", type=click.DateTime(formats=["%H:%M"]))
+
+    start_date = datetime(year, month, start_day).date()
+
+    end_day = click.prompt("Enter End Day", type=int)
+    end_time = click.prompt("Enter End Time (HH:MM)", type=click.DateTime(formats=["%H:%M"]))
+
+    end_date = datetime(year, month, end_day).date()
+
+    print("\nAvailable Clash Rules:")
+    for idx, rule in enumerate(ClashRules):
+        print(f"{idx + 1}. {rule.name} - {rule.value}")
+
+   # STEP 3: Prompt For Clash Rule To Apply
+    while True:
+        try:
+            clash_rule_input = click.prompt("\nSelect A Clash Rule (Enter Number)", type=int)
+            if 1 <= clash_rule_input <= len(ClashRules):
+                selected_rule_name = list(ClashRules)[clash_rule_input - 1].name
+                selected_rule = selected_rule_name
+                break
+            else:
+                print("Invalid Selection! You Must Choose A Valid ClashRule From The List.")
+        except ValueError:
+            print("Invalid Input! Please Enter A Number Corresponding To A ClashRule.")
+
+    # After The User Listened To Instructions
+    result = add_course_assessment(coursecode, assessmentcode, start_date, start_time, end_date, end_time, selected_rule)
 
     if result:
-        print(f"{result}")
+        success_message = result["Message"]
+        course_assessment_data = result["CourseAssessment"]
+
+        print(f"\n{'='*50}")
+        print(f"Success: {success_message}")
+        print(f"\n{'Assessment Details':^50}")
+        print(f"{'-'*50}")
+        
+        for key, value in course_assessment_data.items():
+            print(f"{key}: {value}")
+        
+        print(f"\n{'='*50}")
     else:
-        print(f"\nError: An error occurred while assigning assessment to {coursecode}\n")
+        print(f"Error: An Error Occurred While Assigning Assessment To {coursecode}")
+
 
 # COMMAND #6 : REMOVE ASSESSMENT FROM A COURSE
 @course_cli.command('remove-assessment', help='Remove Assessment From A Course')
@@ -321,7 +358,7 @@ def add_course_to_programme_command(programme_title, course_code):
         print(f"ERROR: Programmme '{programme_title}' Does Not Exist.")
         return
 
-    new_programme_course = add_course_to_programme(courseCode=course_code, programmeID=fetched_programme.get('programmeID'))
+    new_programme_course = add_course_to_programme(courseCode=course_code, programmeID=fetched_programme.programmeID)
 
     if new_programme_course is None:
         print(f"ERROR: Failed To Add Course: '{course_code}' To Programme: '{programme_title}'.")

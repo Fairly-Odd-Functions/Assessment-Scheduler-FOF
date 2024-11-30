@@ -1,30 +1,69 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
+from App.controllers.course import get_degree_programme
+from App.controllers.courseProgramme import get_course_programme
 from App.models import CourseProgramme, CourseAssessment, CourseOffering
+
+def validate_assessment_clash(new_course_assessment):
+    clash_rule = new_course_assessment.clashRule
+    course_code = new_course_assessment.courseCode
+    start_date = new_course_assessment.startDate
+    start_time = new_course_assessment.startTime
+    end_date = new_course_assessment.endDate
+    end_time = new_course_assessment.endTime
+
+    if clash_rule == "DEGREE":
+        clash_validation_result = validate_by_degree(course_code, start_date, start_time, end_date, end_time)
+        if clash_validation_result["status"] == "error":
+            return clash_validation_result
+    elif clash_rule == "STUDENT_OVERLAP":
+        pass
+
+    elif clash_rule == "ASSESSMENT_TYPE":
+        pass
+    return {"status": "success", "message": "No clashes detected"}
 
 # Clash Rule for Validation of Assesment Schedule by Programm
 # -> Checks whether an assessment for a course clashes with another assessment
 #    in the same degree programme, on the same day.
-def validate_by_degree(courseCode, start_date, end_date):
+def validate_by_degree(courseCode, start_date, start_time, end_date, end_time):
+    try:
+        programme = get_degree_programme(courseCode)
+        all_courses_in_programme = get_course_programme(programme.programmeID)
 
-    related_programmes = CourseProgramme.query.filter_by(courseCode=courseCode).all()
-    if not related_programmes:
-        return {"status": "error", "message": "No related degree programmes found for the course"}
+        if "Error" in all_courses_in_programme:
+            return all_courses_in_programme
 
-    programme_ids = [prog.programmeID for prog in related_programmes]
-    programme_courses = CourseProgramme.query.filter(CourseProgramme.programmeID.in_(programme_ids)).all()
+        for course_programme in all_courses_in_programme["CourseProgrammes"]:
+            other_courseCode = course_programme['courseCode']
 
-    for programme in programme_courses:
-        if programme.courseCode != courseCode:
-            clashes = CourseAssessment.query.filter(
-                CourseAssessment.courseCode == programme.courseCode,
-                CourseAssessment.startDate <= end_date,
-                CourseAssessment.endDate >= start_date
-            ).all()
+            course_assessments = CourseAssessment.query.filter_by(courseCode=other_courseCode).all()
+            for course_assessment in course_assessments:
+                other_start_date = course_assessment.startDate
+                other_end_date = course_assessment.endDate
+                other_start_time = course_assessment.startTime
+                other_end_time = course_assessment.endTime
 
-            if clashes:
-                return {"status": "error", "message": "Assessment clash found with another course in the same programme"}
+                if courseCode == other_courseCode:
+                    continue
 
-    return {"status": "success", "message": "No assessment clashes found in the same programme"}
+                current_start_datetime = datetime.combine(start_date, start_time)
+                current_end_datetime = datetime.combine(end_date, end_time)
+
+                other_start_datetime = datetime.combine(other_start_date, other_start_time)
+                other_end_datetime = datetime.combine(other_end_date, other_end_time)
+
+                if (current_start_datetime < other_end_datetime and current_end_datetime > other_start_datetime):
+                    return {
+                        "status": "error",
+                        "message": f"Assessment clash found with {other_courseCode} in the same programme."
+                    }
+        return {
+            "status": "success",
+            "message": "No assessment clashes found in the same programme."
+        }
+    except Exception as e:
+        print(f"Error: {e}")
+        return {"status": "error", "message": "Failed to validate courses."}
 
 # Clash Rule for Validation of Assesment Schedule by Percentage Overlap
 # -> Checks all courses scheduled on the same day to see if the number of students 
