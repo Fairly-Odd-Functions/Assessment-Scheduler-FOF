@@ -370,4 +370,17 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         result = validate_by_degree("COMP 1601", date(2024, 9, 10), time(12,00,00,00, None), date(2024, 10, 11), time(23,00,00,00, None))
         print(result)
 
+    def test_integration_17_validate_by_degree_clash(self):
+        add_course("COMP 1601", "Computer Programming I", 3, "Introduction to programming", 1)
+        add_course("COMP 1602", "Computer Programming II", 3, "Introduction to programming", 1)
+        create_programme("BSc. Computer Science", "The study of computers and computing - Google")
+        add_course_to_programme("COMP 1601", 1)
+        add_course_to_programme("COMP 1602", 1)
+        create_assessment("Assignment 1", AssessmentTypes.ASSIGNMENT)
+        create_assessment("Assignment 2", AssessmentTypes.ASSIGNMENT)
+        add_course_assessment("COMP 1601", 1, date(2024, 9, 10), time(12,00,00,00, None), date(2024, 10, 11), time(23,00,00,00, None), clashRule=None)
+        add_course_assessment("COMP 1602", 2, date(2024, 9, 20), time(12,00,00,00, None), date(2024, 10, 21), time(23,00,00,00, None), clashRule=None)
+        result = validate_by_degree("COMP 1601", date(2024, 9, 10), time(12,00,00,00, None), date(2024, 10, 11), time(23,00,00,00, None))
+        print(result)
+
        
