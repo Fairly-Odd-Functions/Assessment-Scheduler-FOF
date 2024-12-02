@@ -149,6 +149,9 @@ class AssessmentUnitTest(unittest.TestCase):
     Task 08.2.3. Admin Integration Tests Implementation
     Task 08.2.4. Course Integration Tests Implementation
     Task 08.2.5. Semester Integration Tests Implementation
+    
+    Written by Katoya Ottley (stu-dent101)
+    Task 08.2.6. Special Feature Integration Tests
 '''
 
 class UserIntegrationTests(unittest.TestCase):
@@ -348,3 +351,23 @@ class SemesterIntegrationTests(unittest.TestCase):
        self.assertEqual(semester.academicYear, "2024/2025")
        self.assertEqual(semester.startDate, date(2024, 5, 15))
        self.assertEqual(semester.endDate, date(2024, 7, 20))
+    
+
+    '''
+        Note: 
+            When I had : newCourseAssessment = add_course_assessment("COMP 1601", 1, date(2024, 9, 10), time(12,00,00,00, None), date(2024, 10, 11), time(12,00,00,00, None), clashRule=None)
+            I got this {'Error': ['Start Time Must Be Before End Time.']} note the dates
+    '''
+
+class SpecialFeatureIntegrationTests(unittest.TestCase):
+    
+    def test_integration_16_validate_by_degree_no_clash(self):
+        add_course("COMP 1601", "Computer Programming I", 3, "Introduction to programming", 1)
+        create_programme("BSc. Computer Science", "The study of computers and computing - Google")
+        add_course_to_programme("COMP 1601", 1)
+        create_assessment("Assignment 1", AssessmentTypes.ASSIGNMENT)
+        add_course_assessment("COMP 1601", 1, date(2024, 9, 10), time(12,00,00,00, None), date(2024, 10, 11), time(23,00,00,00, None), clashRule=None)
+        result = validate_by_degree("COMP 1601", date(2024, 9, 10), time(12,00,00,00, None), date(2024, 10, 11), time(23,00,00,00, None))
+        print(result)
+
+       
