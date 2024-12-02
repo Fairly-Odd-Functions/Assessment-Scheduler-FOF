@@ -333,7 +333,7 @@ def create_assessment_command(assessment_title):
 
 # COMMAND #2 : SEARCH ASSESSMENT
 @assessment_cli.command('search', help="Search For An Assessment")
-@click.option('--assessment_id', '-n', prompt="Enter The Assessment ID", help="ID Number Of Assessment")
+@click.option('--assessment_id', '-a', prompt="Enter The Assessment ID", help="ID Number Of Assessment")
 def fetch_assessment_command(assessment_id):
     fetched_assessment = get_assessment_by_id(assessmentID=assessment_id)
 
@@ -498,9 +498,31 @@ def list_programmes_command(format):
 
 # COMMAND #5 : LIST ALL COURSE WITHIN A PROGRAMME
 @programme_cli.command('list-courses', help="List All Courses For A Specific Programme")
-@click.option('--programme_title', '-pt', prompt="Enter Programme Title", help="Title Of The Programme")
-def list_programme_courses_command(programme_title):
-    print(list_programme_courses(programme_title))
+@click.option('--programme_id', '-pt', prompt="Enter Programme ID", help="ID Of The Programme")
+def list_programme_courses_command(programme_id):
+    print(list_programme_courses(programmeID=programme_id))
+
+# COMMAND #6 : SEARCH PROGRAMME
+@programme_cli.command('search', help="Search For A Programme")
+@click.option('--programme_id', '-p', prompt="Enter The Programme ID", help="ID Number Of Programme")
+def fetch_assessment_command(programme_id):
+    fetched_programme = get_programme_by_id(programmeID=programme_id)
+
+    if fetched_programme:
+        print(f"Programme Details:\n{fetched_programme}")
+    else:
+        print(f"ERROR: Programme With ID: {programme_id} Not Found.")
+
+# COMMAND #7 : REMOVE COURSE FROM A PROGRAMME
+@programme_cli.command('remove-course', help='Remove Course From A Programme')
+@click.option('--programme_id', '-p', prompt='Enter Programme ID', required=True)
+@click.option('--course_code', '-c', prompt='Enter Course Code', required=True)
+def remove_course_from_programme_command(programme_id, course_code):
+    result = remove_course_from_programme(programmeID=programme_id, courseCode=course_code)
+    if result:
+        print(f"{result}")
+    else:
+        print(f"Error: An Error Occurred While Removing Course '{course_code}' From Programme\n")
 
 app.cli.add_command(programme_cli)
 
