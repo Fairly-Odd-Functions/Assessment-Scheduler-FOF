@@ -554,10 +554,9 @@ def add_semester_command(semester_name, academic_year, start_date, end_date):
 
 # COMMAND #2 : SEARCH SEMESTER
 @semester_cli.command('search', help="Gets Details For A Specific Semester")
-@click.option('--semester_name', '-n', prompt="Enter Semester Name", help="Name Of The Semester")
-@click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
-def fetch_semester_command(semester_name, academic_year):
-    fetched_semester = get_semester(semesterName=semester_name, academicYear=academic_year)
+@click.option('--semester_id', '-n', prompt="Enter Semester ID", help="ID Of The Semester")
+def fetch_semester_command(semester_id):
+    fetched_semester = get_semester_by_id(semesterID=semester_id)
 
     if isinstance(fetched_semester, dict) and "Error Message" in fetched_semester:
         print(f"ERROR: {fetched_semester['Error Message']}")
@@ -568,17 +567,16 @@ def fetch_semester_command(semester_name, academic_year):
 
 # COMMAND #3 : UPDATE SEMESTER
 @semester_cli.command('update', help="Updates Information For An Existing Semester")
-@click.option('--semester_name', '-s', prompt="Enter Semester Name", help="Name Of The Semester")
-@click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
+@click.option('--semester_id', '-s', prompt="Enter Semester ID", help="ID Of The Semester")
 @click.option('--new_semester_name', '-snew', default=None, help="New Semester Name (Optional)")
 @click.option('--new_academic_year', '-anew', default=None, help="New Academic Year (Optional)")
 @click.option('--start_date', '-st', default=None, type=click.DateTime(formats=["%Y-%m-%d"]), help="New Start Date (Optional)")
 @click.option('--end_date', '-e', default=None, type=click.DateTime(formats=["%Y-%m-%d"]), help="New End Date (Optional)")
-def update_semester_command(semester_name, academic_year, new_semester_name, new_academic_year, start_date, end_date):
-    semester_to_update = Semester.query.filter_by(semesterName=semester_name, academicYear=academic_year).first()
+def update_semester_command(semester_id, new_semester_name, new_academic_year, start_date, end_date):
+    semester_to_update = get_semester_by_id(semesterID=semester_id)
 
     if not semester_to_update:
-        print(f"ERROR: Semester '{semester_name}' for Academic Year '{academic_year}' Not Found.")
+        print(f"ERROR: Semester With ID: {semester_id} Not Found.")
         return
 
     new_semester_name = new_semester_name or input(f"Enter New Semester Name (Current: {semester_to_update.semesterName} | Press ENTER To Skip): ") or semester_to_update.semesterName
@@ -592,8 +590,6 @@ def update_semester_command(semester_name, academic_year, new_semester_name, new
         end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
 
     updated_semester = update_semester(
-        semesterName=semester_name,
-        academicYear=academic_year,
         new_semesterName=new_semester_name,
         new_academicYear=new_academic_year,
         startDate=start_date,
@@ -605,7 +601,7 @@ def update_semester_command(semester_name, academic_year, new_semester_name, new
     elif "Error Message" in updated_semester:
         print(f"ERROR: {updated_semester['Error Message']}")
     else:
-        print(f"SUCCESS: Semester '{semester_name}' Updated Successfully!\nUpdated Details: {updated_semester['Semester Updated']}")
+        print(f"SUCCESS: Semester Updated Successfully!\nUpdated Details: {updated_semester['Semester Updated']}")
 
 # COMMAND #4 : LIST ALL SEMESTERS
 @semester_cli.command('list-all', help="Retrieve And Lists All Semesters In The Database")
@@ -616,18 +612,79 @@ def list_semesters_command(format):
     else:
         print(list_semesters_json())
 
-# COMMAND #5 : LIST ALL SEMESTERS BASED ON ACADEMIC YEAR
+# COMMAND #4.5 : LIST ALL SEMESTERS BASED ON ACADEMIC YEAR
 @semester_cli.command('list-year', help="Retrieve And Lists All Semesters In The Database Based On Academic Year")
 @click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
 def list_year_semesters_command(academic_year):
     print(get_semesters_by_academic_year(academic_year))
 
-# COMMAND #6 : LIST ALL COURSES IN A SEMESTER
+# COMMAND #5 : LIST ALL COURSES IN A SEMESTER
 @semester_cli.command('list-courses', help="List All Courses For A Specific Semester")
-@click.option('--semester_name', '-s', prompt="Enter Semester  Name", help="Name Of The Semester")
-@click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
-def list_semester_courses_command(semester_name, academic_year):
-    print(list_courses_for_semester(semester_name, academic_year))
+@click.option('--semester_id', '-s', prompt="Enter Semester ID", help="ID Of The Semester")
+def list_semester_courses_command(semester_id):
+    print(list_courses_for_semester(semesterID=semester_id))
+
+# COMMAND #6 : ADD COURSE OFFERING TO SEMESTER
+@semester_cli.command('add-offering', help='Add Course To A Semester')
+@click.option('--semester_id', '-s', prompt='Enter Semester ID', required=True)
+@click.option('--course_code', '-c', prompt='Enter Course Code', required=True)
+def add_course_offering_command(semester_id, course_code):
+    fetched_semester = get_semester_by_id(semesterID=semester_id)
+
+    if not fetched_semester:
+        print(f"ERROR: Semester With ID: '{semester_id}' Does Not Exist.")
+        return
+
+    new_course_offering = add_course_offering(semesterID=semester_id, courseCode=course_code)
+
+    if new_course_offering is None:
+        print(f"ERROR: Failed To Add Course: '{course_code}' To Semester.")
+    elif "Error" in new_course_offering:
+        print(f"ERROR: {new_course_offering['Error']}")
+    else:
+        print(f"SUCCESS: Semester Course Offering Added Successfully!\nNew CourseOffering Details: {new_course_offering['CourseOffering']}")
+
+# COMMAND #6.5 : UPDATE COURSE OFFERING
+@semester_cli.command('update-offering', help='Update A CourseOffering In A Semester')
+@click.option('--semester_id', '-s', prompt='Enter Semester ID', required=True)
+@click.option('--course_code', '-c', prompt='Enter Course Code', required=True)
+@click.option('--students_enrolled', '-s', prompt='Enter Students Enrolled', required=True)
+def update_course_offering_command(semester_id, course_code, students_enrolled):
+    fetched_semester = get_semester_by_id(semesterID=semester_id)
+
+    if not fetched_semester:
+        print(f"ERROR: Semester With ID: '{semester_id}' Does Not Exist.")
+        return
+
+    updated_course_offering = update_course_offering(courseCode=course_code, semesterID=semester_id, totalStudentsEnrolled=students_enrolled)
+
+    if updated_course_offering is None:
+        print(f"ERROR: Failed To Update Course: '{course_code}' Offering With The Semester.")
+    elif "Error" in updated_course_offering:
+        print(f"ERROR: {updated_course_offering['Error']}")
+    else:
+        if 'CourseOffering' in updated_course_offering:
+            print(f"SUCCESS: Semester Course Offering Updated Successfully!\nUpdated Details: {updated_course_offering['CourseOffering']}")
+        else:
+            print(f"ERROR: Unexpected result. 'CourseOffering' not found in the response.")
+
+# COMMAND #7 REMOVE COURSE OFFERING FROM SEMESTER
+@semester_cli.command('remove-offering', help='Remove CourseOffering From A Semester')
+@click.option('--semester_id', '-s', prompt='Enter Semester ID', required=True)
+@click.option('--course_code', '-c', prompt='Enter Course Code', required=True)
+def remove_course_offering_command(semester_id, course_code):
+    fetched_semester = get_semester_by_id(semesterID=semester_id)
+
+    if not fetched_semester:
+        print(f"ERROR: Semester With ID: '{semester_id}' Does Not Exist.")
+        return
+
+    result = remove_course_offering(courseCode=course_code, semesterID=semester_id)
+
+    if "Error" in result:
+        print(f"ERROR: {result['Error']}")
+    else:
+        print(f"SUCCESS: {result['Message']}")
 
 app.cli.add_command(semester_cli)
 

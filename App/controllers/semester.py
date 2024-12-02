@@ -33,15 +33,11 @@ def add_semester(semesterName, academicYear, startDate, endDate):
         db.session.rollback()
         return None
 
-def update_semester(semesterName, academicYear, new_semesterName=None, new_academicYear=None, startDate=None, endDate=None):
+def update_semester(semester_id, new_semesterName=None, new_academicYear=None, startDate=None, endDate=None):
     try:
-        errors = validate_dates(startDate, endDate)
-        if errors:
-            return {"Error Message": errors}
-
-        semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
+        semester = Semester.get(semester_id)
         if not semester:
-            return {"Error Message": f"Semester {semesterName} For {academicYear} Not Found"}
+            return {"Error Message": f"Semester With ID: {semester_id} Not Found"}
 
         if new_semesterName:
             semester.semesterName = new_semesterName
@@ -75,6 +71,17 @@ def get_semester(semesterName, academicYear):
 
     except Exception as e:
         print(f"Error While Fetching Semester: {e}")
+        return None
+
+def get_semester_by_id(semesterID):
+    try:
+        semester = Semester.query.get(semesterID)
+        if semester:
+            return semester
+        else:
+            return None
+    except Exception as e:
+        print(f"Error: {e}")
         return None
 
 def list_semesters():
@@ -116,19 +123,15 @@ def get_semesters_by_academic_year(academicYear):
         print(f"Error while fetching semesters: {e}")
         return None
 
-def list_courses_for_semester(semesterName, academicYear):
+def list_courses_for_semester(semesterID):
     try:
-        errors = validate_academic_year(academicYear)
-        if errors:
-            return {"Error Message": errors}
-
-        semester = Semester.query.filter_by(semesterName=semesterName, academicYear=academicYear).first()
+        semester = Semester.query.get(semesterID)
         if not semester:
-            return {"Error Message": f"Semester {semesterName} For {academicYear} Not Found"}
+            return {"Error Message": f"Semester With ID: {semesterID} Not Found"}
 
-        course_offerings = CourseOffering.query.filter_by(semesterID=semester.semesterID).all()
+        course_offerings = CourseOffering.query.filter_by(semesterID=semesterID).all()
         if not course_offerings:
-            return {"Error Message": f"No Courses Found For {semesterName} {academicYear}"}
+            return {"Error Message": f"No Courses Found For Semester With ID: {semesterID}"}
         return course_offerings
 
     except Exception as e:

@@ -27,6 +27,31 @@ def add_course_offering(courseCode, semesterID, totalStudentsEnrolled=0):
         print(f"Error while adding course offering: {e}")
         return {"Error": "An error occurred while adding the course offering"}
 
+# Update A Course Offering Given Enrolled Students
+def update_course_offering(courseCode, semesterID, totalStudentsEnrolled):
+    try:
+        course = Course.query.get(courseCode)
+        if not course:
+            return {"Error": "Course Not Found"}
+
+        semester = Semester.query.get(semesterID)
+        if not semester:
+            return {"Error": "Semester Not Found"}
+
+        existing_offering = CourseOffering.query.filter_by(courseCode=courseCode, semesterID=semesterID).first()
+        if not existing_offering:
+            return {"Error": "Course Offering does not exist in this semester"}
+
+        existing_offering.totalStudentsEnrolled = totalStudentsEnrolled
+        db.session.commit()
+
+        return {"Message": "Course offering added successfully", "CourseOffering": existing_offering.get_json()}
+    
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error while adding course offering: {e}")
+        return {"Error": "An error occurred while adding the course offering"}
+
 # Remove Course Offering Link If Course Is No Longer Offered
 def remove_course_offering(courseCode, semesterID):
     try:
