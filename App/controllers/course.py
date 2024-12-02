@@ -1,5 +1,7 @@
 from App.database import db
 from App.models import Course
+from App.models.courseProgramme import CourseProgramme
+from App.models.programme import Programme
 
 def add_course(courseCode, courseTitle, courseCredits, courseDescription, courseLevel):
     try:
@@ -62,3 +64,19 @@ def edit_course(courseCode, new_courseTitle=None, new_courseCredits=None, new_co
         db.session.rollback()
         print(f"Error while updating course: {e}")
         return {"Error": "An error occurred while updating the course"}
+
+def get_degree_programme(courseCode):
+    try:
+        course = Course.query.filter_by(courseCode=courseCode).first()
+        if not course:
+            raise ValueError(f"No course found with courseCode: {courseCode}")
+
+        course_programme = CourseProgramme.query.filter_by(courseCode=courseCode).first()
+        if not course_programme:
+            raise ValueError(f"Course {courseCode} is not associated with any program.")
+
+        return course_programme
+
+    except Exception as e:
+        print(f"Error while fetching degree program for course {courseCode}: {e}")
+        return None 

@@ -1,7 +1,8 @@
+from .user import User
 from App.database import db
-from App.models import User 
+from flask_login import UserMixin
 
-class Admin(User):
+class Admin(User, UserMixin):
     __tablename__ = 'admin'
 
     # Attributes

@@ -1,20 +1,12 @@
 from App.database import db
 from App.models import Assessment
-from App.services.assessment import *
 
-def create_assessment(assessmentTitle, assessmentType, startDate, dueDate):
+def create_assessment(assessmentTitle, assessmentType):
     try:
         if not assessmentTitle or not assessmentType:
             return {"Error Message": "All Fields Are Required"}
 
-        date_validity = validate_dates(startDate=startDate, dueDate=dueDate)
-        if "Error Message" in date_validity:
-            return date_validity
-
-        start_date = date_validity["startDate"]
-        due_date = date_validity["dueDate"]
-
-        new_assessment = Assessment(assessmentTitle=assessmentTitle, assessmentType=assessmentType, startDate=start_date, dueDate=due_date)
+        new_assessment = Assessment(assessmentTitle=assessmentTitle, assessmentType=assessmentType)
         db.session.add(new_assessment)
         db.session.commit()
         return {"Message": "Assessment Created Successfully", "Assessment": new_assessment.get_json()}
@@ -23,6 +15,17 @@ def create_assessment(assessmentTitle, assessmentType, startDate, dueDate):
         print(f"Error Creating Assessment: {e}")
         db.session.rollback()
         return {"Error Message": "Failed To Create Assessment"}
+
+def get_assessment_by_id(assessmentID):
+    try:
+        assessment = Assessment.query.filter_by(assessmentID=assessmentID).first()
+        if assessment:
+            return assessment
+        else:
+            return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
 
 def get_assessments_by_title(assessmentTitle):
     try:

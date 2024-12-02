@@ -1,5 +1,4 @@
-import click, sys, csv
-sys.dont_write_bytecode = True
+import click, sys, csv, pytest
 from flask import Flask
 from App.models import *
 from App.controllers import *
@@ -27,7 +26,7 @@ def init():
 staff_cli = AppGroup('staff', help='Staff object commands')
 
 # COMMAND #1 - ADD STAFF
-@staff_cli.command('add', help='Add a new staff member')
+@staff_cli.command('register', help='Add a new staff member')
 @click.option('--firstname', prompt='Enter First Name', required=True)
 @click.option('--lastname', prompt='Enter Last Name', required=True)
 @click.option('--email', prompt='Enter Email', required=True)
@@ -89,7 +88,7 @@ def search_staff_profile(staffemail):
         print("\nStaff member not found!\n")
 
 # COMMAND #6 - ASSIGN STAFF TO A COURSE
-@staff_cli.command('add-course', help='Assign a staff member to a course')
+@staff_cli.command('assign-course', help='Assign a staff member to a course')
 @click.option('--staffemail', prompt='Enter Staff Email', required=True)
 @click.option('--coursecode', prompt='Enter Course Code', required=True)
 @click.option('--semestername', prompt='Enter Semester Name', required=True)
@@ -152,7 +151,6 @@ course_cli = AppGroup('course', help='Course object commands')
 @click.option('--courselevel', '-l', prompt='Enter Course Level', required=True)
 def create_course(coursecode, coursetitle, coursecredits, coursedescription, courselevel):
     result = add_course(coursecode, coursetitle, coursecredits, coursedescription, courselevel)
-
     if result:
         print(f"{result}")
     else:
@@ -206,14 +204,65 @@ def get_all_courses():
 # COMMAND #5 : ADD ASSESSMENT TO A COURSE
 @course_cli.command('add-assessment', help='Add Assessment To A Course')
 @click.option('--coursecode', '-c', prompt='Enter Course Code', required=True)
-@click.option('--assessmentcode', '-a', prompt='Enter Assessment Code', required=True)
-def add_assessment_to_course(coursecode, assessmentcode):
-    result = add_course_assessment(coursecode, assessmentcode)
+@click.option('--year', '-y', prompt="Enter Year", type=int, help="Year For The Calendar", required=True)
+@click.option('--month', '-m', prompt="Enter Month", type=int, help="Month For The Calendar", required=True)
+def add_assessment_to_course(coursecode, year, month):
 
-    if result:
-        print(f"{result}")
+    # STEP 1: Generate & Display The Schedule Calendar With Any Unavailable Dates Marked | service/assessment.py
+    print(f"\n{'Assessment Calendar':^50}")
+    print(f"{'-'*50}")
+    calendar_table = generate_calendar(year, month, coursecode)
+    print(calendar_table)
+
+    # STEP 2: Prompt For Scheduling Details
+    assessmentcode = click.prompt("\nEnter Assessment Code")
+    start_day = click.prompt("Enter Start Day", type=int)
+    start_time = click.prompt("Enter Start Time (HH:MM)", type=click.DateTime(formats=["%H:%M"]))
+
+    start_date = datetime(year, month, start_day).date()
+
+    end_day = click.prompt("Enter End Day", type=int)
+    end_time = click.prompt("Enter End Time (HH:MM)", type=click.DateTime(formats=["%H:%M"]))
+
+    end_date = datetime(year, month, end_day).date()
+
+    print("\nAvailable Clash Rules:")
+    for idx, rule in enumerate(ClashRules):
+        print(f"{idx + 1}. {rule.name} - {rule.value}")
+
+   # STEP 3: Prompt For Clash Rule To Apply
+    while True:
+        try:
+            clash_rule_input = click.prompt("\nSelect A Clash Rule (Enter Number)", type=int)
+            if 1 <= clash_rule_input <= len(ClashRules):
+                selected_rule_name = list(ClashRules)[clash_rule_input - 1].name
+                selected_rule = selected_rule_name
+                break
+            else:
+                print("Invalid Selection! You Must Choose A Valid ClashRule From The List.")
+        except ValueError:
+            print("Invalid Input! Please Enter A Number Corresponding To A ClashRule.")
+
+    # After The User Listened To Instructions
+    result = add_course_assessment(coursecode, assessmentcode, start_date, start_time, end_date, end_time, selected_rule)
+    if result.get("status") != "error":
+        success_message = result["Message"]
+        course_assessment_data = result["CourseAssessment"]
+
+        print(f"\n{'='*50}")
+        print(f"Success: {success_message}")
+        print(f"\n{'Assessment Details':^50}")
+        print(f"{'-'*50}")
+        
+        for key, value in course_assessment_data.items():
+            print(f"{key}: {value}")
+        
+        print(f"\n{'='*50}")
+    elif result.get("status") == "error":
+        error_message = result["message"]
+        print(f"{error_message}")
     else:
-        print(f"\nError: An error occurred while assigning assessment to {coursecode}\n")
+        print(f"Error: An Unexpected Error Occurred While Assigning Assessment To {coursecode}")
 
 # COMMAND #6 : REMOVE ASSESSMENT FROM A COURSE
 @course_cli.command('remove-assessment', help='Remove Assessment From A Course')
@@ -248,34 +297,46 @@ Written by Jalene Armstrong (Jalene A) - Task 07.1.3. Assessment Group Commands 
 
 assessment_cli = AppGroup('assessment', help='Assessment Object Commands')
 
-@assessment_cli.command('create_assessment', help="Creates A New Assessment For A Particular Course")
+@assessment_cli.command('create', help="Creates A New Assessment For A Particular Course")
 @click.option('--assessment_title', '-at', prompt="Enter Assessment Title", help="Title Of Assessment")
-@click.option('--assessment_type', '-aty', prompt="Enter Assessment Type", help="Type Of Assessment")
-@click.option('--start_date', '-s', prompt="Enter Start Date (YYYY-MM-DD HH:MM:SS)", 
-              type=click.DateTime(formats=["%Y-%m-%d %H:%M:%S"]), help="Start Date Of The Assessment")
-@click.option('--due_date', '-e', prompt="Enter Due Date (YYYY-MM-DD HH:MM:SS)", 
-              type=click.DateTime(formats=["%Y-%m-%d %H:%M:%S"]), help="End Date Of The Assessment")
-def create_assessment_command(assessment_title, assessment_type, start_date, due_date):
-    new_assessment = create_assessment(assessment_title, assessment_type, start_date, due_date)
+def create_assessment_command(assessment_title):
+
+    print("\nSelect Assessment Type:")
+    for idx, assessment_enum in enumerate(AssessmentTypes):
+        print(f"{idx + 1}. {assessment_enum.name} - {assessment_enum.value}")
+
+    while True:
+        try:
+            assessment_type_input = click.prompt("\nSelect Assessment Type (Enter Number)", type=int)
+            if 1 <= assessment_type_input <= len(AssessmentTypes):
+                selected_assessment_type = list(AssessmentTypes)[assessment_type_input - 1].name
+                selected_type = selected_assessment_type
+                break
+            else:
+                print("Invalid Selection! You Must Choose A Valid Assessment Type From The List.")
+        except ValueError:
+            print("Invalid Input! Please Enter A Number Corresponding To An Assessment Type.")
+
+    new_assessment = create_assessment(assessmentTitle=assessment_title, assessmentType=selected_type)
 
     if new_assessment and "Message" in new_assessment and new_assessment["Message"] == "Assessment Created Successfully":
-            print(f"SUCCESS: New Assessment '{assessment_title}' Added Successfully!.")
+            print(f"\nSUCCESS: New Assessment '{assessment_title}' - Type: {selected_type} Added Successfully!.")
     elif new_assessment and "Error Message" in new_assessment:
         print(f"ERROR: {new_assessment['Error Message']}")
     else:
         print("ERROR: Something Went Wrong. Please Try Again.")
 
-@assessment_cli.command('by_title', help="Retrieve And Displays All Assessments Based On Title")
+@assessment_cli.command('search-title', help="Retrieve And Displays All Assessments Based On Title")
 @click.option('--assessment_title', '-at', prompt="Enter Assessment Title", help="Title Of Assessment")
 def fetch_assessment_by_title_command(assessment_title):
     print(get_assessments_by_title(assessment_title))
 
-@assessment_cli.command('by_type', help="Retrieve And Displays All Assessments Based On Type")
+@assessment_cli.command('search-type', help="Retrieve And Displays All Assessments Based On Type")
 @click.option('--assessment_type', '-aty', prompt="Enter Assessment Type", help="Type Of Assessment")
 def fetch_assessment_by_type_command(assessment_type):
     print(get_assessments_by_type(assessment_type))
 
-@assessment_cli.command('list_all', help="Retrieves And List All Assessments In The Database")
+@assessment_cli.command('list-all', help="Retrieves And List All Assessments In The Database")
 @click.option('--format', '-f', prompt="Enter Desired Output Format : String or JSON", help="Output Format Of Choice : String Or JSON")
 def list_all_assessments_command(format):
     if format.lower() == 'string':
@@ -292,7 +353,7 @@ Written by Jalene Armstrong (Jalene A) - Task 07.2.1. Programme Group Commands I
 """
 programme_cli = AppGroup('programme', help='Programme Object Commands')
 
-@programme_cli.command('create_programme', help="Creates & Adds A New Programme To The Database")
+@programme_cli.command('create', help="Creates & Adds A New Programme To The Database")
 @click.option('--programme_title', '-pt', prompt="Enter Programme Title", help="Title Of Programme")
 @click.option('--programme_desc', '-pd', prompt="Enter Programme Description", help="Description Of The Programme")
 def create_programme_command(programme_title, programme_desc):
@@ -305,7 +366,25 @@ def create_programme_command(programme_title, programme_desc):
     else:
         print("ERROR: Something Went Wrong. Please Try Again.")
 
-@programme_cli.command('update_programme', help="Updates Information For An Existing Programme")
+@programme_cli.command('add-course', help='Add Course To Programme')
+@click.option('--programme_title', '-pt', prompt='Enter Programme Title', required=True)
+@click.option('--course_code', '-c', prompt='Enter Course Code', required=True)
+def add_course_to_programme_command(programme_title, course_code):
+    fetched_programme = get_programme_by_title(programmeTitle=programme_title)
+    if not fetched_programme:
+        print(f"ERROR: Programmme '{programme_title}' Does Not Exist.")
+        return
+
+    new_programme_course = add_course_to_programme(courseCode=course_code, programmeID=fetched_programme.programmeID)
+
+    if new_programme_course is None:
+        print(f"ERROR: Failed To Add Course: '{course_code}' To Programme: '{programme_title}'.")
+    elif "Error" in new_programme_course:
+        print(f"ERROR: {new_programme_course['Error']}")
+    else:
+        print(f"SUCCESS: Programme Updated Successfully!\nUpdated Details: {new_programme_course['CourseProgramme']}")
+
+@programme_cli.command('update', help="Updates Information For An Existing Programme")
 @click.option('--programme_title', '-pt', prompt="Enter Programme Title", help="Title Of The Programme")
 @click.option('--new_programme_title', '-ptnew', default=None, help="New Programme Title (Optional)")
 @click.option('--new_programme_desc', '-pdnew', default=None, help="New Programme Description (Optional)")
@@ -336,7 +415,7 @@ def update_programme_command(programme_title, new_programme_title, new_programme
     else:
         print(f"SUCCESS: Programme Updated Successfully!\nUpdated Details: {updated_programme['Programme']}")
 
-@programme_cli.command('list_programmes', help="Retrieve And Lists All Programmes In The Database")
+@programme_cli.command('list-all', help="Retrieve And Lists All Programmes In The Database")
 @click.argument("format", default="json")
 def list_programmes_command(format):
     if format == 'string':
@@ -344,7 +423,7 @@ def list_programmes_command(format):
     else:
         print(list_programmes_json())
 
-@programme_cli.command('list_programme_courses', help="List All Courses For A Specific Programme")
+@programme_cli.command('list-courses', help="List All Courses For A Specific Programme")
 @click.option('--programme_title', '-pt', prompt="Enter Programme Title", help="Title Of The Programme")
 def list_programme_courses_command(programme_title):
     print(list_programme_courses(programme_title))
@@ -358,7 +437,7 @@ Written by Jalene Armstrong (Jalene A) - Task 07.2.2. Semester Group Commands Im
 """
 semester_cli = AppGroup('semester', help='Semester Object Commands')
 
-@semester_cli.command('add_semester', help="Creates Adds A New Semester")
+@semester_cli.command('add', help="Creates Adds A New Semester")
 @click.option('--semester_name', '-n', prompt="Enter Semester Name", help="Name Of The Semester")
 @click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
 @click.option('--start_date', '-s', prompt="Enter Start Date (YYYY-MM-DD)", type=click.DateTime(formats=["%Y-%m-%d"]), help="Start Date Of The Semester")
@@ -376,7 +455,7 @@ def add_semester_command(semester_name, academic_year, start_date, end_date):
     else:
         print("ERROR: Something Went Wrong. Please Try Again.")
 
-@semester_cli.command('fetch_semester', help="Gets Details For A Specific Semester")
+@semester_cli.command('search', help="Gets Details For A Specific Semester")
 @click.option('--semester_name', '-n', prompt="Enter Semester Name", help="Name Of The Semester")
 @click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
 def fetch_semester_command(semester_name, academic_year):
@@ -389,7 +468,7 @@ def fetch_semester_command(semester_name, academic_year):
     else:
         print("ERROR: Failed To Fetch Requested Semester.")
 
-@semester_cli.command('update_semester', help="Updates Information For An Existing Semester")
+@semester_cli.command('update', help="Updates Information For An Existing Semester")
 @click.option('--semester_name', '-s', prompt="Enter Semester Name", help="Name Of The Semester")
 @click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
 @click.option('--new_semester_name', '-snew', default=None, help="New Semester Name (Optional)")
@@ -429,7 +508,7 @@ def update_semester_command(semester_name, academic_year, new_semester_name, new
     else:
         print(f"SUCCESS: Semester '{semester_name}' Updated Successfully!\nUpdated Details: {updated_semester['Semester Updated']}")
 
-@semester_cli.command('list_semesters', help="Retrieve And Lists All Semesters In The Database")
+@semester_cli.command('list-all', help="Retrieve And Lists All Semesters In The Database")
 @click.argument("format", default="json")
 def list_semesters_command(format):
     if format == 'string':
@@ -437,12 +516,12 @@ def list_semesters_command(format):
     else:
         print(list_semesters_json())
 
-@semester_cli.command('list_year_semesters', help="Retrieve And Lists All Semesters In The Database Based On Academic Year")
+@semester_cli.command('list-year', help="Retrieve And Lists All Semesters In The Database Based On Academic Year")
 @click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
 def list_year_semesters_command(academic_year):
     print(get_semesters_by_academic_year(academic_year))
 
-@semester_cli.command('list_semester_courses', help="List All Courses For A Specific Semester")
+@semester_cli.command('list-courses', help="List All Courses For A Specific Semester")
 @click.option('--semester_name', '-s', prompt="Enter Semester  Name", help="Name Of The Semester")
 @click.option('--academic_year', '-a', prompt="Enter Academic Year (YYYY/YYYY)", help="Academic Year Of The Semester")
 def list_semester_courses_command(semester_name, academic_year):
@@ -458,7 +537,7 @@ Written by Jalene Armstrong (Jalene A) - Task 07.2.3. Admin Group Commands Imple
 
 admin_cli = AppGroup('admin', help='Admin Object Commands')
 
-@admin_cli.command('create_admin', help="Creates An Admin Account")
+@admin_cli.command('create', help="Creates An Admin Account")
 @click.option("--firstname", "-f", prompt="Enter Admin First Name", required=True, help="Admin First Name")
 @click.option("--lastname", "-l", prompt="Enter Admin Last Name", required=True, help="Admin Last Name")
 @click.option("--email", "-e", prompt="Enter Admin Email", required=True, help="Admin Email Address")
@@ -475,7 +554,7 @@ def create_admin_command(firstname, lastname, email, password):
     else:
         print(f"ERROR: Failed To Create Admin '{firstname} {lastname}'.")
 
-@admin_cli.command('register_staff', help="Registers A Staff Account To The System")
+@admin_cli.command('register-staff', help="Registers A Staff Account To The System")
 @click.option("--firstname", "-f", prompt="Enter Staff First Name", required=True, help="Staff First Name")
 @click.option("--lastname", "-l", prompt="Enter Staff Last Name", required=True, help="Staff Last Name")
 @click.option("--email", "-e", prompt="Enter Staff Email", required=True, help="Staff Email Address")
@@ -492,7 +571,7 @@ def register_staff_command(firstname, lastname, email, password):
     else:
         print(f"ERROR: Failed To Register Staff '{firstname} {lastname}'.")
 
-@admin_cli.command('delete_admin', help="Deletes An Admin Account")
+@admin_cli.command('delete', help="Deletes An Admin Account")
 @click.option("--email", "-e", prompt="Enter Email Of Admin To Delete", required=True, help="Admin Email Address")
 def delete_admin_command(email):
     admin = get_admin_by_email(email)
@@ -509,7 +588,7 @@ def delete_admin_command(email):
     else:
         print(f"ERROR: Failed To delete Admin With Email '{email}'.")
 
-@admin_cli.command('update_admin', help="Updates An Existing Admin Account")
+@admin_cli.command('update', help="Updates An Existing Admin Account")
 @click.option('--current_email', '-c', prompt="Enter Email Of Admin To Edit", help="Enter Current Admin Email", required=True)
 @click.option('--firstname', '-f', default=None, help="Enter New First Name (Optional)")
 @click.option('--lastname', '-l', default=None, help="Enter New Last Name (Optional)")
@@ -547,7 +626,7 @@ def update_admin_command(current_email, firstname, lastname, password, email):
     else:
         print("ERROR: Failed To Update Admin. Ensure The Current Email Exists And New Email Isn't Already In Use.")
 
-@admin_cli.command('list_admins', help="Retrieve And Lists All Admins In The Database")
+@admin_cli.command('list-all', help="Retrieve And Lists All Admins In The Database")
 @click.argument("format", default="json")
 def list_admins_command(format):
     if format == 'string':
@@ -556,3 +635,80 @@ def list_admins_command(format):
         print(get_all_admin_users_json())
 
 app.cli.add_command(admin_cli)
+
+'''
+Test Commands
+Written by Daniel Young (DaNJO-Y) - Integration (Task 08.2.1 - Task 08.2.5)
+Modified by Jalene Armstrong (JaleneA) - Unit & App (Task 09.1. Post-CLI and Post-Tests Cleanup)
+'''
+
+test = AppGroup('test', help='Testing Commands')
+
+@test.command("user", help="Run User Tests")
+@click.argument("type", default="all")
+def user_tests_command(type):
+    if type == "int":
+        sys.exit(pytest.main(["-k", "UserIntegrationTests"]))
+    elif type == "unit":
+        sys.exit(pytest.main(["-k", "UserUnitTest"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+@test.command("staff", help="Run Staff Tests")
+@click.argument("type", default="all")
+def staff_tests_command(type):
+    if type == "int":
+        sys.exit(pytest.main(["-k", "StaffIntegrationTests"]))
+    elif type == "unit":
+        sys.exit(pytest.main(["-k", "StaffUnitTest"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+@test.command("admin", help="Run Admin Tests")
+@click.argument("type", default="all")
+def admin_tests_command(type):
+    if type == "int":
+        sys.exit(pytest.main(["-k", "AdminIntegrationTests"]))
+    elif type == "unit":
+        sys.exit(pytest.main(["-k", "AdminUnitTest"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+@test.command("course", help="Run Course Tests")
+@click.argument("type", default="all")
+def course_tests_command(type):
+    if type == "int":
+        sys.exit(pytest.main(["-k", "CourseIntegrationTests"]))
+    elif type == "unit":
+        sys.exit(pytest.main(["-k", "CourseUnitTest"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+@test.command("semester", help="Run Semester Tests")
+@click.argument("type", default="all")
+def semester_tests_command(type):
+    if type == "int":
+        sys.exit(pytest.main(["-k", "SemesterIntegrationTests"]))
+    elif type == "unit":
+        sys.exit(pytest.main(["-k", "SemesterUnitTest"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+# Unit Tests Only
+@test.command("programme", help="Run Programme Tests")
+@click.argument("type", default="all")
+def programme_tests_command(type):
+    if type == "unit":
+        sys.exit(pytest.main(["-k", "ProgrammeUnitTest"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+@test.command("assessment", help="Run Assessment Tests")
+@click.argument("type", default="all")
+def assessment_tests_command(type):
+    if type == "unit":
+        sys.exit(pytest.main(["-k", "AssessmentUnitTest"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+app.cli.add_command(test)

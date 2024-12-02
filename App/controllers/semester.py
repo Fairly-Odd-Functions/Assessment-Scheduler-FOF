@@ -35,7 +35,7 @@ def add_semester(semesterName, academicYear, startDate, endDate):
 
 def update_semester(semesterName, academicYear, new_semesterName=None, new_academicYear=None, startDate=None, endDate=None):
     try:
-        errors = validate_dates(academicYear, startDate, endDate)
+        errors = validate_dates(startDate, endDate)
         if errors:
             return {"Error Message": errors}
 

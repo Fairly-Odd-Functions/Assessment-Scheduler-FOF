@@ -1,37 +1,54 @@
+from App.controllers.clashDetection import validate_assessment_clash
 from App.database import db
+from App.services.assessment import *
 from App.models import Course, Assessment, CourseAssessment
 
 # Link New Course Assessment To Relevant Code
-def add_course_assessment(courseCode, assessmentID):
+def add_course_assessment(courseCode, assessmentID, startDate, startTime, endDate, endTime, clashRule=None):
     try:
         course = Course.query.get(courseCode)
         if not course:
-            return {"Error": "Course with this courseCode does not exist"}
+            return {"Error": "Course With This CourseCode Does Not Exist"}
 
         assessment = Assessment.query.get(assessmentID)
         if not assessment:
-            return {"Error": "Assessment with this assessmentID does not exist"}
+            return {"Error": "Assessment With This AssessmentID Does Not Exist"}
 
-        existing_association = CourseAssessment.query.filter_by(courseCode=courseCode, assessmentID=assessmentID).first()
+        date_validation = validate_dates(startDate, endDate)
+        if "Error Message" in date_validation:
+            return {"Error": date_validation["Error Message"]}
+
+        time_validation = validate_times(startTime, endTime)
+        if "Error Message" in time_validation:
+            return {"Error": time_validation["Error Message"]}
+
+        existing_association = CourseAssessment.query.filter_by(courseCode=courseCode,
+                                                                assessmentID=assessmentID).first()
         if existing_association:
-            return {"Error": "Assessment is already associated with this course"}
+            return {"Error": "Assessment Is Already Associated With This Course"}
 
         new_course_assessment = CourseAssessment(
             courseCode=courseCode,
             assessmentID=assessmentID,
-            startDate=assessment.startDate,
-            dueDate=assessment.dueDate
+            startDate=date_validation["startDate"],
+            endDate=date_validation["endDate"],
+            startTime=time_validation["startTime"],
+            endTime=time_validation["endTime"],
+            clashRule=clashRule
         )
+
+        validation_result = validate_assessment_clash(new_course_assessment)
+        if validation_result["status"] == "error":
+            return validation_result
 
         db.session.add(new_course_assessment)
         db.session.commit()
-
-        return {"Message": "Course and Assessment successfully associated", "CourseAssessment": new_course_assessment.get_json()}
+        return {"Message": "Course And Assessment Successfully Associated",
+                "CourseAssessment": new_course_assessment.get_json()}
 
     except Exception as e:
         db.session.rollback()
-        print(f"Error while adding course assessment: {e}")
-        return {"Error": "An error occurred while associating the course with the assessment"}
+        return {"Error": "An Error Occurred While Associating The Course With The Assessment"}
 
 # List All Assessments For A Specific Course (Throughout Time)
 def list_course_assessments(courseCode):
@@ -39,12 +56,12 @@ def list_course_assessments(courseCode):
         course_assessments = CourseAssessment.query.filter_by(courseCode=courseCode).all()
         
         if not course_assessments:
-            return {"Message": f"No assessments found for course {courseCode}"}
+            return {"Message": f"No Assessments Found For Course {courseCode}"}
         return {"CourseAssessments": [assessments.get_json() for assessments in course_assessments]}
 
     except Exception as e:
-        print(f"Error while listing course assessments: {e}")
-        return {"Error": "An error occurred while fetching course assessments"}
+        print(f"Error While Listing Course Assessments: {e}")
+        return {"Error": "An Error Occurred While Fetching Course Assessments"}
 
 # Get Specific Course Assessment Via AssessmentID
 def get_course_assessment(courseAssessmentID):
@@ -52,25 +69,30 @@ def get_course_assessment(courseAssessmentID):
         course_assessment = CourseAssessment.query.get(courseAssessmentID)
         
         if not course_assessment:
-            return {"Error": "CourseAssessment not found"}
+            return {"Error": "CourseAssessment Not Found"}
         return {"CourseAssessment": course_assessment.get_json()}
 
     except Exception as e:
-        print(f"Error while fetching course assessment: {e}")
-        return {"Error": "An error occurred while fetching the course assessment"}
+        print(f"Error While Fetching Course Assessment: {e}")
+        return {"Error": "An Error Occurred While Fetching The Course Assessment"}
 
-#Get Specific courseAssesment object via courseCode and assessmentID
-def get_course_assessment_by_code_and_id(courseCode, assessmentID):
+# Get Specific courseAssesment
+def get_course_assessment_by_code_and_id(courseCode, assessmentID, startDate, startTime, endDate, endTime):
     try:
-        course_assessment = CourseAssessment.query.filter_by(courseCode=courseCode, assessmentID=assessmentID).first()
-        
+        course_assessment = CourseAssessment.query.filter_by(courseCode=courseCode, 
+                                                             assessmentID=assessmentID,
+                                                             startDate=startDate,
+                                                             startTime=startTime,
+                                                             endDate=endDate,
+                                                             endTime=endTime).first()
+
         if not course_assessment:
-            return {"Error": "CourseAssessment not found"}
+            return {"Error": "CourseAssessment Not Found"}
         return course_assessment
 
     except Exception as e:
-        print(f"Error while fetching course assessment: {e}")
-        return {"Error": "An error occurred while fetching the course assessment"}
+        print(f"Error While Fetching Course Assessment: {e}")
+        return {"Error": "An Error Occurred While Fetching The Course Assessment"}
 
 # Unlink CourseAssessment From Course | Deletes The Associated Assessment As Well
 def delete_course_assessment(courseAssessmentID):
@@ -78,7 +100,7 @@ def delete_course_assessment(courseAssessmentID):
         course_assessment = CourseAssessment.query.get(courseAssessmentID)
 
         if not course_assessment:
-            return {"Error": "CourseAssessment not found"}
+            return {"Error": "CourseAssessment Not Found"}
 
         assessment = course_assessment.assessment
 
@@ -87,9 +109,18 @@ def delete_course_assessment(courseAssessmentID):
 
         db.session.delete(course_assessment)
         db.session.commit()
-        return {"Message": "CourseAssessment and associated Assessment deleted"}
+        return {"Message": "CourseAssessment And Associated Assessment Deleted"}
 
     except Exception as e:
         db.session.rollback()
-        print(f"Error while deleting course assessment: {e}")
-        return {"Error": "An error occurred while deleting the course assessment"}
+        print(f"Error While Deleting Course Assessment: {e}")
+        return {"Error": "An Error Occurred While Deleting The Course Assessment"}
+
+# Get All Scheduled Assessments For A Specific Course Given A Date Range (Too Tired For Error Handling)
+def get_scheduled_assessments(courseCode, start_date, end_date):
+    assessments = CourseAssessment.query.filter(
+        CourseAssessment.courseCode == courseCode,
+        CourseAssessment.startDate >= start_date,
+        CourseAssessment.endDate <= end_date
+    ).all()
+    return assessments
