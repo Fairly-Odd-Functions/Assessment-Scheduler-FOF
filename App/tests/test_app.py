@@ -484,12 +484,29 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         result = validate_by_assessment_type(assessmentObject1, date(2025, 1, 15), 15)
         print(result)
 
-
-
-
+    '''Passing but not working as expected - it is saying not clash detected but, it is violating the validate_by_assessment_type_clash
+    def test_integration_22_validate_assessment_clash(self):
+        create_programme("BSc. Computer Science", "The study of computers and computing - Google")
+        add_semester("Semester 1", "2024/2025", date(2024, 9, 2), date(2024, 12 ,20))
         
+        add_course("COMP 1603", "Computer Programming III", 3, "Introduction to programming", 1)
+        add_course("COMP 1604", "Mathematics for Computing ", 3, "Welcome to Mathematics 101", 1)
         
-    
-    
+        add_course_to_programme("COMP 1603", 1)
+        add_course_to_programme("COMP 1604", 1)
+        
+        create_assessment("Course Work Exam 1", AssessmentTypes.COURSEWORK)
+        assessmentObject1 = Assessment("Course Work Exam 1", AssessmentTypes.COURSEWORK)
+        
+        create_assessment("Quiz 3", AssessmentTypes.QUIZ)
+        assessmentObject2 = Assessment("Quiz 3", AssessmentTypes.QUIZ)
+        
+        add_course_assessment("COMP 1603", 1, date(2025, 1, 15), time(12,00,00,00, None), date(2025, 1, 30), time(23,00,00,00, None), clashRule= None)
+        add_course_assessment("COMP 1604", 2, date(2025, 1, 20), time(12,00,00,00, None), date(2025, 2, 7), time(23,00,00,00, None), clashRule=None)
+        
+        newCourseAssessment = CourseAssessment("COMP 1603", 1, date(2025, 1, 15), date(2025, 1, 30), time(12,00,00,00, None), time(23,00,00,00, None), clashRule = None)
 
-      
+        result = validate_assessment_clash(newCourseAssessment)
+        print(result)
+
+    '''
