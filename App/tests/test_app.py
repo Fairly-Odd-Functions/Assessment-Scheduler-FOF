@@ -390,7 +390,7 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         print(result)
 
 
-    ''' Not working as expected - It has two assessments that are not overlapping but it's showing a clash, it looks like it is only paying attention to the threshold value
+    ''' Passing but not working as expected - It has two assessments that are not overlapping but it's showing a clash, it looks like it is only paying attention to the threshold value
     def test_integration_18_validate_by_student_overlap_no_clash(self):
         create_programme("BSc. Computer Science", "The study of computers and computing - Google")
         add_semester("Semester 2", "2024/2025", date(2025, 1, 13), date(2025,5,25))
@@ -408,7 +408,7 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         create_assessment("Assignment 2", AssessmentTypes.ASSIGNMENT)
         
         add_course_assessment("COMP 1603", 1, date(2025, 1, 20), time(12,00,00,00, None), date(2025, 1, 28), time(23,00,00,00, None), clashRule=None)
-        #add_course_assessment("COMP 1604", 2, date(2025, 2, 4), time(12,00,00,00, None), date(2025, 2, 16), time(23,00,00,00, None), clashRule=None)
+        add_course_assessment("COMP 1604", 2, date(2025, 2, 4), time(12,00,00,00, None), date(2025, 2, 16), time(23,00,00,00, None), clashRule=None)
         
         result = validate_by_student_overlap("COMP 1603", date(2025, 1, 20), date(2025, 1, 28), 75)
         print(result)
@@ -418,18 +418,76 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
     def test_integration_19_validate_by_student_overlap_clash(self):
         create_programme("BSc. Computer Science", "The study of computers and computing - Google")
         add_semester("Semester 2", "2024/2025", date(2025, 1, 13), date(2025,5,25))
+        
         add_course("COMP 1603", "Computer Programming III", 3, "Introduction to programming", 1)
         add_course("COMP 1604", "Mathematics for Computing ", 3, "Welcome to Mathematics 101", 1)
+        
         add_course_offering("COMP 1603", 1, totalStudentsEnrolled= 350)
         add_course_offering("COMP 1604", 1, totalStudentsEnrolled= 250)
+        
         add_course_to_programme("COMP 1603", 1)
         add_course_to_programme("COMP 1604", 1)
+        
         create_assessment("Assignment 1", AssessmentTypes.ASSIGNMENT)
         create_assessment("Assignment 2", AssessmentTypes.ASSIGNMENT)
+        
         add_course_assessment("COMP 1603", 1, date(2025, 1, 20), time(12,00,00,00, None), date(2025, 2, 11), time(23,00,00,00, None), clashRule=None)
         add_course_assessment("COMP 1604", 2, date(2025, 1, 25), time(12,00,00,00, None), date(2025, 2, 16), time(23,00,00,00, None), clashRule=None)
+        
         result = validate_by_student_overlap("COMP 1603", date(2025, 1, 20), date(2025, 2, 11), 75)
         print(result)
+        
+    
+    ''' Two assessments are scheduled but but are not overlapping but I'm getting a clash - It is passing but not working as expected
+    def test_integration_20_validate_by_assessment_type(self):
+        create_programme("BSc. Computer Science", "The study of computers and computing - Google")
+        add_semester("Semester 2", "2024/2025", date(2025, 1, 13), date(2025,5,25))
+        
+        add_course("COMP 1603", "Computer Programming III", 3, "Introduction to programming", 1)
+        add_course("COMP 1604", "Mathematics for Computing ", 3, "Welcome to Mathematics 101", 1)
+        
+        add_course_to_programme("COMP 1603", 1)
+        add_course_to_programme("COMP 1604", 1)
+        
+        create_assessment("Course Work Exam 1", AssessmentTypes.COURSEWORK)
+        assessmentObject1 = Assessment("Course Work Exam 1", AssessmentTypes.COURSEWORK)
+        
+        create_assessment("Quiz 3", AssessmentTypes.QUIZ)
+        assessmentObject2 = Assessment("Quiz 3", AssessmentTypes.QUIZ)
+        
+        add_course_assessment("COMP 1603", 1, date(2025, 1, 15), time(12,00,00,00, None), date(2025, 1, 30), time(23,00,00,00, None), clashRule=None)
+        add_course_assessment("COMP 1604", 2, date(2025, 3, 1), time(12,00,00,00, None), date(2025, 2, 17), time(23,00,00,00, None), clashRule=None)
+        
+        result = validate_by_assessment_type(assessmentObject1, date(2025, 1, 15), 15)
+        print(result)
+        '''
+
+    def test_integration_21_validate_by_assessment_type_clash(self):
+        create_programme("BSc. Computer Science", "The study of computers and computing - Google")
+        add_semester("Semester 2", "2024/2025", date(2025, 1, 13), date(2025,5,25))
+        
+        add_course("COMP 1603", "Computer Programming III", 3, "Introduction to programming", 1)
+        add_course("COMP 1604", "Mathematics for Computing ", 3, "Welcome to Mathematics 101", 1)
+        
+        add_course_to_programme("COMP 1603", 1)
+        add_course_to_programme("COMP 1604", 1)
+        
+        create_assessment("Course Work Exam 1", AssessmentTypes.COURSEWORK)
+        assessmentObject1 = Assessment("Course Work Exam 1", AssessmentTypes.COURSEWORK)
+        
+        create_assessment("Quiz 3", AssessmentTypes.QUIZ)
+        assessmentObject2 = Assessment("Quiz 3", AssessmentTypes.QUIZ)
+        
+        add_course_assessment("COMP 1603", 1, date(2025, 1, 15), time(12,00,00,00, None), date(2025, 1, 30), time(23,00,00,00, None), clashRule=None)
+        add_course_assessment("COMP 1604", 2, date(2025, 1, 20), time(12,00,00,00, None), date(2025, 2, 7), time(23,00,00,00, None), clashRule=None)
+        
+        result = validate_by_assessment_type(assessmentObject1, date(2025, 1, 15), 15)
+        print(result)
+
+
+
+
+        
         
     
     
