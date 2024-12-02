@@ -3,7 +3,7 @@ from flask import Flask
 from App.models import *
 from App.controllers import *
 from datetime import datetime
-from App.main import create_app
+from App.main import create_app, parse_users, parse_courses, parse_assessments, parse_programmes, parse_semesters
 from App.database import db, create_db, get_migrate
 from flask.cli import with_appcontext, AppGroup
 from App.models import *
@@ -18,6 +18,40 @@ migrate = get_migrate(app)
 def init():
     initialize()
     print('Database Initialized!')
+
+"""
+CSV Commands 
+Written by Jalene Armstrong (Jalene A) - Task 07.4. CLI Commands Polishing
+"""
+
+csv_cli = AppGroup('csv', help='Commands To Easily Populate Models With Data')
+
+@csv_cli.command('users', help="Populate The User Model With Data")
+def user_csv():
+    result = parse_users()
+    print(result)
+
+@csv_cli.command('courses', help="Populate The Course Model With Data")
+def course_csv():
+    result = parse_courses()
+    print(result)
+
+@csv_cli.command('assessments', help="Populate The Assessment Model With Data")
+def assessment_csv():
+    result = parse_assessments()
+    print(result)
+
+@csv_cli.command('programmes', help="Populate The Programme Model With Data")
+def programme_csv():
+    result = parse_programmes()
+    print(result)
+
+@csv_cli.command('semesters', help="Populate The Semester Model With Data")
+def semester_csv():
+    result = parse_semesters()
+    print(result)
+
+app.cli.add_command(csv_cli)
 
 '''
 |   Staff Group Commands
@@ -688,7 +722,6 @@ def remove_course_offering_command(semester_id, course_code):
 
 app.cli.add_command(semester_cli)
 
-
 """
 Admin Commands 
 Written by Jalene Armstrong (Jalene A) - Task 07.2.3. Admin Group Commands Implementation
@@ -771,14 +804,25 @@ def update_admin_command(current_email, firstname, lastname, password, email):
     else:
         print("ERROR: Failed To Update Admin. Ensure The Current Email Exists And New Email Isn't Already In Use.")
 
-# COMMAND #4 : LIST ALL ADMIN
-@admin_cli.command('list-all', help="Retrieve And Lists All Admins In The Database")
-@click.argument("format", default="json")
-def list_admins_command(format):
-    if format == 'string':
-        print(get_all_admin_users())
+# COMMAND #4 - SEARCH STAFF PROFILE
+@admin_cli.command('search', help='Search For An Admin')
+@click.option('--admin_email', prompt='Enter Admin Email', required=True)
+def search_admin_command(admin_email):
+    admin = get_admin_by_email(adminEmail=admin_email)
+    if admin:
+        print(f"{admin}")
     else:
-        print(get_all_admin_users_json())
+        print("Admin Not Found Or User is Not An Admin.")
+
+# COMMAND #5 : LIST ALL ADMIN
+@admin_cli.command('list-all', help="Retrieve And Lists All Admins In The Database")
+def list_admins_command():
+    adminMembers = get_all_admin_users()
+    if adminMembers:
+        for admin in adminMembers:
+            print(admin)
+    else:
+        print("No Admin Members Found")
 
 app.cli.add_command(admin_cli)
 

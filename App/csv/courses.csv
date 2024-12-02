@@ -1,0 +1,11 @@
+courseCode;courseTitle;courseCredits;courseDescription;courseLevel
+CS101;Introduction to Computer Science;3;Introduction to programming and computer systems;1
+CS201;Data Structures and Algorithms;4;Study of data structures and algorithm analysis;2
+CS301;Operating Systems;3;In-depth study of operating system concepts;3
+CS401;Software Engineering;3;Design and development of software systems;4
+BA101;Introduction to Business;3;Basics of business principles and practices;1
+BA201;Marketing Principles;3;Study of marketing techniques and strategies;2
+ME101;Engineering Mechanics;3;Introduction to mechanics and material properties;1
+EE101;Circuit Theory;3;Study of basic electrical circuits and components;1
+DS101;Introduction to Data Science;3;Overview of data science and its tools;1
+PSY101;Introduction to Psychology;3;Basics of psychology and human behavior;1
