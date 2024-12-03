@@ -123,6 +123,35 @@ def update_course_action():
         print (f"Error While Updating Course: {e}")
         return jsonify(error = "An Error Occurred While Updating Course"), 500
 
+# 03 : Get Course By Code*
+@admin_views.route('/search/<str:courseCode>', methods=['GET'])
+@jwt_required(Admin)
+def search_course_action(courseCode):
+    try:
+        #if not is_valid_course_code(courseCode):
+        #    return jsonify(error = "Invaild Course Code, Please Try Again."), 400
+        
+        course = get_course_by_code(courseCode)
+        if not course:
+            return jsonify(error= f"Course With ID: {courseCode} Not Found"), 404
+        
+        return jsonify(course), 200
+    
+    except Exception as e:
+        return jsonify(error = f"An Error Occurred While Searching for Course With Code: {courseCode}"), 500
+
+# 04 : List All Courses*
+@admin_views.route('listCourses', methods=['GET'])
+@jwt_required(Admin)
+def list_course_action():
+    try:
+        
+        courseList = list_courses()
+        return jsonify(courseList), 200
+
+    except Exception as e:
+        return jsonify(error = f"An Error Occurred While Listing Courses"), 500
+
 
 """
 Semester [2]
