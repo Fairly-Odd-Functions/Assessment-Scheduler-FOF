@@ -6,6 +6,8 @@ from sqlalchemy import not_
 from App.controllers import Staff
 from App.controllers import Course, Semester
 from App.controllers import CourseAssessment
+from App.controllers.clashDetection import validate_assessment_clash
+from App.controllers.courseAssessment import add_course_assessment
 from App.database import db
 from App.models.assessment import Assessment
 import json
@@ -21,57 +23,33 @@ staff_views = Blueprint('staff_views', __name__, template_folder='../templates')
 
 """
 Special Feature - Demonstrated Via Scheduling Assessments
-Written By
+Written By Jalene Armstrong (JaleneA) - Task 10.4. Implement API View For Staff (Main)
 """
 
-# Placeholder Names For Now
-
-# 01 : Schedule A Course Assessment *
-@staff_views.route('/scheduleCourseAssessemntNoClash', methods=['POST'])
+# 01 : Schedule A Course Assessment
+@staff_views.route('/scheduleAssessment', methods=['POST'])
 @jwt_required(Staff)
 def schedule_course_assessment_action():
-    # course = request.form.get('myCourses')
-    # asmType = request.form.get('AssessmentType')
-    # startDate = request.form.get('startDate')
-    # endDate = request.form.get('endDate')
-    # startTime = request.form.get('startTime')
-    # endTime = request.form.get('endTime')
+    courseCode = request.form.get('courseCode')
+    assessmentID = request.form.get('assessmentID')
+    startDate = request.form.get('startDate')
+    startTime = request.form.get('startTime')
+    endDate = request.form.get('endDate')
+    endTime = request.form.get('endTime')
+    clashRule = request.form.get('clashRule')
+
+    result = add_course_assessment(courseCode, assessmentID, startDate, startTime, endDate, endTime, clashRule)
+
+    if "Error" in result:
+        return jsonify({"error": result["Error"]}), 400
+
+    if result.get("status") == "error":
+        return jsonify(result), 400
     
-    # if startDate=='' or endDate=='' or startTime=='' or endTime=='':
-    #     startDate=None
-    #     endDate=None
-    #     startTime=None
-    #     endTime=None
-
-    # newAsm = add_CourseAsm(course, asmType, startDate, endDate, startTime, endTime, False)  
-    # if newAsm.startDate:
-    #     clash=detect_clash(newAsm.id)
-    #     if clash:
-    #         newAsm.clashDetected = True
-    #         db.session.commit()
-    #         flash("Clash detected! The maximum amount of assessments for this level has been exceeded.")
-    #         time.sleep(1)
-
-    # return redirect(url_for('staff_views.get_assessments_page'))
-    pass
-
-# Validate By Degree
-@staff_views.route("/scheduleCourseAssessemntDegreeClash", methods=["GET"])
-@jwt_required(Staff)
-def degree_clash_action():
-    pass
-
-# Validate By Student Overlap
-@staff_views.route("/scheduleCourseAssessemntOverlapClash", methods=["GET"])
-@jwt_required(Staff)
-def overlap_clash_action():
-    pass
-
-# Validate By Assessment Type
-@staff_views.route("/scheduleCourseAssessemntTypeClash", methods=["GET"])
-@jwt_required(Staff)
-def type_clash_action():
-    pass
+    return jsonify({
+        "message": result["Message"],
+        "courseAssessment": result["CourseAssessment"]
+    }), 201
 
 """
 Assessment
