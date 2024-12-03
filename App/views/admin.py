@@ -1,10 +1,10 @@
 import os, csv
+from App.controllers import *
 from App.database import db
 from App.models import Admin
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask_jwt_extended import jwt_required
-from App.controllers import Course, CourseAssessment
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 # IMPORTS TO CLEAN UP
 
@@ -81,7 +81,7 @@ def add_course_action():
         level = request.form.get('level')
         semester = request.form.get('semester')
         numAssessments = request.form.get('numAssessments')
-        course = add_Course(courseCode,title,description,level,semester,numAssessments)
+        course = add_course(courseCode,title,description,level,semester,numAssessments)
         pass
 
 # 02 : Update Course *
@@ -97,8 +97,8 @@ def update_course_action():
         numAssessments = request.form.get('assessment')
         # programme = request.form.get('programme')
 
-        delete_Course(get_course(courseCode)) # Woah that's extreme
-        add_Course(courseCode, title, description, level, semester, numAssessments)
+        delete_course_assessment(get_course(courseCode)) # Woah that's extreme
+        add_course_staff(courseCode, title, description, level, semester, numAssessments)
         flash("Course Updated Successfully!") 
     pass
 
