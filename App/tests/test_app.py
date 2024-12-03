@@ -365,32 +365,52 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
     def test_integration_16_validate_by_degree_no_clash(self):
         add_course("COMP 1601", "Computer Programming I", 3, "Introduction to programming", 1)
         add_course("COMP 1602", "Computer Programming II", 3, "Introduction to programming", 1)
+        
         create_programme("BSc. Computer Science", "The study of computers and computing - Google")
+        
         add_course_to_programme("COMP 1601", 1)
-        add_course_to_programme("COMP 1603", 1)
+        add_course_to_programme("COMP 1602", 1)
+        
         create_assessment("Assignment 1", AssessmentTypes.ASSIGNMENT)
         create_assessment("Assignment 2", AssessmentTypes.ASSIGNMENT)
-        add_course_assessment("COMP 1601", 1, date(2024, 9, 10), time(12,00,00,00, None), date(2024, 10, 11), time(23,00,00,00, None), clashRule=None)
-        add_course_assessment("COMP 1602", 2, date(2024, 10, 15), time(12,00,00,00, None), date(2024, 11, 14), time(23,00,00,00, None), clashRule=None)
-        result = validate_by_degree("COMP 1601", date(2024, 9, 10), time(12,00,00,00, None), date(2024, 10, 11), time(23,00,00,00, None))
-        print(result)
+        
+        assessment1 = CourseAssessment("COMP 1601", 1, date(2024, 9, 10), date(2024, 10, 11), time(12,0), time(23,0), clashRule=None)
+        assessment2 = CourseAssessment("COMP 1602", 2, date(2024, 10, 15),date(2024, 11, 14), time(12,0), time(23,0), clashRule=None)
+        db.session.add(assessment1)
+        db.session.add(assessment2)
+        db.session.commit()
 
-    #Two assessments for two different courses schedules are overlapping 
+        result = validate_by_degree("COMP 1601", date(2024, 9, 10), time(12,0), date(2024, 10, 11), time(23,0))
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["message"], "No Assessment Clashes Found In The Same Programme.")
+
+    #Two assessments for two different courses, schedules are overlapping 
     def test_integration_17_validate_by_degree_clash(self):
         add_course("COMP 1601", "Computer Programming I", 3, "Introduction to programming", 1)
         add_course("COMP 1602", "Computer Programming II", 3, "Introduction to programming", 1)
+        
         create_programme("BSc. Computer Science", "The study of computers and computing - Google")
+        
         add_course_to_programme("COMP 1601", 1)
         add_course_to_programme("COMP 1602", 1)
+        
         create_assessment("Assignment 1", AssessmentTypes.ASSIGNMENT)
         create_assessment("Assignment 2", AssessmentTypes.ASSIGNMENT)
-        add_course_assessment("COMP 1601", 1, date(2024, 9, 10), time(12,00,00,00, None), date(2024, 10, 11), time(23,00,00,00, None), clashRule=None)
-        add_course_assessment("COMP 1602", 2, date(2024, 9, 20), time(12,00,00,00, None), date(2024, 10, 21), time(23,00,00,00, None), clashRule=None)
-        result = validate_by_degree("COMP 1601", date(2024, 9, 10), time(12,00,00,00, None), date(2024, 10, 11), time(23,00,00,00, None))
-        print(result)
+        
+        assessment1 = CourseAssessment("COMP 1601", 1, date(2024, 9, 10), date(2024, 10, 11), time(12,0), time(23,0), clashRule=None)
+        assessment2 = CourseAssessment("COMP 1602", 2, date(2024, 9, 15),date(2024, 10, 14), time(12,0), time(23,0), clashRule=None)
+        db.session.add(assessment1)
+        db.session.add(assessment2)
+        db.session.commit()
 
+        result = validate_by_degree("COMP 1601", date(2024, 9, 10), time(12,0), date(2024, 10, 11), time(23,0))
+        self.assertEqual(result["status"], "error")
+        self.assertIn("Degree Clash Detected", result["message"])
+    
 
-    ''' Passing but not working as expected - It has two assessments that are not overlapping but it's showing a clash, it looks like it is only paying attention to the threshold value
+    
+    '''
+    #Passing but not working as expected - It has two assessments that are not overlapping but it's showing a clash, it looks like it is only paying attention to the threshold value
     def test_integration_18_validate_by_student_overlap_no_clash(self):
         create_programme("BSc. Computer Science", "The study of computers and computing - Google")
         add_semester("Semester 2", "2024/2025", date(2025, 1, 13), date(2025,5,25))
@@ -412,7 +432,7 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         
         result = validate_by_student_overlap("COMP 1603", date(2025, 1, 20), date(2025, 1, 28), 75)
         print(result)
-        '''
+        
     
     #Overlapping assessments
     def test_integration_19_validate_by_student_overlap_clash(self):
@@ -438,7 +458,7 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         print(result)
         
     
-    ''' Two assessments are scheduled but but are not overlapping but I'm getting a clash - It is passing but not working as expected
+    #Two assessments are scheduled but but are not overlapping but I'm getting a clash - It is passing but not working as expected
     def test_integration_20_validate_by_assessment_type(self):
         create_programme("BSc. Computer Science", "The study of computers and computing - Google")
         add_semester("Semester 2", "2024/2025", date(2025, 1, 13), date(2025,5,25))
@@ -460,7 +480,7 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         
         result = validate_by_assessment_type(assessmentObject1, date(2025, 1, 15), 15)
         print(result)
-        '''
+        
 
     def test_integration_21_validate_by_assessment_type_clash(self):
         create_programme("BSc. Computer Science", "The study of computers and computing - Google")
@@ -484,7 +504,7 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         result = validate_by_assessment_type(assessmentObject1, date(2025, 1, 15), 15)
         print(result)
 
-    '''Passing but not working as expected - it is saying not clash detected but, it is violating the validate_by_assessment_type_clash
+    #Passing but not working as expected - it is saying not clash detected but, it is violating the validate_by_assessment_type_clash
     def test_integration_22_validate_assessment_clash(self):
         create_programme("BSc. Computer Science", "The study of computers and computing - Google")
         add_semester("Semester 1", "2024/2025", date(2024, 9, 2), date(2024, 12 ,20))
