@@ -73,7 +73,7 @@ def search_staff_action(email):
         return jsonify(error="Please provide an email"), 400
 
 # 04 : Get Staff Courses
-@user_views.route("/staffCourses\<string:email>", methods=["GET"])
+@user_views.route("/staffCourses/<string:email>", methods=["GET"])
 @jwt_required()
 def get_staff_courses_action(email):
 
