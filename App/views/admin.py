@@ -4,7 +4,7 @@ from App.models import Admin
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask_jwt_extended import jwt_required
-from App.controllers import Course, CourseAssessment
+from App.controllers import *
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 # IMPORTS TO CLEAN UP
 
@@ -147,20 +147,56 @@ def remove_programme_course_action():
 
 """
 CourseOffering [3]
-Written By
+Written ByKatoya Ottley
+Task: 10.3.2. Implement API Views for Admin (CourseOffering)
 """
 
 # 01: Add Course Offering
 @admin_views.route('/addCourseOffering', methods=['POST'])
 @jwt_required(Admin)
 def add_offering_action():
-    pass
+    try:
+        data = request.get_json()
+        courseCode = data.get("courseCode")
+        semesterID = data.get("semesterID")
+        totalStudentsEnrolled = data.get("totalStudentsEnrolled")
+
+        if not courseCode or not semesterID or not totalStudentsEnrolled:
+            return jsonify(error= "All Fields are Required To Add Course Offering"), 400
+
+        newCourseOffering = add_course_offering(courseCode, semesterID, totalStudentsEnrolled)
+        if newCourseOffering is None:
+            return jsonify(error = "Failed To Add Course Offering or Course Offering Already Exists."), 400
+
+        message = f'Course: {newCourseOffering.courseCode} for Semester ID {newCourseOffering.semesterID}  with {newCourseOffering.totalStudentsEnrolled} Number of Students Was Added Successfully!'
+        return jsonify(message=message), 201
+    
+    except Exception as e:
+        print (f"Error While Adding Course Offering: {e}")
+        return jsonify(error = "An Error Occurred While Adding Course Offering"), 500
 
 # 02 : Remove Course Offering
 @admin_views.route('/removeCourseOffering', methods=['POST'])
 @jwt_required(Admin)
 def remove_offering_action():
-    pass
+    try:
+        data = request.get_json()
+        courseCode = data.get("courseCode")
+        semesterID = data.get("semesterID")
+
+        if not courseCode or not semesterID:
+            return jsonify(error= "All Fields are Required To Remove Course Offering"), 400
+
+        removeCourseOffering = remove_course_offering(courseCode, semesterID)
+        if removeCourseOffering is None:
+            return jsonify(error = "Failed To Remove Course Offering or Course Offering Does Not Exists."), 400
+
+        message = f'Course: {removeCourseOffering.courseCode} for Semester ID {removeCourseOffering.semesterID} Was Removed Successfully!'
+        return jsonify(message=message), 201
+    
+    except Exception as e:
+        print (f"Error While Removing Course Offering: {e}")
+        return jsonify(error = "An Error Occurred While Removing Course Offering"), 500
 
 # 03 : Update Course Offering
 @admin_views.route('/updateCourseOffering', methods=['POST'])
