@@ -128,7 +128,7 @@ def update_semester_action():
 
 
 """
-ProgrammeCourse [2]
+ProgrammeCourse [4]
 Written By Daniel Young
 """
 @admin_views.route('/addProgrammeCourse', methods=['POST'])
@@ -139,8 +139,8 @@ def add_programme_course_action():
     programmeID = data['programmeID']
 
     response = add_course_to_programme(courseCode, programmeID)
-    if "Error Message" in response:
-        return jsonify ({"message" : response["Error Message"]}),400
+    if "Error" in response:
+        return jsonify ({"message" : response["Error"]}),400
 
     if "CourseProgramme" in response:
         return jsonify({
@@ -158,16 +158,43 @@ def remove_programme_course_action():
     programmeID = data['programmeID']
 
     response = remove_course_from_programme(courseCode, programmeID)
-    if "Error Message" in response:
-        return jsonify ({"message" : response["Error Message"]}),400
+    if "Error" in response:
+        return jsonify ({"message" : response["Error"]}),400
     if "Message" in response:
         return jsonify({
             "message" : response["Message"]
         }),201
     return jsonify({"message":"Unable to delete"}), 500
 
-# @admin_views.route('/getProgrammeCourse', methods=['GET'])
+# 03 : Get Course Degree Programme
+@user_views.route("/courseProgramme/<string:courseCode>", methods=["GET"])
+@jwt_required()
+def get_course_programme_action(courseCode):
+    try: 
+        course_programme = get_degree_programme(courseCode)
+        if course_programme is None:
+            return jsonify(error=f'Course with ID:{courseCode} Not enlisted in Programme'),404
+        return jsonify(course_programme),200
 
+    except Exception as e:
+        return jsonify(error=f'An Error Occurred While Searching For Course With ID: {courseCode}'), 500
+
+
+# 08 : List Programme Courses
+@user_views.route('/listProgrammeCourses', methods=['GET'])
+@jwt_required()
+def list_programme_courses_action():
+    data = request.json
+    programmeID = data['programmeID']
+    
+    response = get_course_programme(programmeID)
+    if "Error" in response:
+        return jsonify ({"message" : response["Error"]}),400
+    if "Message" in response:
+        return jsonify ({"message" : response['Message']}),404
+    if "CourseProgrammes" in response:
+        return jsonify({"CourseProgrammes":response["CourseProgrammes"]}),201
+    return jsonify({"message":"An unknown error occured"}),500
 
 """
 CourseOffering [3]

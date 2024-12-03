@@ -40,10 +40,10 @@ def search_course_action():
     pass
 
 # 03 : Get Course Degree Programme
-@user_views.route("/courseProgramme/<string:courseCode>", methods=["GET"])
-@jwt_required()
-def get_course_programme_action(courseCode):
-    pass
+# @user_views.route("/courseProgramme/<string:courseCode>", methods=["GET"])
+# @jwt_required()
+# def get_course_programme_action(courseCode):
+#     pass
     
 # 04 : Get Course Offering
 @user_views.route('/getCourseOfferings', methods=['GET'])
@@ -69,11 +69,11 @@ def get_course_staff_action():
 def list_programmes_action():
     pass
 
-# 08 : List Programme Courses
-@user_views.route('/listProgrammeCourses', methods=['GET'])
-@jwt_required()
-def list_programme_courses_action():
-    pass
+# # 08 : List Programme Courses
+# @user_views.route('/listProgrammeCourses', methods=['GET'])
+# @jwt_required()
+# def list_programme_courses_action():
+#     pass
 
 # 09 : Search Semester
 @user_views.route('/searchSemester', methods=['GET'])
