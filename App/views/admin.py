@@ -105,26 +105,107 @@ def update_course_action():
 
 """
 Semester [2]
-Written By
+Written By Daniel Young
 """
 
 # 01 : Add Semester *
 @admin_views.route('/addSemester', methods=['POST'])
 @jwt_required(Admin)
 def add_semester_action():
-    # if request.method == 'POST':
-        # semBegins = request.form.get('teachingBegins')
-        # semEnds = request.form.get('teachingEnds')
-        # semChoice = request.form.get('semester')
-        # maxAssessments = request.form.get('maxAssessments') #used for class detection feature
-        # add_sem(semBegins,semEnds,semChoice,maxAssessments)
-    pass
+    try:
+        data = request.json
+        semesterName = data['semesterName']
+        academicYear = data['academicYear']
+        startDate = data['startDate']
+        endDate = data['endDate']
+        response = add_semester(semesterName, academicYear, startDate, endDate)
+        if "Error Message" in response:
+            return jsonify({"message" : response['Error Message']}),400
+        else:
+            return jsonify(response),201
+    except Exception as e:
+        return jsonify(error=f'An Error Occurred While trying to add semester'), 500
 
 # 02 : Update Semester
 @admin_views.route('/updateSemester', methods=['POST'])
 @jwt_required(Admin)
 def update_semester_action():
-    pass
+    try:
+        data = request.json
+        semesterName = data['semesterName']
+        academicYear = data['academicYear']
+        new_semesterName = data['new_semesterName']
+        new_academicYear = data['new_academicYear']
+        startDate = data['startDate']
+        endDate = data['endDate']
+        response = update_semester(semesterName, academicYear, new_semesterName=None, new_academicYear=None, startDate=None, endDate=None)
+        if "Error Message" in response:
+            return jsonify({"message" : response['Error Message']}),400
+        else:
+            return jsonify(response),201
+    except Exception as e:
+        return jsonify(error=f'An Error Occurred While trying to update semester'), 500
+
+# 09 : Search Semester
+@admin_views.route('/searchSemester', methods=['GET'])
+@jwt_required(Admin)
+def search_semester_action():
+    try:
+        data = request.json
+        semesterName = data['semesterName']
+        academicYear = data['academicYear']
+        response = get_semester(semesterName, academicYear)
+        if "Error Message" in response:
+            return jsonify({"message" : response['Error Message']}),400
+        else:
+            return jsonify(response),201
+    except Exception as e:
+        return jsonify(error=f'An Error Occurred While trying to update semester'), 500
+
+# 10 : List Semesters
+@admin_views.route('/listSemesters', methods=['GET'])
+@jwt_required(Admin)
+def list_semesters_action():
+    try:
+        response = list_semesters()
+        if "Error Message" in response:
+            return jsonify({"message" : response['Error Message']}),400
+        else:
+            return jsonify(response),201
+    except Exception as e:
+        return jsonify(error=f'An Error Occurred While trying to list semesters'), 500
+
+
+# 11 : List Semester Courses
+@admin_views.route('/listSemesterCourses', methods=['GET'])
+@jwt_required(Admin)
+def list_semester_courses_action():
+    try:
+        data = request.json
+        semesterName = data['semesterName']
+        academicYear = data['academicYear']
+        response = list_courses_for_semester(semesterName, academicYear)
+        if "Error Message" in response:
+            return jsonify({"message" : response['Error Message']}),400
+        else:
+            return jsonify(response),201
+    except Exception as e:
+        return jsonify(error=f'An Error Occurred While trying to list Courses for the semesters'), 500
+
+@admin_views.route('/getSemesterByAcademicYear', methods=['GET'])
+@jwt_required(Admin)
+def get_semester_by_academic_year():
+    try:
+        data = request.json
+        academicYear = data['academicYear']
+        response = get_semesters_by_academic_year(academicYear)
+        if "Error Message" in response:
+            return jsonify({"message" : response['Error Message']}),400
+        else:
+            return jsonify(response),201
+    except Exception as e:
+        return jsonify(error=f'An Error Occurred While trying to Semesters or an academic year'), 500
+
 
 
 """
