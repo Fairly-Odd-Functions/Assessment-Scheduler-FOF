@@ -248,35 +248,98 @@ def remove_programme_action():
 @jwt_required(Admin)
 def update_programme_action():
     data = request.json
-    programmeTitle = data{}
-    update_programme(programmeTitle, new_title=None, new_description=None)
+    programmeTitle = data['programmeTitle']
+    new_title = data['new_title']
+    new_description = data['new_description']
+
+    response = update_programme(programmeTitle, new_title=None, new_description=None)
+    if "Error Message" in response:
+        return jsonify({"message" : response["Error Message"]}), 400
+    if "Programme" in response:
+        return jsonify({"message" : reponse['Message'],
+                    "Programme": response['Programme']
+        }),201
+    return jsonify({"message":"An unknown error occorred"}),500
+                    
 
 # 05 : Get Programme Course
-@user_views.route('/getProgrammeCourse', methods=['GET'])
-@jwt_required()
+@admin_views.route('/getProgrammeCourse', methods=['GET'])
+@jwt_required(Admin)
 def get_programme_course_action():
-    pass
+    
+    data = request.json
+    programmeID = data['programmeID']
+    
+    response = get_course_programme(programmeID)
+    if "Error" in response:
+        return jsonify ({"message" : response["Error"]}),400
+    if "Message" in response:
+        return jsonify ({"message" : response['Message']}),404
+    if "CourseProgrammes" in response:
+        return jsonify({"CourseProgrammes":response["CourseProgrammes"]}),201
+    return jsonify({"message":"An unknown error occured"}),500
 
 # 07 : List Programmes
-@user_views.route('/listProgrammes', methods=['GET'])
-@jwt_required()
+@admin_views.route('/listProgrammes', methods=['GET'])
+@jwt_required(Admin)
 def list_programmes_action():
-    pass
+    try :
+        response = list_programmes()
+        if "Error Message" in response:
+            return jsonify ({"message" : response['Error Message']}),400
+        if "Message" in rsponse:
+            return jsonify ({"message" : response['Message']}),404
+        return jsonify(response),201
+    except Exeption as e:
+         return jsonify(error=f'An Error Occurred While Searching For Programmes'), 500
 
+    
 # 08 : List Programme Courses
-@user_views.route('/listProgrammeCourses', methods=['GET'])
-@jwt_required()
+@admin_views.route('/listProgrammeCourses', methods=['GET'])
+@jwt_required(Admin)
 def list_programme_courses_action():
-    pass
+    try:
+        data = request.json
+        programmeTitle = data['programmeTitle']
+
+        response = list_programme_courses(programmeTitle)
+        if "Error Message" in response:
+            return jsonify ({"message" : response['Error Message']}), 400
+        else:
+            return jsonify(response), 201
+    except Exception as e:
+        return jsonify(error=f'An Error Occurred While Searching For Programmes Courses'), 500
+   
 
 # 08 : Programme by ID
-@user_views.route('/getProgrammeByID<int:programmeID>', methods=['GET'])
-@jwt_required()
+@admin_views.route('/getProgrammeByID<int:programmeID>', methods=['GET'])
+@jwt_required(Admin)
 def get_programme_by_id_action(programmeID):
-    pass
+    try:
+        data = request.json
+        programmeID = data['programmeID']
+
+        response = get_programme_by_id(programmeID)
+        if response is None:
+            return jsonify (error=f"No programme found with ID:{programmeID} "), 404
+        else:
+            return jsonify(response), 201
+    except Exception as e:
+        return jsonify(error=f'An Error Occurred While Searching For Programmes Courses'), 500
+
 
 # 08 : Programme by title
-@user_views.route('/getProgrammeByTitle<string:programmeTitle>', methods=['GET'])
-@jwt_required()
+@admin_views.route('/getProgrammeByTitle<string:programmeTitle>', methods=['GET'])
+@jwt_required(Admin)
 def get_programme_by_id_action(programmeTitle):
-    pass
+    try:
+        data = request.json
+        programmeTitle = data['programmeTitle']
+
+        response = get_programme_by_title(programmeTitle)
+        if "Error Message" in response:
+            return jsonify ({"message" : response['Error Message']}), 400
+        else:
+            return jsonify(response), 201
+    except Exception as e:
+        return jsonify(error=f'An Error Occurred While Searching For Programmes Courses'), 500
