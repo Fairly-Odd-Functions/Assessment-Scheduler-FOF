@@ -2,7 +2,7 @@ import flask_login
 from flask import jsonify
 from functools import wraps
 from App.models import User, Admin, Staff
-from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt_identity, verify_jwt_in_request
+from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt_identity, unset_jwt_cookies, verify_jwt_in_request
 
 # Setup JWT Authentication
 def setup_jwt(app):
@@ -34,14 +34,16 @@ def setup_flask_login(app):
           return admin
        return None
 
-def login_user(user):
+def my_login_user(user):
   flask_login.login_user(user)
   access_token = create_access_token(identity=user.userID)
-  return jsonify(access_token=access_token), 200
+  return access_token
 
-def logout_user(user):
+def my_logout_user():
   flask_login.logout_user()
-  return jsonify(message="Logged Out successfully"), 200
+  response = jsonify(message="Logged Out Successfully")
+  unset_jwt_cookies(response)
+  return response, 200
 
 def login_required(required_class):
   def wrapper(f):

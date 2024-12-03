@@ -155,7 +155,7 @@ class UserIntegrationTests(unittest.TestCase):
     def test_integration_01_authenticate_user_valid(self):
         new_user = create_user("Robert", "Watson", "robpass", "rob22@email.com", "staff")
         with current_app.test_request_context():
-            response = login_user(new_user)
+            response = my_login_user(new_user)
             assert response is not None
 
     def test_integration_02_get_user_invalid(self):

@@ -1,55 +1,58 @@
 from flask import Blueprint, flash, redirect, request, jsonify, render_template, url_for, make_response
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, current_user, unset_jwt_cookies, set_access_cookies
-from flask_login import logout_user
+from App.controllers.auth import my_login_user, my_logout_user
 from App.models.user import User
 from App.models.staff import Staff
 from App.models.admin import Admin
 from App.database import db
+# IMPORTS TO CLEAN UP
 
 auth_views = Blueprint('auth_views', __name__, template_folder='../templates')
 
-@auth_views.route('/login', methods=['GET'])
-def get_login_page():
-    return render_template('login.html')
-    
+"""Login
+Written
+"""
 @auth_views.route('/login', methods=['POST'])
 def login_action():
-    email = request.form.get('email')           #To be linked to login button
-    password = request.form.get('password')     #To be linked to login button
-    response = login_user(email, password)
-    if not response:
-        flash('Bad email or password given'), 401 
-    return response       
+    try:
+        data = request.get_json()
+        if not data or 'email' not in data or 'password' not in data:
+            return jsonify({"error":"Email And Password Are Required"}), 400
 
-def login_user(email, password):
-    admin_user=db.session.query(Admin).filter(Admin.email == email).first()
+        token = authenticate_and_login_user(data['email'], data['password'])
+        if not token:
+            return jsonify({"error": "Bad Email Or Password Given"}), 401
+
+        return jsonify(access_token=token), 200
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify(error="An Error Occurred While Logging In"), 500
+
+# Login Acion Helper Function
+def authenticate_and_login_user(email, password):
+    admin_user = db.session.query(Admin).filter(Admin.email == email).first()
+    print(f"DEBUG: Attempting Admin Login: {admin_user}")
     if admin_user and admin_user.check_password(password):
-        response = make_response(redirect(url_for('admin_views.get_upload_page')))    
-        token = create_access_token(identity=email)
-        response.set_cookie('access_token', token)
-        return response
-    else:
-        user = db.session.query(Staff).filter(Staff.email == email).first()
-        if user and user.check_password(password):
-            response = make_response(redirect(url_for('staff_views.get_calendar_page')))
-            token = create_access_token(identity=email)
-            response.set_cookie('access_token', token)
-            return response
-    return jsonify(message="Invalid username or password"), 401
+        return my_login_user(admin_user)
 
-@auth_views.route('/logout', methods=['GET'])
+    staff_user = db.session.query(Staff).filter(Staff.email == email).first()
+    print(f"DEBUG: Attempting Staff Login: {staff_user}")
+    if staff_user and staff_user.check_password(password):
+        return my_login_user(staff_user)
+
+    return None
+
+"""LogOut"""
+@auth_views.route('/logout', methods=['POST'])
 @jwt_required()
-def logout():
-    email=get_jwt_identity()
-    print(email)
-    logout_user()
-    return render_template('login.html')
+def logout_action():
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
 
-# @auth_views.route('/identify')
-# @jwt_required()
-# def identify_view():
-#   email = get_jwt_identity()
-#   user = User.query.filter_by(email=email).first()
-#   if user:
-#     return jsonify(user.to_json())
-#   return jsonify(message='Invalid user'), 403
+        print(f"DEBUG: Logging Out: {user.user_type} user")
+        return my_logout_user()
+    except Exception as e:
+        print(f"DEBUG: Error During Logout: {e}")
+        return jsonify(error="An Error Occurred While Logging Out"), 500

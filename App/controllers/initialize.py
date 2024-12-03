@@ -13,8 +13,8 @@ def initialize():
         # Create Default Staff User
         rick = Staff(firstName="Rick", lastName="Rickson", password="rickpass", email="rick.rickson@mail.com")
 
-        db.session.add(rick)
         db.session.add(bob)
+        db.session.add(rick)
         db.session.commit()
 
     except Exception as e:
