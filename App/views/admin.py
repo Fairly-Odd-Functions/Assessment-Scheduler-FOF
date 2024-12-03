@@ -167,7 +167,7 @@ def remove_programme_course_action():
     return jsonify({"message":"Unable to delete"}), 500
 
 # 03 : Get Course Degree Programme
-@user_views.route("/courseProgramme/<string:courseCode>", methods=["GET"])
+@admin_views.route("/courseProgramme/<string:courseCode>", methods=["GET"])
 @jwt_required()
 def get_course_programme_action(courseCode):
     try: 
@@ -181,7 +181,7 @@ def get_course_programme_action(courseCode):
 
 
 # 08 : List Programme Courses
-@user_views.route('/listProgrammeCourses', methods=['GET'])
+@admin_views.route('/listProgrammeCourses', methods=['GET'])
 @jwt_required()
 def list_programme_courses_action():
     data = request.json
