@@ -407,10 +407,8 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         self.assertEqual(result["status"], "error")
         self.assertIn("Degree Clash Detected", result["message"])
     
-
-    
     '''
-    #Passing but not working as expected - It has two assessments that are not overlapping but it's showing a clash, it looks like it is only paying attention to the threshold value
+    #It has two assessments that are not overlapping but it's showing a clash [ AssertionError: 'error' != 'success']
     def test_integration_18_validate_by_student_overlap_no_clash(self):
         create_programme("BSc. Computer Science", "The study of computers and computing - Google")
         add_semester("Semester 2", "2024/2025", date(2025, 1, 13), date(2025,5,25))
@@ -420,19 +418,37 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         
         add_course_offering("COMP 1603", 1, 350)
         add_course_offering("COMP 1604", 1, 250)
-        
+
+        #Testing
+        #course1 = get_course_offering("COMP 1603", 1)
+        #print("HERE 1 -", course1 )
+        #course2 = get_course_offering("COMP 1604", 1)
+        #print("HERE 2 -", course2 )
+
         add_course_to_programme("COMP 1603", 1)
         add_course_to_programme("COMP 1604", 1)
         
         create_assessment("Assignment 1", AssessmentTypes.ASSIGNMENT)
         create_assessment("Assignment 2", AssessmentTypes.ASSIGNMENT)
         
-        add_course_assessment("COMP 1603", 1, date(2025, 1, 20), time(12,00,00,00, None), date(2025, 1, 28), time(23,00,00,00, None), clashRule=None)
-        add_course_assessment("COMP 1604", 2, date(2025, 2, 4), time(12,00,00,00, None), date(2025, 2, 16), time(23,00,00,00, None), clashRule=None)
+        #Testing
+        #listOfAssessment = list_assessments()
+        #print(listOfAssessment)
+
+        #add_course_assessment("COMP 1603", 1, date(2025, 1, 20), time(12,0), date(2025, 1, 28), time(23,0), clashRule=None)
+        #add_course_assessment("COMP 1604", 2, date(2025, 2, 4), time(12,0), date(2025, 2, 16), time(23,0), clashRule=None)
         
+        assessment1 = CourseAssessment("COMP 1603", 1, date(2025, 1, 20), date(2025, 1, 28), time(12,0), time(23,0), clashRule=None)
+        assessment2 = CourseAssessment("COMP 1604", 2, date(2025, 2, 4),date(2025, 2, 16), time(12,0), time(23,0), clashRule=None)
+        db.session.add(assessment1)
+        db.session.add(assessment2)
+        db.session.commit()
+
         result = validate_by_student_overlap("COMP 1603", date(2025, 1, 20), date(2025, 1, 28), 75)
-        print(result)
-        
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["message"], "No Assessment Clashes Found Due To Overlapping Student Enrollment")
+    '''
+    
     
     #Overlapping assessments
     def test_integration_19_validate_by_student_overlap_clash(self):
@@ -451,15 +467,17 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         create_assessment("Assignment 1", AssessmentTypes.ASSIGNMENT)
         create_assessment("Assignment 2", AssessmentTypes.ASSIGNMENT)
         
-        add_course_assessment("COMP 1603", 1, date(2025, 1, 20), time(12,00,00,00, None), date(2025, 2, 11), time(23,00,00,00, None), clashRule=None)
-        add_course_assessment("COMP 1604", 2, date(2025, 1, 25), time(12,00,00,00, None), date(2025, 2, 16), time(23,00,00,00, None), clashRule=None)
+        add_course_assessment("COMP 1603", 1, date(2025, 1, 20), time(12,0), date(2025, 2, 11), time(23,0), clashRule=None)
+        add_course_assessment("COMP 1604", 2, date(2025, 1, 25), time(12,0), date(2025, 2, 16), time(23,0), clashRule=None)
         
         result = validate_by_student_overlap("COMP 1603", date(2025, 1, 20), date(2025, 2, 11), 75)
-        print(result)
-        
+        self.assertEqual(result["status"], "error")
+        self.assertIn("Assessment Clash Found Due To Overlapping Student Enrollment", result["message"])
     
-    #Two assessments are scheduled but but are not overlapping but I'm getting a clash - It is passing but not working as expected
-    def test_integration_20_validate_by_assessment_type(self):
+
+    '''
+    #Two assessments are scheduled but but are not overlapping but I'm getting a clash - AssertionError: 'error' != 'success'
+    def test_integration_20_validate_by_assessment_type_no_clash(self):
         create_programme("BSc. Computer Science", "The study of computers and computing - Google")
         add_semester("Semester 2", "2024/2025", date(2025, 1, 13), date(2025,5,25))
         
@@ -477,11 +495,15 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         
         add_course_assessment("COMP 1603", 1, date(2025, 1, 15), time(12,00,00,00, None), date(2025, 1, 30), time(23,00,00,00, None), clashRule=None)
         add_course_assessment("COMP 1604", 2, date(2025, 3, 1), time(12,00,00,00, None), date(2025, 2, 17), time(23,00,00,00, None), clashRule=None)
-        
-        result = validate_by_assessment_type(assessmentObject1, date(2025, 1, 15), 15)
-        print(result)
-        
 
+        result = validate_by_assessment_type(assessmentObject1, date(2025, 1, 15), 14)
+        #print(result)
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["message"], "No Assessment Clashes Found Due To Overlapping Student Enrollment")
+    '''   
+    
+    
+    #It has the Reserved start date for preparation: 2024-12-31, not sure where it got that date from
     def test_integration_21_validate_by_assessment_type_clash(self):
         create_programme("BSc. Computer Science", "The study of computers and computing - Google")
         add_semester("Semester 2", "2024/2025", date(2025, 1, 13), date(2025,5,25))
@@ -498,13 +520,13 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         create_assessment("Quiz 3", AssessmentTypes.QUIZ)
         assessmentObject2 = Assessment("Quiz 3", AssessmentTypes.QUIZ)
         
-        add_course_assessment("COMP 1603", 1, date(2025, 1, 15), time(12,00,00,00, None), date(2025, 1, 30), time(23,00,00,00, None), clashRule=None)
-        add_course_assessment("COMP 1604", 2, date(2025, 1, 20), time(12,00,00,00, None), date(2025, 2, 7), time(23,00,00,00, None), clashRule=None)
+        add_course_assessment("COMP 1603", 1, date(2025, 1, 15), time(12,0), date(2025, 1, 30), time(23,0), clashRule=None)
+        add_course_assessment("COMP 1604", 2, date(2025, 1, 20), time(12,0), date(2025, 2, 7), time(23,0), clashRule=None)
         
         result = validate_by_assessment_type(assessmentObject1, date(2025, 1, 15), 15)
-        print(result)
+        self.assertEqual(result["status"], "error")
+        self.assertIn("\nAssessment Clash Found Due To Insufficient Preparation Time\n", result["message"])
 
-    #Passing but not working as expected - it is saying not clash detected but, it is violating the validate_by_assessment_type_clash
     def test_integration_22_validate_assessment_clash(self):
         create_programme("BSc. Computer Science", "The study of computers and computing - Google")
         add_semester("Semester 1", "2024/2025", date(2024, 9, 2), date(2024, 12 ,20))
@@ -521,12 +543,11 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         create_assessment("Quiz 3", AssessmentTypes.QUIZ)
         assessmentObject2 = Assessment("Quiz 3", AssessmentTypes.QUIZ)
         
-        add_course_assessment("COMP 1603", 1, date(2025, 1, 15), time(12,00,00,00, None), date(2025, 1, 30), time(23,00,00,00, None), clashRule= None)
-        add_course_assessment("COMP 1604", 2, date(2025, 1, 20), time(12,00,00,00, None), date(2025, 2, 7), time(23,00,00,00, None), clashRule=None)
+        add_course_assessment("COMP 1603", 1, date(2025, 1, 15), time(12,0), date(2025, 1, 30), time(23,0), clashRule= None)
+        add_course_assessment("COMP 1604", 2, date(2025, 1, 20), time(12,0), date(2025, 2, 7), time(23,0), clashRule= None)
         
-        newCourseAssessment = CourseAssessment("COMP 1603", 1, date(2025, 1, 15), date(2025, 1, 30), time(12,00,00,00, None), time(23,00,00,00, None), clashRule = None)
+        newCourseAssessment = CourseAssessment("COMP 1603", 1, date(2025, 1, 15), date(2025, 1, 30), time(12,0), time(23,0), clashRule = "DEGREE")
 
         result = validate_assessment_clash(newCourseAssessment)
-        print(result)
-
-    '''
+        self.assertEqual(result["status"], "error")
+        self.assertIn("Degree Clash Detected", result["message"])
