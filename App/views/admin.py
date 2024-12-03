@@ -1,89 +1,76 @@
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
+import os, csv
+from App.database import db
+from App.models import Admin
+from datetime import datetime
+from werkzeug.utils import secure_filename
 from flask_jwt_extended import jwt_required
 from App.controllers import Course, CourseAssessment
-from App.models import Admin
-from App.database import db
-from werkzeug.utils import secure_filename
-import os, csv
-from datetime import datetime
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
+# IMPORTS TO CLEAN UP
 
 admin_views = Blueprint('admin_views', __name__, template_folder='../templates')
 
-# Gets Semester Details Page
-@admin_views.route('/semester', methods=['GET'])
+# * - PPC [Previous Project's Code :D]
+
+"""
+Users [8]
+Written By
+"""
+# 01 : Register Staff
+@admin_views.route('/registerStaff', methods=['POST'])
 @jwt_required(Admin)
-def get_upload_page():
-    return render_template('semester.html')
-
-@admin_views.route('/uploadFiles', methods=['GET'])
+def register_staff_action():
+    pass
+    
+# 02 : Create Admin
+@admin_views.route('/createAdmin', methods=['POST'])
 @jwt_required(Admin)
-def get_uploadFiles_page():
-    return render_template('uploadFiles.html')
+def create_admin_action():
+    pass
 
-# Gets Course Listings Page
-@admin_views.route('/coursesList', methods=['GET'])
+# 03 : Get All Staff Users
+@admin_views.route('/allStaff', methods=['GET'])
 @jwt_required(Admin)
-def index():
-    return render_template('courses.html')    
+def list_all_staff_action():
+    pass
 
-# Retrieves semester details and stores it in global variables 
-@admin_views.route('/newSemester', methods=['POST'])
+# 04 : Get All Admin Users
+@admin_views.route('/allAdmin', methods=['GET'])
 @jwt_required(Admin)
-def new_semester_action():
-    if request.method == 'POST':
-        semBegins = request.form.get('teachingBegins')
-        semEnds = request.form.get('teachingEnds')
-        semChoice = request.form.get('semester')
-        maxAssessments = request.form.get('maxAssessments') #used for class detection feature
-        add_sem(semBegins,semEnds,semChoice,maxAssessments)
+def list_all_admin_action():
+    pass
 
-        # Return course upload page to upload cvs file for courses offered that semester
-        return render_template('uploadFiles.html')  
-
-# Gets csv file with course listings, parses it to store course data and stores it in application
-@admin_views.route('/uploadcourse', methods=['POST'])
+# 05 : Update Admin
+@admin_views.route('/updateAdmin', methods=['POST'])
 @jwt_required(Admin)
-def upload_course_file():
-    if request.method == 'POST': 
-        file = request.files['file'] 
+def update_admin_action():
+    pass
 
-        # Check if file is present
-        if (file.filename == ''):
-            message = 'No file selected!' 
-            return render_template('uploadFiles.html', message = message) 
-        else:
-            # Secure filename
-            filename = secure_filename(file.filename)
-        
-            # Save file to uploads folder
-            file.save(os.path.join('App/uploads', filename)) 
-            
-            # Retrieves course details from file and stores it in database ie. store course info 
-            fpath = 'App/uploads/' + filename
-            with open(fpath, 'r') as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    #create object
-                    course = add_Course(courseCode=row['Course Code'], courseTitle=row['Course Title'], description=row['Course Description'], level=int(row['Level']), semester=int(row['Semester']), aNum=int(row['Assessment No.']))
-
-            # Redirect to view course listings!   
-            return redirect(url_for('admin_views.get_courses'))    
-            
-# Pull course list from database
-@admin_views.route('/get_courses', methods=['GET'])
+# 06 : Remove Admin
+@admin_views.route('/removeAdmin', methods=['POST'])
 @jwt_required(Admin)
-def get_courses():
-    courses = list_Courses()
-    return render_template('courses.html', courses=courses)
+def remove_admin_action():
+    pass
 
-# Gets Add Course Page
-@admin_views.route('/newCourse', methods=['GET'])
+# 07 : Update Staff
+@admin_views.route('/updateStaff', methods=['POST'])
 @jwt_required(Admin)
-def get_new_course():
-    return render_template('addCourse.html')  
+def update_staff_action():
+    pass
 
-# Retrieves course info and stores it in database ie. add new course
-@admin_views.route('/addNewCourse', methods=['POST'])
+# 08 : Remove Staff
+@admin_views.route('/removeStaff', methods=['POST'])
+@jwt_required(Admin)
+def remove_staff_action():
+    pass
+
+"""
+Course [2]
+Written By
+"""
+
+# 01 : Add Course *
+@admin_views.route('/addCourse', methods=['POST'])
 @jwt_required(Admin)
 def add_course_action():
     if request.method == 'POST':
@@ -94,23 +81,13 @@ def add_course_action():
         level = request.form.get('level')
         semester = request.form.get('semester')
         numAssessments = request.form.get('numAssessments')
-         
         course = add_Course(courseCode,title,description,level,semester,numAssessments)
+        pass
 
-        # Redirect to view course listings!  
-        return redirect(url_for('admin_views.get_courses')) 
-        
-# Gets Update Course Page
-@admin_views.route('/modifyCourse/<string:courseCode>', methods=['GET'])
-@jwt_required(Admin)
-def get_update_course(courseCode):
-    course = get_course(courseCode) # Gets selected course
-    return render_template('updateCourse.html', course=course)  
-
-# Selects new course details and updates existing course in database
+# 02 : Update Course *
 @admin_views.route('/updateCourse', methods=['POST'])
 @jwt_required(Admin)
-def update_course():
+def update_course_action():
     if request.method == 'POST':
         courseCode = request.form.get('code')
         title = request.form.get('title')
@@ -120,66 +97,118 @@ def update_course():
         numAssessments = request.form.get('assessment')
         # programme = request.form.get('programme')
 
-        delete_Course(get_course(courseCode))
+        delete_Course(get_course(courseCode)) # Woah that's extreme
         add_Course(courseCode, title, description, level, semester, numAssessments)
         flash("Course Updated Successfully!") 
+    pass
 
-    # Redirect to view course listings! 
-    return redirect(url_for('admin_views.get_courses')) 
 
-# Selects course and removes it from database
-@admin_views.route("/deleteCourse/<string:courseCode>", methods=["POST"])
+"""
+Semester [2]
+Written By
+"""
+
+# 01 : Add Semester *
+@admin_views.route('/addSemester', methods=['POST'])
 @jwt_required(Admin)
-def delete_course_action(courseCode):
-    if request.method == 'POST':
-        course = get_course(courseCode) # Gets selected course
-        delete_Course(course)
-        print(courseCode, " deleted")
-        flash("Course Deleted Successfully!")
+def add_semester_action():
+    # if request.method == 'POST':
+        # semBegins = request.form.get('teachingBegins')
+        # semEnds = request.form.get('teachingEnds')
+        # semChoice = request.form.get('semester')
+        # maxAssessments = request.form.get('maxAssessments') #used for class detection feature
+        # add_sem(semBegins,semEnds,semChoice,maxAssessments)
+    pass
 
-    # Redirect to view course listings!   
-    return redirect(url_for('admin_views.get_courses'))    
-
-@admin_views.route("/clashes", methods=["GET"])
+# 02 : Update Semester
+@admin_views.route('/updateSemester', methods=['POST'])
 @jwt_required(Admin)
-def get_clashes_page():
-    #for search
-    all_assessments=CourseAssessment.query.all()
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-    searchResults=[]
-    if start_date and end_date:
-        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-        for a in all_assessments:
-            if start_date <= a.startDate <= end_date or start_date <= a.endDate <= end_date:
-                searchResults.append(a)
-    #for table
-    assessments=get_clashes()
-    return render_template('clashes.html',assessments=assessments,results=searchResults)
+def update_semester_action():
+    pass
 
 
+"""
+ProgrammeCourse [2]
+Written By
+"""
 
-@admin_views.route("/acceptOverride/<int:aID>", methods=['POST'])
+# 01 : Add Programme Course
+@admin_views.route('/addProgrammeCourse', methods=['POST'])
 @jwt_required(Admin)
-def accept_override(aID):
-    ca=get_CourseAsm_id(aID)
-    if ca:
-        ca.clashDetected=False
-        db.session.commit()
-        print("Accepted override.")
-    return redirect(url_for('admin_views.get_clashes_page'))
+def add_programme_course_action():
+    pass
 
-@admin_views.route("/rejectOverride/<int:aID>", methods=['POST'])
+# 02 : Remove Programme Course
+@admin_views.route('/removeProgrammeCourse', methods=['POST'])
 @jwt_required(Admin)
-def reject_override(aID):
-    ca=get_CourseAsm_id(aID)
-    if ca:
-        ca.clashDetected=False
-        ca.startDate=None
-        ca.endDate=None
-        ca.startTime=None
-        ca.endTime=None
-        db.session.commit()
-        print("Rejected override.")
-    return redirect(url_for('admin_views.get_clashes_page'))
+def remove_programme_course_action():
+    pass
+
+
+"""
+CourseOffering [3]
+Written By
+"""
+
+# 01: Add Course Offering
+@admin_views.route('/addCourseOffering', methods=['POST'])
+@jwt_required(Admin)
+def add_offering_action():
+    pass
+
+# 02 : Remove Course Offering
+@admin_views.route('/removeCourseOffering', methods=['POST'])
+@jwt_required(Admin)
+def remove_offering_action():
+    pass
+
+# 03 : Update Course Offering
+@admin_views.route('/updateCourseOffering', methods=['POST'])
+@jwt_required(Admin)
+def update_offering_action():
+    pass
+
+"""
+CourseStaff [3]
+Written By
+"""
+# 01 : Add Course Staff
+@admin_views.route('/addCourseStaff', methods=['POST'])
+@jwt_required(Admin)
+def add_course_staff_action():
+    pass
+
+# 02 : Remove Course Staff
+@admin_views.route('/removeCourseStaff', methods=['POST'])
+@jwt_required(Admin)
+def remove_course_staff_action():
+    pass
+
+# 03 : Update Course Staff
+@admin_views.route('/updateCourseStaff', methods=['POST'])
+@jwt_required(Admin)
+def update_course_staff_action():
+    pass
+
+"""
+Programme [3]
+Written By
+"""
+
+# 01 : Add Programme
+@admin_views.route('/addProgramme', methods=['POST'])
+@jwt_required(Admin)
+def add_programme_action():
+    pass
+
+# 02 : Remove Programme
+@admin_views.route('/removeProgramme', methods=['POST'])
+@jwt_required(Admin)
+def remove_programme_action():
+    pass
+
+# 03 : Update Programme
+@admin_views.route('/updateProgramme', methods=['POST'])
+@jwt_required(Admin)
+def update_programme_action():
+    pass

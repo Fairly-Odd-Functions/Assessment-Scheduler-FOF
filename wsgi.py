@@ -1,5 +1,6 @@
 import click, sys, csv, pytest
 from flask import Flask
+from App.controllers import initialize
 from App.models import *
 from App.controllers import *
 from datetime import datetime
