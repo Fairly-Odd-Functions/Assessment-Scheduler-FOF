@@ -168,7 +168,7 @@ def remove_programme_course_action():
 
 # 03 : Get Course Degree Programme
 @admin_views.route("/courseProgramme/<string:courseCode>", methods=["GET"])
-@jwt_required()
+@jwt_required(Admin)
 def get_course_programme_action(courseCode):
     try: 
         course_programme = get_degree_programme(courseCode)
@@ -182,7 +182,7 @@ def get_course_programme_action(courseCode):
 
 # 08 : List Programme Courses
 @admin_views.route('/listProgrammeCourses', methods=['GET'])
-@jwt_required()
+@jwt_required(Admin)
 def list_programme_courses_action():
     data = request.json
     programmeID = data['programmeID']
