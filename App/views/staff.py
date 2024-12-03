@@ -3,42 +3,82 @@ from flask_login import current_user
 from flask import current_app as app
 from flask_mail import Mail, Message
 from sqlalchemy import not_
-from App.controllers import Staff
-from App.controllers import Course, Semester
-from App.controllers import CourseAssessment
-from App.controllers.clashDetection import validate_assessment_clash
-from App.controllers.courseAssessment import add_course_assessment
 from App.database import db
-from App.models.assessment import Assessment
 import json
 from flask_jwt_extended import current_user as jwt_current_user, get_jwt_identity
 from flask_jwt_extended import jwt_required
 from datetime import date, timedelta
 import time
+from App.models import *
+from App.controllers import *
 # IMPORTS TO CLEAN UP
 
 staff_views = Blueprint('staff_views', __name__, template_folder='../templates')
 
-# * - PPC [Previous Project's Code :D]
+"""
+Staff Views
+Written By Jalene Armstrong (JaleneA) - Task 10.4. Implement API View For Staff (Main)
+"""
+
+# 01 : Create Course Assessment
+@staff_views.route('/createAssessment', methods=['POST'])
+@jwt_required(Staff)
+def create_course_assessment_action():
+    data = request.get_json()
+    assessmentTitle = data['assessmentTitle']
+    assessmentType = data['assessmentType']
+
+    result = create_assessment(
+        assessmentTitle=assessmentTitle,
+        assessmentType=assessmentType)
+
+    if "Error Message" in result:
+        return jsonify({
+            "message": result["Error Message"]
+        }), 400
+
+    if "Assessment" in result:
+        return jsonify({
+            "message": result["Message"],
+            "CourseAssessment": result["Assessment"]
+        }), 201
+
+    return jsonify({
+        "message": "An unknown error occurred."
+    }), 500
 
 """
 Special Feature - Demonstrated Via Scheduling Assessments
 Written By Jalene Armstrong (JaleneA) - Task 10.4. Implement API View For Staff (Main)
 """
 
-# 01 : Schedule A Course Assessment
+# 02 : Schedule A Course Assessment
 @staff_views.route('/scheduleAssessment', methods=['POST'])
 @jwt_required(Staff)
 def schedule_course_assessment_action():
-    courseCode = request.form.get('courseCode')
-    assessmentID = request.form.get('assessmentID')
-    startDate = request.form.get('startDate')
-    startTime = request.form.get('startTime')
-    endDate = request.form.get('endDate')
-    endTime = request.form.get('endTime')
-    clashRule = request.form.get('clashRule')
+    data = request.get_json()
 
-    result = add_course_assessment(courseCode, assessmentID, startDate, startTime, endDate, endTime, clashRule)
+    courseCode = data['courseCode']
+    assessmentID = data['assessmentID']
+    startDate = data['startDate']
+    startTime = data['startTime']
+    endDate = data['endDate']
+    endTime = data['endTime']
+    clashRule = data['clashRule']
+
+    start_date = datetime.strptime(startDate, "%Y-%m-%d").date()
+    end_date = datetime.strptime(endDate, "%Y-%m-%d").date()
+    start_time = datetime.strptime(startTime, "%H:%M").time()
+    end_time = datetime.strptime(endTime, "%H:%M").time()
+
+    result = add_course_assessment(
+        courseCode=courseCode, 
+        assessmentID=assessmentID,
+        startDate=start_date,
+        startTime=start_time,
+        endDate=end_date,
+        endTime=end_time,
+        clashRule=clashRule)
 
     if "Error" in result:
         return jsonify({"error": result["Error"]}), 400
@@ -51,89 +91,67 @@ def schedule_course_assessment_action():
         "courseAssessment": result["CourseAssessment"]
     }), 201
 
-"""
-Assessment
-Written By
-"""
-
-# 02 : Delete Assessment *
-@staff_views.route('/deleteAssessment/<string:courseAssessmentID>', methods=['GET'])
-@jwt_required()
+# 03 : Delete Assessment
+@staff_views.route('/deleteAssessment/<int:courseAssessmentID>', methods=['DELETE'])
+@jwt_required(Staff)
 def delete_assessment_action(courseAssessmentID):
-    # courseAsm = get_CourseAsm_id(caNum) # Gets selected assessment for course
-    # delete_CourseAsm(courseAsm)
-    # print(caNum, ' deleted')
-    # return redirect(url_for('staff_views.get_assessments_page'))
-    pass 
+    result = delete_course_assessment(courseAssessmentID)
 
-# 03 : Update Assessment *
-@staff_views.route('/updateAssessment/<int:courseAssessmentID>', methods=['POST'])
+    if "Error" in result:
+        return jsonify({"error": result["Error"]}), 400
+    return jsonify(result), 200
+
+# 04 : Reshedule Assessment
+@staff_views.route('/rescheduleAssessment/<int:courseAssessmentID>', methods=['PUT'])
 @jwt_required()
-def update_assessment_action(courseAssessmentID):
-    # if request.method=='POST':
-    #     #get form details
-    #     course = request.form.get('myCourses')
-    #     asmType = request.form.get('AssessmentType')
-    #     startDate = request.form.get('startDate')
-    #     endDate = request.form.get('endDate')
-    #     startTime = request.form.get('startTime')
-    #     endTime = request.form.get('endTime')
+def reschedule_assessment_action(courseAssessmentID):
+    data = request.get_json()
+    newStartDate = data.get('startDate')
+    newStartTime = data.get('startTime')
+    newEndDate = data.get('endDate')
+    newEndTime = data.get('endTime')
 
-    #     #update record
-    #     assessment=get_CourseAsm_id(id)
-    #     if assessment:
-    #         assessment.a_ID=asmType
-    #         if startDate!='' and endDate!='' and startTime!='' and endTime!='':
-    #             assessment.startDate=startDate
-    #             assessment.endDate=endDate
-    #             assessment.startTime=startTime
-    #             assessment.endTime=endTime
+    startDate = datetime.strptime(newStartDate, "%Y-%m-%d").date()
+    endDate = datetime.strptime(newEndDate, "%Y-%m-%d").date()
+    startTime = datetime.strptime(newStartTime, "%H:%M").time()
+    endTime = datetime.strptime(newEndTime, "%H:%M").time()
 
-    #         db.session.commit()
+    result = reschedule_course_assessment(courseAssessmentID, newStartDate=startDate, newEndDate=endDate, newStartTime=startTime, newEndTime=endTime)
 
-    #         clash=detect_clash(assessment.id)
-    #         if clash:
-    #             assessment.clashDetected = True
-    #             db.session.commit()
-    #             flash("Clash detected! The maximum amount of assessments for this level has been exceeded.")
-    #             time.sleep(1)
+    if "Error" in result:
+        return jsonify({"error": result["Error"]}), 400
+    return jsonify(result), 200
 
-    # return redirect(url_for('staff_views.get_assessments_page'))
-    pass
-
-# 04 : View Course Schedule *
-@staff_views.route('/courseSchedule', methods=['GET'])
+# 05 : View Course Schedule
+@staff_views.route('/viewCourseSchedule/<string:courseCode>', methods=['GET'])
 @jwt_required()
-def view_course_schedule_action():
-    # # Retrieve data from page
-    # id = request.form.get('id')
-    # startDate = request.form.get('startDate')
-    # startTime = request.form.get('startTime')
-    # endDate = request.form.get('endDate')
-    # endTime = request.form.get('endTime')
+def view_course_schedule_action(courseCode):
+    data = request.get_json()
+    startDate = data['startDate']
+    endDate = data['endDate']
 
-    # # Get course assessment
-    # assessment=get_CourseAsm_id(id)
-    # if assessment:
-    #     assessment.startDate=startDate
-    #     assessment.endDate=endDate
-    #     assessment.startTime=startTime
-    #     assessment.endTime=endTime
+    if not courseCode or not startDate or not endDate:
+        return jsonify({"Error": "Missing Required Fields."}), 400
 
-    #     db.session.commit()
-        
-    #     clash=detect_clash(assessment.id)
-    #     if clash:
-    #         assessment.clashDetected = True
-    #         db.session.commit()
-    #         session['message'] = assessment.courseCode+" - Clash detected! The maximum amount of assessments for this level has been exceeded."
-    #     else:
-    #         session['message'] = "Assessment modified"
-    # return session['message']
-    pass
+    try:
+        start_date = datetime.strptime(startDate, '%Y-%m-%d').date()
+        end_date = datetime.strptime(endDate, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({"Error": "Invalid Date Format. Please Use YYYY-MM-DD."}), 400
 
-# 05 : Search Scheduled Assessment
-@staff_views.route("/searchAssessment", methods=["GET"])
+    result = get_scheduled_assessments(courseCode, start_date, end_date)
+
+    if "Error" in result:
+        return jsonify(result), 400
+
+    return jsonify(result), 200
+
+# 06 : Search Scheduled Assessment
+@staff_views.route("/searchCourseAssessment/<int:courseAssessmentID>", methods=["GET"])
 @jwt_required()
-def search_assessment_action():
-    pass
+def search_course_assessment_action(courseAssessmentID):
+    result = get_course_assessment(courseAssessmentID=courseAssessmentID)
+
+    if "Error" in result:
+        return jsonify({"error": result["Error"]}), 400
+    return jsonify(result), 200
