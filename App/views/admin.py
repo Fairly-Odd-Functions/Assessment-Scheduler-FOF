@@ -4,7 +4,7 @@ from App.models import Admin
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask_jwt_extended import jwt_required
-from App.controllers import Course, CourseAssessment
+from App.controllers import *
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 # IMPORTS TO CLEAN UP
 
@@ -65,42 +65,63 @@ def remove_staff_action():
     pass
 
 """
-Course [2]
-Written By
+Course [6]
+Written By: Katoya Ottley
+Task: 10.3.1. Implement API Views for Admin (Course)
 """
 
 # 01 : Add Course *
 @admin_views.route('/addCourse', methods=['POST'])
 @jwt_required(Admin)
 def add_course_action():
-    if request.method == 'POST':
-        courseCode = request.form.get('course_code')
-        title = request.form.get('title')
-        description = request.form.get('description')
-        data = request.form
-        level = request.form.get('level')
-        semester = request.form.get('semester')
-        numAssessments = request.form.get('numAssessments')
-        course = add_Course(courseCode,title,description,level,semester,numAssessments)
-        pass
+    try:
+        data = request.get_json()
+        courseCode = data.get("courseCode")
+        courseTitle = data.get("courseTitle")
+        courseCredits = data.get("courseCredits")
+        courseDescription = data.get("courseDescription")
+        courseLevel = data.get("courseLevel")
+
+        if not courseCode or not courseTitle or not courseCredits or not courseDescription or not courseLevel:
+            return jsonify(error= "All Fields are Required To Add Course"), 400
+
+        newCourse = add_course(courseCode, courseTitle, courseCredits, courseDescription, courseLevel)
+        if newCourse is None:
+            return jsonify(error = "Failed To Add Course or Course Already Exists."), 400
+
+        message = f'Course: {newCourse.courseCode} - {newCourse.courseTitle} Added Successfully!'
+        return jsonify(message=message), 201
+    
+    except Exception as e:
+        print (f"Error While Adding Course: {e}")
+        return jsonify(error = "An Error Occurred While Adding Course"), 500
+
 
 # 02 : Update Course *
-@admin_views.route('/updateCourse', methods=['POST'])
+@admin_views.route('/updateCourse', methods=['PUT'])
 @jwt_required(Admin)
 def update_course_action():
-    if request.method == 'POST':
-        courseCode = request.form.get('code')
-        title = request.form.get('title')
-        description = request.form.get('description')
-        level = request.form.get('level')
-        semester = request.form.get('semester')
-        numAssessments = request.form.get('assessment')
-        # programme = request.form.get('programme')
+    try:
+        data = request.get_json()
+        courseCode = data.get("courseCode")
+        new_courseTitle = data.get("new_courseTitle")
+        new_courseCredits = data.get("new_courseCredits")
+        new_courseDescription = data.get("new_courseDescription")
+        new_courseLevel = data.get("new_courseLevel")
 
-        delete_Course(get_course(courseCode)) # Woah that's extreme
-        add_Course(courseCode, title, description, level, semester, numAssessments)
-        flash("Course Updated Successfully!") 
-    pass
+        #if not is_valid_course_code(courseCode):
+        #    return jsonify(error = "Invalid Course Code, Please Try Again"), 400
+        
+        updatedCourse = edit_course(courseCode, new_courseTitle=None, new_courseCredits=None, new_courseDescription=None, new_courseLevel=None)
+        if updatedCourse is None:
+            return jsonify(error = "Failed To Update Course or Course Does Not Exists."), 400
+
+        message = f'Course: {updatedCourse.courseCode} - {updatedCourse.new_courseTitle} Updated Successfully!'
+        return jsonify(message=message), 201
+    
+    except Exception as e:
+        print (f"Error While Updating Course: {e}")
+        return jsonify(error = "An Error Occurred While Updating Course"), 500
 
 
 """
