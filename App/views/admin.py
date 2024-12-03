@@ -4,7 +4,7 @@ from App.models import Admin
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask_jwt_extended import jwt_required
-from App.controllers import Course, CourseAssessment
+from App.controllers import *
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 # IMPORTS TO CLEAN UP
 
@@ -14,55 +14,156 @@ admin_views = Blueprint('admin_views', __name__, template_folder='../templates')
 
 """
 Users [8]
-Written By
+Written By Rynnia(Rynnia.R) - Task 10.3. Implement API Views for Admin (Main)
 """
 # 01 : Register Staff
 @admin_views.route('/registerStaff', methods=['POST'])
 @jwt_required(Admin)
 def register_staff_action():
-    pass
+    data = request.form
+    firstName = data.get('firstName')
+    lastName = data.get('lastName')
+    email = data.get('email')
+    password = data.get('password')
+
+    result = register_staff(firstName, lastName, password, email)
+
+    if "error" in result:
+        return jsonify(error = result["error"]), 400
+    
+    if result:
+        return jsonify(result.get_json()), 201
+
+    return jsonify(error = "An unknown error occurred"), 500
     
 # 02 : Create Admin
 @admin_views.route('/createAdmin', methods=['POST'])
 @jwt_required(Admin)
 def create_admin_action():
-    pass
+    
+    data = request.form
+    firstName = data.get('firstName')
+    lastName = data.get('lastName')
+    email = data.get('email')
+    password = data.get('password')
+
+    result = create_admin(firstName, lastName, password, email)
+
+    if "error" in result:
+        return jsonify(error = result["error"]), 400
+    
+    if result:
+        return jsonify(result.get_json()), 201
+
+    return jsonify(error = "An unknown error occurred"), 500
 
 # 03 : Get All Staff Users
 @admin_views.route('/allStaff', methods=['GET'])
 @jwt_required(Admin)
 def list_all_staff_action():
-    pass
+    
+    allStaff = get_all_staff()
+
+    if allStaff is None:
+        #there is no staff
+        return jsonify(error = "No Staff Found."), 404
+
+    elif allStaff:
+
+        allStaff = [staff.get_json() for staff in allStaff]
+        return jsonify(allStaff), 200    
+    else:
+        return jsonify(error = "An unknown error occurred"), 500
 
 # 04 : Get All Admin Users
 @admin_views.route('/allAdmin', methods=['GET'])
 @jwt_required(Admin)
 def list_all_admin_action():
-    pass
+    
+    allAdmin = get_all_admin_users_json()
+
+    if allAdmin is None:
+        return jsonify(error = "No Admin Found."), 404
+
+    elif allAdmin:
+        return jsonify(allAdmin), 200    
+    
+    else:
+        return jsonify(error = "An unknown error occurred"), 500
 
 # 05 : Update Admin
-@admin_views.route('/updateAdmin', methods=['POST'])
+@admin_views.route('/updateAdmin/<str:adminEmail>', methods=['POST'])
 @jwt_required(Admin)
-def update_admin_action():
-    pass
+def update_admin_action(adminEmail):
+    
+    data = request.form
+    firstName = data.get('firstName')
+    lastName = data.get('lastName')
+    email = data.get('email')
+    password = data.get('password')
+
+    result = update_admin(adminEmail, firstName, lastName, password, email)
+
+    if "error" in result:
+        return jsonify(error = result["error"]), 400
+    
+    if result:
+        return jsonify(result.get_json()), 201
+
+    return jsonify(error = "An unknown error occurred"), 500
 
 # 06 : Remove Admin
-@admin_views.route('/removeAdmin', methods=['POST'])
+@admin_views.route('/removeAdmin/<str:email>', methods=['POST'])
 @jwt_required(Admin)
-def remove_admin_action():
-    pass
+def remove_admin_action(email):
+    
+    result = delete_admin(email)
+
+    if "error" in result:
+        return jsonify(error = result["error"]), 400
+    
+    if result:
+        return jsonify(result.get_json()), 201
+
+    return jsonify(error = "An unknown error occurred"), 500
+
 
 # 07 : Update Staff
-@admin_views.route('/updateStaff', methods=['POST'])
+@admin_views.route('/updateStaff/<str:staffEmail>', methods=['POST'])
 @jwt_required(Admin)
-def update_staff_action():
-    pass
+def update_staff_action(staffEmail):
+    
+    data = request.form
+    firstName = data.get('firstName')
+    lastName = data.get('lastName')
+    email = data.get('email')
+    password = data.get('password')
+
+    result = update_staff(staffEmail, firstName, lastName, password, email)
+
+    if "error" in result:
+        return jsonify(error = result["error"]), 400
+    
+    if result:
+        return jsonify(result.get_json()), 201
+
+    return jsonify(error = "An unknown error occurred"), 500
+    
 
 # 08 : Remove Staff
-@admin_views.route('/removeStaff', methods=['POST'])
+@admin_views.route('/removeStaff/<str:staffEmail>', methods=['POST'])
 @jwt_required(Admin)
-def remove_staff_action():
-    pass
+def remove_staff_action(staffEmail):
+    
+    result = delete_staff(staffEmail)
+
+    if "error" in result:
+        return jsonify(error = result["error"]), 400
+    
+    if result:
+        return jsonify(result.get_json()), 201
+
+    return jsonify(error = "An unknown error occurred"), 500
 
 """
 Course [2]
@@ -81,7 +182,7 @@ def add_course_action():
         level = request.form.get('level')
         semester = request.form.get('semester')
         numAssessments = request.form.get('numAssessments')
-        course = add_Course(courseCode,title,description,level,semester,numAssessments)
+        #course = add_Course(courseCode,title,description,level,semester,numAssessments)
         pass
 
 # 02 : Update Course *
@@ -97,8 +198,8 @@ def update_course_action():
         numAssessments = request.form.get('assessment')
         # programme = request.form.get('programme')
 
-        delete_Course(get_course(courseCode)) # Woah that's extreme
-        add_Course(courseCode, title, description, level, semester, numAssessments)
+        #delete_Course(get_course(courseCode)) # Woah that's extreme
+        #add_Course(courseCode, title, description, level, semester, numAssessments)
         flash("Course Updated Successfully!") 
     pass
 
