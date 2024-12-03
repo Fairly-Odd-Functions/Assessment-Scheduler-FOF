@@ -198,11 +198,62 @@ def remove_offering_action():
         print (f"Error While Removing Course Offering: {e}")
         return jsonify(error = "An Error Occurred While Removing Course Offering"), 500
 
+''' No Controller Present
 # 03 : Update Course Offering
 @admin_views.route('/updateCourseOffering', methods=['POST'])
 @jwt_required(Admin)
 def update_offering_action():
     pass
+'''
+# 04 : List of Courses For A Specific Semester
+@admin_views.route('/listCourse', methods=['GET'])
+@jwt_required(Admin)
+def list_semester_course_action():
+    try:
+        data = request.get_json()
+        semesterName = data.get("semesterName")
+        academicYear = data.get("academicYear")
+
+        if not semesterName or not academicYear:
+            return jsonify(error= "All Fields are Required To Add Course"), 400
+
+        listOfSemesterCourse = list_courses_for_semester(semesterName, academicYear)
+        if listOfSemesterCourse is None:
+            return jsonify(error = "Failed To List Semester Courses or Courses Do Not Exists."), 400
+
+        message = f'Course for : {listOfSemesterCourse.semesterName} For the Academic Year {listOfSemesterCourse.academicYear} Was Listed Successfully!'
+        return jsonify(message=message), 201
+    
+    except Exception as e:
+        print (f"Error While Listing Semester Courses: {e}")
+        return jsonify(error = "An Error Occurred While Listing Semester Course"), 500
+
+# 05:  List Of A Course Offering For An Academic Year
+@admin_views.route('/listCourse', methods=['GET'])
+@jwt_required(Admin)
+def list_semester_course_action():
+    try:
+        data = request.get_json()
+        courseCode = data.get("courseCode")
+        academicYear = data.get("academicYear")
+
+        #if not is_valid_course_code(courseCode):
+        #    return jsonify(error = "Invalid Course Code, Please Try Again"), 400
+
+        if not courseCode or not academicYear:
+            return jsonify(error= "All Fields are Required To Add Course"), 400
+
+        listOfAcademicYearCourse = get_course_offerings(courseCode, academicYear)
+        if listOfAcademicYearCourse is None:
+            return jsonify(error = "Failed To List Course For Academic Year Courses or Course Do Not Exists."), 400
+
+        message = f'Course for : {listOfAcademicYearCourse.courseCode} For the Academic Year {listOfAcademicYearCourse.academicYear} Was Listed Successfully!'
+        return jsonify(message=message), 201
+    
+    except Exception as e:
+        print (f"Error While Listing Course For The Academic Year: {e}")
+        return jsonify(error = "An Error Occurred While Listing Course For The Academic Year"), 500
+
 
 """
 CourseStaff [3]
