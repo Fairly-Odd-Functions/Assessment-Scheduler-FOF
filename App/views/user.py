@@ -9,7 +9,7 @@ from App.controllers import *
 user_views = Blueprint('user_views', __name__, template_folder='../templates')
 
 """
-User Views [total : 11]
+User Views [total : 5]
 Written by RynniaRyan (Rynnia.R) - Task 10.2 Implement API Views for User
 Comment: Original views template made by Jalene has been modified and moved to Admin Views as requested :)
 """
@@ -97,12 +97,13 @@ def get_staff_courses_action(email):
 @jwt_required()
 def get_course_staff_action():
 
-    #Obtaining specified coursecode, semesterName and  academicYear
-    courseCode = request.args.get('courseCode', type=str)
-    semesterName = request.args.get('semesterName', type=str)
-    academicYear = request.args.get('academicYear', type=str)
+    data = request.get_json()
+    courseCode = data.get('courseCode')
+    semesterName = data.get('semesterName')
+    academicYear = data.get('academicYear')
+ 
 
-    if courseCode:
+    if not courseCode or not semesterName or not academicYear:
         try:    
             course_staff = get_course_staff(courseCode, semesterName, academicYear)    
 
