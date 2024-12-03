@@ -216,14 +216,26 @@ def update_course_staff_action():
 
 """
 Programme [3]
-Written By
+Written By Daniel Young
 """
 
 # 01 : Add Programme
 @admin_views.route('/addProgramme', methods=['POST'])
 @jwt_required(Admin)
 def add_programme_action():
-    pass
+    data = request.json
+    programmeTitle = data['programmeTitle']
+    programmeDescription = data['programmeDescription']
+
+    response = create_programme(programmeTitle, programmeDescription)
+    if "Error Message" in response:
+        return jsonify({"message" : response["Error Message"]}), 400
+    if "Programme" in response:
+        return jsonify({
+            "message" : reponse["Message"],
+            "Programme" : response["Programme"]
+        }),201
+    return jsonify({"message":"An unknown error occorred"}),500
 
 # 02 : Remove Programme
 @admin_views.route('/removeProgramme', methods=['POST'])
@@ -235,4 +247,36 @@ def remove_programme_action():
 @admin_views.route('/updateProgramme', methods=['POST'])
 @jwt_required(Admin)
 def update_programme_action():
+    data = request.json
+    programmeTitle = data{}
+    update_programme(programmeTitle, new_title=None, new_description=None)
+
+# 05 : Get Programme Course
+@user_views.route('/getProgrammeCourse', methods=['GET'])
+@jwt_required()
+def get_programme_course_action():
+    pass
+
+# 07 : List Programmes
+@user_views.route('/listProgrammes', methods=['GET'])
+@jwt_required()
+def list_programmes_action():
+    pass
+
+# 08 : List Programme Courses
+@user_views.route('/listProgrammeCourses', methods=['GET'])
+@jwt_required()
+def list_programme_courses_action():
+    pass
+
+# 08 : Programme by ID
+@user_views.route('/getProgrammeByID<int:programmeID>', methods=['GET'])
+@jwt_required()
+def get_programme_by_id_action(programmeID):
+    pass
+
+# 08 : Programme by title
+@user_views.route('/getProgrammeByTitle<string:programmeTitle>', methods=['GET'])
+@jwt_required()
+def get_programme_by_id_action(programmeTitle):
     pass
