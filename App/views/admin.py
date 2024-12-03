@@ -152,6 +152,61 @@ def list_course_action():
     except Exception as e:
         return jsonify(error = f"An Error Occurred While Listing Courses"), 500
 
+# 05 : Assign A Staff to A Course *
+@admin_views.route('/addStaff', methods=['POST'])
+@jwt_required(Admin)
+def add_course_staff_action():
+    try:
+        data = request.get_json()
+        courseCode = data.get("courseCode")
+        semesterName = data.get("semesterName")
+        academicYear = data.get("academicYear")
+        staffID = data.get("staffID")
+        
+        if not courseCode or not semesterName or not academicYear or not staffID:
+            return jsonify(error= "All Fields are Required To Assign Staff to Course"), 400
+
+        #if not is_valid_staff_id(staffID):
+        #    return jsonify(error = "Invalid Staff ID, Please Try Again."), 400
+
+        newStaff =  add_course_staff(courseCode, semesterName, academicYear, staffID)
+        if newStaff is None:
+            return jsonify(error = "Failed To Add Staff To The Course or Staff Already Assigned to That Course."), 400
+
+        message = f'Staff: {newStaff.staffID} Assigned to {courseCode} for Academic Year {academicYear}, Semester {semesterName} Added Successfully!'
+        return jsonify(message=message), 201
+    
+    except Exception as e:
+        print (f"Error While Assigning Staff To Course: {e}")
+        return jsonify(error = "An Error Occurred While Assigning Staff To Course"), 500
+    
+# 06 : Remove A Staff from A Course *
+@admin_views.route('/removeStaff', methods=['DELETE'])
+@jwt_required(Admin)
+def add_course_staff_action():
+    try:
+        data = request.get_json()
+        courseCode = data.get("courseCode")
+        semesterName = data.get("semesterName")
+        academicYear = data.get("academicYear")
+        staffID = data.get("staffID")
+        
+        if not courseCode or not semesterName or not academicYear or not staffID:
+            return jsonify(error= "All Fields are Required To Remove Staff From A Course"), 400
+
+        #if not is_valid_staff_id(staffID):
+        #    return jsonify(error = "Invalid Staff ID, Please Try Again."), 400
+
+        removeStaff =  remove_course_staff(courseCode, semesterName, academicYear, staffID)
+        if removeStaff is None:
+            return jsonify(error = "Failed To Remove Staff From Course or Staff Is Not Assigned to That Course."), 400
+
+        message = f'Staff: {removeStaff.staffID} From {courseCode} for Academic Year {academicYear}, Semester {semesterName} Removed Successfully!'
+        return jsonify(message=message), 201
+    
+    except Exception as e:
+        print (f"Error While Removing Staff From Course: {e}")
+        return jsonify(error = "An Error Occurred While Removing Staff From Course"), 500
 
 """
 Semester [2]
