@@ -4,7 +4,7 @@ from App.models import Admin
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask_jwt_extended import jwt_required
-from App.controllers import Course, CourseAssessment
+from App.controllers import *
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 # IMPORTS TO CLEAN UP
 
@@ -129,20 +129,44 @@ def update_semester_action():
 
 """
 ProgrammeCourse [2]
-Written By
+Written By Daniel Young
 """
-
-# 01 : Add Programme Course
 @admin_views.route('/addProgrammeCourse', methods=['POST'])
 @jwt_required(Admin)
 def add_programme_course_action():
-    pass
+    data = request.json
+    courseCode = data['courseCode']
+    programmeID = data['programmeID']
+
+    response = add_course_to_programme(courseCode, programmeID)
+    if "Error Message" in response:
+        return jsonify ({"message" : response["Error Message"]}),400
+
+    if "CourseProgramme" in response:
+        return jsonify({
+            "message" : response["Message"],
+            "CourseProgramme" : response["CourseProgramme"]
+        }),201
+    return jsonify({"message":"An unknown error occured"}),500
 
 # 02 : Remove Programme Course
 @admin_views.route('/removeProgrammeCourse', methods=['POST'])
 @jwt_required(Admin)
 def remove_programme_course_action():
-    pass
+    data = request.json
+    courseCode = data['courseCode']
+    programmeID = data['programmeID']
+
+    response = remove_course_from_programme(courseCode, programmeID)
+    if "Error Message" in response:
+        return jsonify ({"message" : response["Error Message"]}),400
+    if "Message" in response:
+        return jsonify({
+            "message" : response["Message"]
+        }),201
+    return jsonify({"message":"Unable to delete"}), 500
+
+# @admin_views.route('/getProgrammeCourse', methods=['GET'])
 
 
 """
