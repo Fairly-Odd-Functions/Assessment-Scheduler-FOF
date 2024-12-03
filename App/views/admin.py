@@ -28,11 +28,14 @@ def register_staff_action():
 
     result = register_staff(firstName, lastName, password, email)
 
-    if "error" in result:
+    if result is None:
+        return jsonify(error = "Staff with this email or password already exists"), 400
+    
+    if isinstance(result, dict):
         return jsonify(error = result["error"]), 400
     
     if result:
-        return jsonify(result.get_json()), 201
+        return jsonify(message = "Staff registered successfully"), 201
 
     return jsonify(error = "An unknown error occurred"), 500
     
@@ -49,11 +52,11 @@ def create_admin_action():
 
     result = create_admin(firstName, lastName, password, email)
 
-    if "error" in result:
-        return jsonify(error = result["error"]), 400
+    if result is None:
+        return jsonify(error = "Admin with this email already exists"), 400
     
     if result:
-        return jsonify(result.get_json()), 201
+        return jsonify(message = "Admin created successfully"), 201
 
     return jsonify(error = "An unknown error occurred"), 500
 
@@ -91,45 +94,8 @@ def list_all_admin_action():
     else:
         return jsonify(error = "An unknown error occurred"), 500
 
-# 05 : Update Admin
-@admin_views.route('/updateAdmin/<str:adminEmail>', methods=['POST'])
-@jwt_required(Admin)
-def update_admin_action(adminEmail):
-    
-    data = request.form
-    firstName = data.get('firstName')
-    lastName = data.get('lastName')
-    email = data.get('email')
-    password = data.get('password')
-
-    result = update_admin(adminEmail, firstName, lastName, password, email)
-
-    if "error" in result:
-        return jsonify(error = result["error"]), 400
-    
-    if result:
-        return jsonify(result.get_json()), 201
-
-    return jsonify(error = "An unknown error occurred"), 500
-
-# 06 : Remove Admin
-@admin_views.route('/removeAdmin/<str:email>', methods=['POST'])
-@jwt_required(Admin)
-def remove_admin_action(email):
-    
-    result = delete_admin(email)
-
-    if "error" in result:
-        return jsonify(error = result["error"]), 400
-    
-    if result:
-        return jsonify(result.get_json()), 201
-
-    return jsonify(error = "An unknown error occurred"), 500
-
-
-# 07 : Update Staff
-@admin_views.route('/updateStaff/<str:staffEmail>', methods=['POST'])
+# 05 : Update Staff
+@admin_views.route('/updateDmin/<string:staffEmail>', methods=['POST'])
 @jwt_required(Admin)
 def update_staff_action(staffEmail):
     
@@ -145,23 +111,64 @@ def update_staff_action(staffEmail):
         return jsonify(error = result["error"]), 400
     
     if result:
-        return jsonify(result.get_json()), 201
+        return jsonify(message = "Staff member updated successfully"), 200
 
     return jsonify(error = "An unknown error occurred"), 500
-    
 
-# 08 : Remove Staff
-@admin_views.route('/removeStaff/<str:staffEmail>', methods=['POST'])
+# 06 : Remove Admin
+@admin_views.route('/removeAdmin/<string:adminEmail>', methods=['POST'])
 @jwt_required(Admin)
-def remove_staff_action(staffEmail):
+def remove_admin_action(adminEmail):
+
+    admin = Admin.query.filter_by(email=adminEmail).first()
+
+    if not admin:
+        return jsonify(error = "No Admin Found."), 404
+
+    if admin:
+        result = delete_admin(adminEmail)
+
+        if "error" in result:
+            return jsonify(error=result["error"]), 400
+        
+        if result is not None:
+            return jsonify(message="Admin deleted successfully"), 200
+
+    return jsonify(error="An unknown error occurred"), 500
+
+# 07 : Update Admin
+@admin_views.route('/updateAdmin/<string:adminEmail>', methods=['POST'])
+@jwt_required(Admin)
+def update_admin_action(adminEmail):
     
-    result = delete_staff(staffEmail)
+    data = request.form
+    firstName = data.get('firstName')
+    lastName = data.get('lastName')
+    email = data.get('email')
+    password = data.get('password')
+
+    result = update_admin(adminEmail, firstName, lastName, password, email)
 
     if "error" in result:
         return jsonify(error = result["error"]), 400
     
     if result:
-        return jsonify(result.get_json()), 201
+        return jsonify(message = "Admin updated successfully"), 200
+
+    return jsonify(error = "An unknown error occurred"), 500
+    
+# 08 : Remove Staff
+@admin_views.route('/removeStaff/<string:staffEmail>', methods=['POST'])
+@jwt_required(Admin)
+def remove_staff_action(staffEmail):
+    
+    result = delete_staff(staffEmail)
+
+    if "Error" in result:
+        return jsonify(error = result), 400
+    
+    if "Staff member deleted successfully" in result:
+        return jsonify(message = result), 200
 
     return jsonify(error = "An unknown error occurred"), 500
 
