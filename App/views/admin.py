@@ -168,32 +168,40 @@ def add_offering_action(courseCode):
             return jsonify(error=newCourseOffering["Error"]), 400
 
         elif "Message" in newCourseOffering:
-            message = f'Course: {newCourseOffering["CourseOffering"]["courseCode"]} for Semester ID {newCourseOffering["CourseOffering"]["semesterID"]} With {newCourseOffering["CourseOffering"]["totalStudentsEnrolled"]} Students Was Added Successfully!'
-            return jsonify(message=message), 201
+            course_offering_data = newCourseOffering["CourseOffering"]
+            course_offering_data["courseOfferingID"] = newCourseOffering["CourseOffering"]["offeringID"]
+
+            message = f'Course: {course_offering_data["courseCode"]} for Semester ID {course_offering_data["semesterID"]} With {course_offering_data["totalStudentsEnrolled"]} Students Was Added Successfully!'
+
+            response_data = {
+                "message": message,
+                "courseOfferingID": course_offering_data["courseOfferingID"]
+            }
+            return jsonify(response_data), 201
     
     except Exception as e:
         print (f"Error While Adding Course Offering: {e}")
         return jsonify(error = "An Error Occurred While Adding Course Offering"), 500
 
 # 02 : Remove Course Offering
-@admin_views.route('/removeCourseOffering', methods=['POST'])
+@admin_views.route('/removeCourseOffering', methods=['DELETE'])
 @jwt_required(Admin)
 def remove_offering_action():
     try:
         data = request.get_json()
-        courseCode = data.get("courseCode")
-        semesterID = data.get("semesterID")
+        courseCode = data["courseCode"]
+        semesterID = data["semesterID"]
 
         if not courseCode or not semesterID:
             return jsonify(error= "All Fields are Required To Remove Course Offering"), 400
 
         removeCourseOffering = remove_course_offering(courseCode, semesterID)
-        if removeCourseOffering is None:
-            return jsonify(error = "Failed To Remove Course Offering or Course Offering Does Not Exists."), 400
+        if "Error" in removeCourseOffering:
+            return jsonify(error=removeCourseOffering["Error"]), 400
 
-        message = f'Course: {removeCourseOffering.courseCode} for Semester ID {removeCourseOffering.semesterID} Was Removed Successfully!'
+        message = removeCourseOffering["Message"]
         return jsonify(message=message), 201
-    
+
     except Exception as e:
         print (f"Error While Removing Course Offering: {e}")
         return jsonify(error = "An Error Occurred While Removing Course Offering"), 500
