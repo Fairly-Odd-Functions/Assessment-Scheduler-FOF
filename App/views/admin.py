@@ -316,9 +316,7 @@ def list_programme_courses_action():
 @jwt_required(Admin)
 def get_programme_by_id_action(programmeID):
     try:
-        data = request.json
-        programmeID = data['programmeID']
-
+        
         response = get_programme_by_id(programmeID)
         if response is None:
             return jsonify (error=f"No programme found with ID:{programmeID} "), 404
@@ -331,7 +329,7 @@ def get_programme_by_id_action(programmeID):
 # 08 : Programme by title
 @admin_views.route('/getProgrammeByTitle<string:programmeTitle>', methods=['GET'])
 @jwt_required(Admin)
-def get_programme_by_id_action(programmeTitle):
+def get_programme_by_title_action(programmeTitle):
     try:
         data = request.json
         programmeTitle = data['programmeTitle']
