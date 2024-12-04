@@ -378,7 +378,7 @@ def get_semester_by_academic_year():
         return jsonify(error=f'An Error Occurred While trying to Semesters or an academic year'), 500
 
 """
-ProgrammeCourse [2]
+ProgrammeCourse [4]
 Written By Daniel Young
 """
 @admin_views.route('/addProgrammeCourse', methods=['POST'])
@@ -389,8 +389,8 @@ def add_programme_course_action():
     programmeID = data['programmeID']
 
     response = add_course_to_programme(courseCode, programmeID)
-    if "Error Message" in response:
-        return jsonify ({"message" : response["Error Message"]}),400
+    if "Error" in response:
+        return jsonify ({"message" : response["Error"]}),400
 
     if "CourseProgramme" in response:
         return jsonify({
@@ -408,15 +408,41 @@ def remove_programme_course_action():
     programmeID = data['programmeID']
 
     response = remove_course_from_programme(courseCode, programmeID)
-    if "Error Message" in response:
-        return jsonify ({"message" : response["Error Message"]}),400
+    if "Error" in response:
+        return jsonify ({"message" : response["Error"]}),400
     if "Message" in response:
         return jsonify({
             "message" : response["Message"]
         }),201
     return jsonify({"message":"Unable to delete"}), 500
 
-# @admin_views.route('/getProgrammeCourse', methods=['GET'])
+# 03 : Get Course Degree Programme
+@admin_views.route("/courseProgramme/<string:courseCode>", methods=["GET"])
+@jwt_required(Admin)
+def get_course_programme_action(courseCode):
+    try: 
+        course_programme = get_degree_programme(courseCode)
+        if course_programme is None:
+            return jsonify(error=f'Course with ID:{courseCode} Not enlisted in Programme'),404
+        return jsonify(course_programme),200
+    except Exception as e:
+        return jsonify(error=f'An Error Occurred While Searching For Course With ID: {courseCode}'), 500
+
+# 04 : List Programme Courses
+@admin_views.route('/listProgrammeCourses', methods=['GET'])
+@jwt_required(Admin)
+def list_programme_courses_action():
+    data = request.json
+    programmeID = data['programmeID']
+    
+    response = get_course_programme(programmeID)
+    if "Error" in response:
+        return jsonify ({"message" : response["Error"]}),400
+    if "Message" in response:
+        return jsonify ({"message" : response['Message']}),404
+    if "CourseProgrammes" in response:
+        return jsonify({"CourseProgrammes":response["CourseProgrammes"]}),201
+    return jsonify({"message":"An unknown error occured"}),500
 
 """
 CourseOffering [4]
@@ -603,7 +629,7 @@ def add_programme_action():
         return jsonify({"message" : response["Error Message"]}), 400
     if "Programme" in response:
         return jsonify({
-            "message" : reponse["Message"],
+            "message" : response["Message"],
             "Programme" : response["Programme"]
         }),201
     return jsonify({"message":"An unknown error occorred"}),500
@@ -627,7 +653,7 @@ def update_programme_action():
     if "Error Message" in response:
         return jsonify({"message" : response["Error Message"]}), 400
     if "Programme" in response:
-        return jsonify({"message" : reponse['Message'],
+        return jsonify({"message" : response['Message'],
                     "Programme": response['Programme']
         }),201
     return jsonify({"message":"An unknown error occorred"}),500
@@ -658,7 +684,7 @@ def list_programmes_action():
         response = list_programmes()
         if "Error Message" in response:
             return jsonify ({"message" : response['Error Message']}),400
-        if "Message" in rsponse:
+        if "Message" in response:
             return jsonify ({"message" : response['Message']}),404
         return jsonify(response),201
     except Exception as e:

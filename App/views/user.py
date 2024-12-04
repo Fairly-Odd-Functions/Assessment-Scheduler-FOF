@@ -9,7 +9,7 @@ from App.controllers import *
 user_views = Blueprint('user_views', __name__, template_folder='../templates')
 
 """
-User Views [total : 5]
+User Views [5]
 Written by RynniaRyan (Rynnia.R) - Task 10.2 Implement API Views for User
 Comment: Original views template made by Jalene has been modified and moved to Admin Views as requested :)
 """
@@ -18,7 +18,6 @@ Comment: Original views template made by Jalene has been modified and moved to A
 @user_views.route('/courseSearch/<string:courseCode>', methods=['GET'])
 @jwt_required()
 def search_course_action(courseCode):
-
     if courseCode:
         try:
             course = get_course_by_code(courseCode) #course variable already holds a dictionary
@@ -33,7 +32,7 @@ def search_course_action(courseCode):
             return jsonify(error=f"An error occurred while searching for the course"), 500
     else:
         return jsonify(error="Please provide a course code"), 400
-    
+
 # 02 : Get Admin by Email
 @user_views.route("/adminSearch/<string:email>", methods=["GET"])
 @jwt_required()
@@ -92,7 +91,7 @@ def get_staff_courses_action(email):
     else:
         return jsonify(error="Please provide an email"), 400
     
-# 05 : Get Course Staff - Not to be confused with get staff with courses
+# 05 : Get Course Staff - Not To Be Confused With Get Staff With Courses
 @user_views.route("/courseStaff", methods=["GET"])
 @jwt_required()
 def get_course_staff_action():
@@ -101,7 +100,6 @@ def get_course_staff_action():
     courseCode = data.get('courseCode')
     semesterName = data.get('semesterName')
     academicYear = data.get('academicYear')
- 
 
     if not courseCode or not semesterName or not academicYear:
         try:    
