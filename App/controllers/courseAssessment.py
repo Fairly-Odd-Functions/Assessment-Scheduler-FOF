@@ -34,7 +34,7 @@ def add_course_assessment(courseCode, assessmentID, startDate, startTime, endDat
             endDate=date_validation["endDate"],
             startTime=time_validation["startTime"],
             endTime=time_validation["endTime"],
-            clashRule=clashRule.upper()
+            clashRule=clashRule.upper() if clashRule else None
         )
 
         validation_result = validate_assessment_clash(new_course_assessment)
