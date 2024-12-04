@@ -35,22 +35,27 @@ wsgi.py is a utility script for performing various tasks related to the project.
 
 ### CSV Commands
 ```bash
+# COMMAND #1 - Upload A CSV Of User Data
 $ flask csv users
 ```
 
 ```bash
+# COMMAND #2 - Upload A CSV Of Course Data
 $ flask csv courses
 ```
 
 ```bash
+# COMMAND #3 - Upload A CSV Of Assesment Data
 $ flask csv assessments
 ```
 
 ```bash
+# COMMAND #4 - Upload A CSV Of Programme Data
 $ flask csv programmes
 ```
 
 ```bash
+# COMMAND #5 - Upload A CSV Of Semester Data
 $ flask csv semesters
 ```
 
@@ -284,7 +289,7 @@ You can then execute all all application as follows:
 $ pytest
 ```
 
-![Screenshot1](img\tests.png)
+![Screenshot1](./img/test.png)
 
 or run perform specific tests with the following convention:
 
