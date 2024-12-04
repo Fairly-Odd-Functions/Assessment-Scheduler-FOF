@@ -131,13 +131,13 @@ def add_semester_action():
 @jwt_required(Admin)
 def update_semester_action():
     try:
-        data = request.json
-        semesterName = data['semesterName']
-        academicYear = data['academicYear']
-        new_semesterName = data['new_semesterName']
-        new_academicYear = data['new_academicYear']
-        startDate = data['startDate']
-        endDate = data['endDate']
+        data = request.get_json()
+        semesterName = data.get("semesterName")
+        academicYear = data.get("academicYear")
+        new_semesterName = data.get("new_semesterName")
+        new_academicYear = data.get("new_academicYear")
+        startDate = data.get("startDate")
+        endDate = data.get("endDate")
         response = update_semester(semesterName, academicYear, new_semesterName=None, new_academicYear=None, startDate=None, endDate=None)
         if "Error Message" in response:
             return jsonify({"message" : response['Error Message']}),400
@@ -150,17 +150,18 @@ def update_semester_action():
 @admin_views.route('/searchSemester', methods=['GET'])
 @jwt_required(Admin)
 def search_semester_action():
-    try:
-        data = request.json
-        semesterName = data['semesterName']
-        academicYear = data['academicYear']
+    # try:
+        data = request.get_json()
+        semesterName = data.get("semesterName")
+        academicYear = data.get("academicYear")
         response = get_semester(semesterName, academicYear)
         if "Error Message" in response:
             return jsonify({"message" : response['Error Message']}),400
         else:
-            return jsonify(response),201
-    except Exception as e:
-        return jsonify(error=f'An Error Occurred While trying to update semester'), 500
+            message=f'{response.semesterName} retrieved'
+            return jsonify(message=message),201
+    # except Exception as e:
+        # return jsonify(error=f'An Error Occurred While trying to find semester'), 500
 
 # 10 : List Semesters
 @admin_views.route('/listSemesters', methods=['GET'])
@@ -181,9 +182,9 @@ def list_semesters_action():
 @jwt_required(Admin)
 def list_semester_courses_action():
     try:
-        data = request.json
-        semesterName = data['semesterName']
-        academicYear = data['academicYear']
+        data = request.get_json()
+        semesterName = data.get("semesterName")
+        academicYear = data.get("academicYear")
         response = list_courses_for_semester(semesterName, academicYear)
         if "Error Message" in response:
             return jsonify({"message" : response['Error Message']}),400
@@ -196,8 +197,8 @@ def list_semester_courses_action():
 @jwt_required(Admin)
 def get_semester_by_academic_year():
     try:
-        data = request.json
-        academicYear = data['academicYear']
+        data = request.get_json()
+        academicYear = data.get("academicYear")
         response = get_semesters_by_academic_year(academicYear)
         if "Error Message" in response:
             return jsonify({"message" : response['Error Message']}),400
@@ -412,7 +413,7 @@ def get_programme_by_id_action(programmeID):
 # 08 : Programme by title
 @admin_views.route('/getProgrammeByTitle<string:programmeTitle>', methods=['GET'])
 @jwt_required(Admin)
-def get_programme_by_id_action(programmeTitle):
+def get_programme_by_title_action(programmeTitle):
     try:
         data = request.json
         programmeTitle = data['programmeTitle']
