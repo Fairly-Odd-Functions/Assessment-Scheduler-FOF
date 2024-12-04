@@ -392,7 +392,7 @@ def list_all_assessments_command(format):
     else:
         print(list_assessments_json())
 
-# # COMMAND #4 : UPDATE ASSESSMENT
+# COMMAND #4 : UPDATE ASSESSMENT
 @assessment_cli.command('update', help="Updates An Assessment")
 @click.option('--assessment_id', '-at', prompt="Enter Assessment ID", help="ID Number Of Assesment")
 @click.option('--new_assessment_title', '-atnew', default=None, help="New Assessment Title (Optional)")
