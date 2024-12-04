@@ -1,14 +1,15 @@
 from App.database import db
+from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'user'
 
     # Attributes
     userID = db.Column(db.Integer, unique=True, primary_key=True) 
     firstName = db.Column(db.String(120), nullable=False) 
     lastName = db.Column(db.String(120), nullable=False)
-    password = db.Column(db.String(120), nullable=False)
+    password = db.Column(db.String(120), nullable=False, unique = True) #[Added unique constraint by Rynnia]
     email = db.Column(db.String(120), nullable=False, unique = True)
 
     # Distinguishes between different user types ('admin', 'staff')
@@ -39,7 +40,10 @@ class User(db.Model):
             "lastName": self.lastName,
             "password": self.password,
             "email": self.email
-        }
+    }
+
+    def get_id(self):
+        return str(self.userID)
 
     def __str__(self):
         return (
@@ -47,10 +51,10 @@ class User(db.Model):
             f"firstName={self.firstName}, "
             f"lastName={self.lastName}, "
             f"email={self.email})"
-        )
+    )
 
     def __repr__(self):
         return (
             f"Staff(userID={self.userID}, firstName='{self.firstName}', "
             f"lastName='{self.lastName}', email='{self.email}')"
-        )
+    )

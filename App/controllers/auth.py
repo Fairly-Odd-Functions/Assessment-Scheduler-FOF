@@ -10,7 +10,7 @@ def setup_jwt(app):
 
     @jwt.user_identity_loader
     def user_identity_lookup(user):
-      return user.userID
+      return user
 
     @jwt.user_lookup_loader
     def user_lookup_callback(_jwt_header, jwt_data):
@@ -32,7 +32,6 @@ def setup_flask_login(app):
        admin = Admin.query.get(user_id)
        if admin:
           return admin
-
        return None
 
 def login_user(user):
