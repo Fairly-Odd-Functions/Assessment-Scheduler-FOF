@@ -67,8 +67,9 @@ def remove_staff_action():
 """
 Course [6]
 Written By: Katoya Ottley
-Task Re-Assigned: Jalene Armstrong (JaleneA)
-Task: 10.3.1. Implement API Views for Admin (Course)
+
+Task Re-Assigned:
+Written By: Jalene Armstrong (JaleneA) - Task: 10.3.1. Implement API Views for Admin (Course)
 """
 
 # 01 : Add Course
@@ -103,7 +104,7 @@ def add_course_action():
         print (f"Error While Adding Course: {e}")
         return jsonify(error = "An Error Occurred While Adding Course"), 500
 
-# 02 : Update Course *
+# 02 : Update Course
 @admin_views.route('/updateCourse/<string:courseCode>', methods=['PUT'])
 @jwt_required(Admin)
 def update_course_action(courseCode):
@@ -138,21 +139,19 @@ def update_course_action(courseCode):
         print (f"Error While Updating Course: {e}")
         return jsonify(error = "An Error Occurred While Updating Course"), 500
 
-# 03 : Get Course By Code*
+# 03 : Get Course By Code
 @admin_views.route('/searchCourse/<string:courseCode>', methods=['GET'])
 @jwt_required(Admin)
 def search_course_action(courseCode):
     try:
-        #if not is_valid_course_code(courseCode):
-        #    return jsonify(error = "Invaild Course Code, Please Try Again."), 400
+        course = get_course(courseCode)
+        if isinstance(course, dict) and "Error" in course:
+            return jsonify(error=course["Error"]), 404
         
-        course = get_course_by_code(courseCode)
-        if not course:
-            return jsonify(error= f"Course With ID: {courseCode} Not Found"), 404
-        
-        return jsonify(course), 200
+        return jsonify(course.get_json()), 200
     
     except Exception as e:
+        print(f"DEBUG: {e}")
         return jsonify(error = f"An Error Occurred While Searching for Course With Code: {courseCode}"), 500
 
 # 04 : List All Courses*
