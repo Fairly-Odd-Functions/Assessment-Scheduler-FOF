@@ -4,7 +4,7 @@ from App.models import Admin
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask_jwt_extended import jwt_required
-from App.controllers import Course, CourseAssessment
+from App.controllers import *
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 # IMPORTS TO CLEAN UP
 
@@ -147,26 +147,92 @@ def remove_programme_course_action():
 
 """
 CourseOffering [3]
-Written By
+Written By Katoya Ottley
+
+Task Re-Assigned:
+Written By: Jalene Armstrong (JaleneA) - Task: 10.3.2. Implement API Views for Admin (CourseOffering)
 """
 
 # 01: Add Course Offering
-@admin_views.route('/addCourseOffering', methods=['POST'])
+@admin_views.route('/addCourseOffering/<string:courseCode>', methods=['POST'])
 @jwt_required(Admin)
-def add_offering_action():
-    pass
+def add_offering_action(courseCode):
+    try:
+        data = request.get_json()
+        semesterID = data["semesterID"]
+        totalStudentsEnrolled = data["totalStudentsEnrolled"]
+
+        newCourseOffering = add_course_offering(courseCode, semesterID, totalStudentsEnrolled)
+
+        if "Error" in newCourseOffering:
+            return jsonify(error=newCourseOffering["Error"]), 400
+
+        elif "Message" in newCourseOffering:
+            course_offering_data = newCourseOffering["CourseOffering"]
+            course_offering_data["courseOfferingID"] = newCourseOffering["CourseOffering"]["offeringID"]
+
+            message = f'Course: {course_offering_data["courseCode"]} for Semester ID {course_offering_data["semesterID"]} With {course_offering_data["totalStudentsEnrolled"]} Students Was Added Successfully!'
+
+            response_data = {
+                "message": message,
+                "courseOfferingID": course_offering_data["courseOfferingID"]
+            }
+            return jsonify(response_data), 201
+    
+    except Exception as e:
+        print (f"Error While Adding Course Offering: {e}")
+        return jsonify(error = "An Error Occurred While Adding Course Offering"), 500
 
 # 02 : Remove Course Offering
-@admin_views.route('/removeCourseOffering', methods=['POST'])
+@admin_views.route('/removeCourseOffering', methods=['DELETE'])
 @jwt_required(Admin)
 def remove_offering_action():
-    pass
+    try:
+        data = request.get_json()
+        courseCode = data["courseCode"]
+        semesterID = data["semesterID"]
+
+        if not courseCode or not semesterID:
+            return jsonify(error= "All Fields are Required To Remove Course Offering"), 400
+
+        removeCourseOffering = remove_course_offering(courseCode, semesterID)
+        if "Error" in removeCourseOffering:
+            return jsonify(error=removeCourseOffering["Error"]), 400
+
+        message = removeCourseOffering["Message"]
+        return jsonify(message=message), 201
+
+    except Exception as e:
+        print (f"Error While Removing Course Offering: {e}")
+        return jsonify(error = "An Error Occurred While Removing Course Offering"), 500
+
+''' 
+Controller Available In CLI Polishing Branch - To Be Implemented in main
 
 # 03 : Update Course Offering
 @admin_views.route('/updateCourseOffering', methods=['POST'])
 @jwt_required(Admin)
 def update_offering_action():
     pass
+'''
+
+# 04 : List All Offerings
+@admin_views.route('/listAllOfferings', methods=['GET'])
+@jwt_required(Admin)
+def list_all_offerings_action():
+    try:
+        course_offerings = get_all_offerings()
+
+        if "Error" in course_offerings:
+            return jsonify(error=course_offerings["Error"]), 500
+        elif "Message" in course_offerings:
+            return jsonify(message=course_offerings["Message"]), 404
+
+        return jsonify(course_offerings), 200
+
+    except Exception as e:
+        print(f"Error While Fetching All Offerings: {e}")
+        return jsonify(error="An Error Occurred While Listing All Course Offerings"), 500
 
 """
 CourseStaff [3]
