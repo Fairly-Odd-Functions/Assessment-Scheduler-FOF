@@ -5,7 +5,7 @@ from flask_uploads import DOCUMENTS, IMAGES, TEXT, UploadSet, configure_uploads
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
-from datetime import timedelta
+from datetime import datetime, timedelta
 from flask_jwt_extended import (
     JWTManager,
     create_access_token,
@@ -61,3 +61,122 @@ def create_app(config_overrides={}):
     setup_flask_login(app)
     app.app_context().push()
     return app
+
+import csv
+from App.models import db, Admin, Staff, Programme, Course, Assessment, AssessmentTypes, Semester
+
+def parse_users():
+    try:
+        filepath = os.path.join(os.path.dirname(__file__), 'csv', 'users.csv')
+        with open(filepath, encoding='unicode_escape') as csvfile:
+            reader = csv.DictReader(csvfile, delimiter=';')
+            for row in reader:
+                user_type = row['user_type'].lower()
+
+                if user_type == 'staff':
+                    staff_member = Staff(
+                        firstName=row['firstName'],
+                        lastName=row['lastName'],
+                        password=row['password'],
+                        email=row['email'],
+                    )
+                    db.session.add(staff_member)
+
+                elif user_type == 'admin':
+                    admin_member = Admin(
+                        firstName=row['firstName'],
+                        lastName=row['lastName'],
+                        password=row['password'],
+                        email=row['email']
+                    )
+                    db.session.add(admin_member)
+                else:
+                    print(f"ERROR: Invalid user_type '{user_type}' In CSV, Skipping This Entry.")
+                    continue
+            db.session.commit()
+        return "SUCCESS: Users Successfully Added To The Database!"
+
+    except Exception as e:
+        print(f"ERROR: An Error Occurred While Processing The CSV File: {e}")
+        return "ERROR: Failed To Add Users To The Database."
+
+def parse_programmes():
+    try:
+        filepath = os.path.join(os.path.dirname(__file__), 'csv', 'programmes.csv')
+        with open(filepath, encoding='unicode_escape') as csvfile:
+            reader = csv.DictReader(csvfile, delimiter=';')
+            for row in reader:
+                programme = Programme(
+                    programmeTitle=row['programmeTitle'],
+                    programmeDescription=row['programmeDescription']
+                )
+                db.session.add(programme)
+            db.session.commit()
+        return "SUCCESS: Programmes Successfully Added To The Database!"
+
+    except Exception as e:
+        print(f"ERROR: An Error Occurred While Processing The CSV File: {e}")
+        return "ERROR: Failed To Add Programmes To The Database."
+
+def parse_courses():
+    try:
+        filepath = os.path.join(os.path.dirname(__file__), 'csv', 'courses.csv')
+        with open(filepath, encoding='unicode_escape') as csvfile:
+            reader = csv.DictReader(csvfile, delimiter=';')
+            for row in reader:
+                course = Course(
+                    courseCode=row['courseCode'],
+                    courseTitle=row['courseTitle'],
+                    courseCredits=row['courseCredits'],
+                    courseDescription=row['courseDescription'],
+                    courseLevel=row['courseLevel']
+                )
+                db.session.add(course)
+            db.session.commit()
+        return "SUCCESS: Courses Successfully Added To The Database!"
+
+    except Exception as e:
+        print(f"ERROR: An Error Occurred While Processing The CSV File: {e}")
+        return "ERROR: Failed To Add Courses To The Database."
+
+def parse_assessments():
+    try:
+        filepath = os.path.join(os.path.dirname(__file__), 'csv', 'assessments.csv')
+        with open(filepath, encoding='unicode_escape') as csvfile:
+            reader = csv.DictReader(csvfile, delimiter=';')
+            for row in reader:
+                assessment_type = AssessmentTypes[row['assessmentType'].upper()]
+                assessment = Assessment(
+                    assessmentTitle=row['assessmentTitle'],
+                    assessmentType=assessment_type
+                )
+                db.session.add(assessment)
+            db.session.commit()
+        return "SUCCESS: Assessments Successfully Added To The Database!"
+
+    except Exception as e:
+        print(f"ERROR: An Error Occurred While Processing The CSV File: {e}")
+        return "ERROR: Failed To Add Assessments To The Database."
+
+def parse_semesters():
+    try:
+        filepath = os.path.join(os.path.dirname(__file__), 'csv', 'semesters.csv')
+        with open(filepath, encoding='unicode_escape') as csvfile:
+            reader = csv.DictReader(csvfile, delimiter=';')
+            for row in reader:
+                start_date = datetime.strptime(row['startDate'], '%Y-%m-%d').date() if row['startDate'] else None
+                end_date = datetime.strptime(row['endDate'], '%Y-%m-%d').date() if row['endDate'] else None
+        
+                semester = Semester(
+                    semesterName=row['semesterName'],
+                    academicYear=row['academicYear'],
+                    startDate=start_date,
+                    endDate=end_date
+                )
+                db.session.add(semester)
+            db.session.commit()
+        return "SUCCESS: Semesters Successfully Added To The Database!"
+
+    except Exception as e:
+        print(f"ERROR: An Error Occurred While Processing The CSV File: {e}")
+        return "ERROR: Failed To Add Semesters To The Database."

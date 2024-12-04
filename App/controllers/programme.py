@@ -88,15 +88,15 @@ def update_programme(programmeTitle, new_title=None, new_description=None):
         db.session.rollback()
         return {"Error Message": "Failed To Update Programme"}
 
-def list_programme_courses(programmeTitle):
+def list_programme_courses(programmeID):
     try:
-        programme = Programme.query.filter_by(programmeTitle=programmeTitle).first()
+        programme = Programme.query.get(programmeID)
         if not programme:
-            return {"Error Message": f"There Is No Programme With Title: {programmeTitle} In The Database"}
+            return {"Error Message": f"There Is No Programme With ID: {programmeID} In The Database"}
         
-        programme_courses = CourseProgramme.query.filter_by(programmeID=programme.programmeID).all()
+        programme_courses = CourseProgramme.query.filter_by(programmeID=programmeID).all()
         if not programme_courses:
-            return {"Error Message": f"No Courses Found For Programme: {programme.programmeTitle}"}
+            return {"Error Message": f"No Courses Found For Programme: {programme.programmeTitle} | ID : {programmeID}"}
         return programme_courses
 
     except Exception as e:

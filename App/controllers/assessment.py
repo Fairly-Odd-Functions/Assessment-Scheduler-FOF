@@ -16,6 +16,25 @@ def create_assessment(assessmentTitle, assessmentType):
         db.session.rollback()
         return {"Error Message": "Failed To Create Assessment"}
 
+def update_assessment(assessmentID, new_title=None, new_type=None):
+    try:
+        assessment = Assessment.query.get(assessmentID)
+        if not assessment:
+            return {"Error Message": f"There Is No Assessment With ID: {assessmentID} In The Database"}
+
+        if new_title and new_title != assessment.assessmentTitle:
+            assessment.assessmentTitle = new_title
+        if new_type:
+            assessment.assessmentType = new_type
+
+        db.session.commit()
+        return {"Message": "Assessment Updated Successfully", "Assessment": assessment}
+
+    except Exception as e:
+        print(f"Error Updating Assesment: {e}")
+        db.session.rollback()
+        return {"Error Message": "Failed To Update Assessment"}
+
 def get_assessment_by_id(assessmentID):
     try:
         assessment = Assessment.query.filter_by(assessmentID=assessmentID).first()

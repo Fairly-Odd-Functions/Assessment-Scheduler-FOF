@@ -47,15 +47,15 @@ def add_course_to_programme(courseCode, programmeID):
 # Remove Course From a Programme
 def remove_course_from_programme(courseCode, programmeID):
     try:
-        course = Course.query.filter_by(courseCode=courseCode).first()
+        course = Course.query.get(courseCode)
         if not course:
             return {"Error": "Course Not Found"}
 
-        programme = Programme.query.filter_by(programmeID=programmeID).first()
+        programme = Programme.query.get(programmeID)
         if not programme:
             return {"Error": "Programme Not Found"}
 
-        course_programme = CourseProgramme.query.filter_by(courseCode=courseCode, programmeID=programmeID).first()
+        course_programme = CourseProgramme.query.filter_by(programmeID=programmeID, courseCode=courseCode).first()
         if not course_programme:
             return {"Error": "Course is not part of this programme"}
 
