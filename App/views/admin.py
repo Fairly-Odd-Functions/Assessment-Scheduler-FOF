@@ -75,7 +75,7 @@ Task: 10.3.1. Implement API Views for Admin (Course)
 @jwt_required(Admin)
 def add_course_action():
     try:
-        data = request.get_json()
+        data = request.form
         courseCode = data.get("courseCode")
         courseTitle = data.get("courseTitle")
         courseCredits = data.get("courseCredits")
@@ -83,24 +83,18 @@ def add_course_action():
         courseLevel = data.get("courseLevel")
 
         if not courseCode or not courseTitle or not courseCredits or not courseDescription or not courseLevel:
-            return jsonify(error= "All Fields are Required To Add Course", data=data), 400
+            return jsonify(error= "All Fields are Required To Add Course"), 400
 
         newCourse = add_course(courseCode, courseTitle, courseCredits, courseDescription, courseLevel)
         if newCourse is None:
-            return jsonify(error = "Failed To Add Course or Course Already Exists.", data=data), 400
+            return jsonify(error = "Failed To Add Course or Course Already Exists."), 400
 
-        message = f'Course: {newCourse.courseCode} - {newCourse.courseTitle} Added Successfully!'
-        return jsonify(message=message, data= {
-                                                    "courseCode": newCourse.courseCode,
-                                                    "courseTitle": newCourse.courseTitle,
-                                                    "courseCredits": newCourse.courseCredits,
-                                                    "courseDescription": newCourse.courseDescription,
-                                                    "courseLevel": newCourse.courseLevel
-                                                }), 201
+        if newCourse:
+            return jsonify (message = f'Course: {newCourse.courseCode} - {newCourse.courseTitle} Added Successfully!'),201
     
     except Exception as e:
         print (f"Error While Adding Course: {e}")
-        return jsonify(error = "An Error Occurred While Adding Course", exception=str(e)), 500
+        return jsonify(error = "An Error Occurred While Adding Course"), 500
 
 
 # 02 : Update Course *
