@@ -38,7 +38,6 @@ class User(db.Model, UserMixin):
         return {
             "firstName": self.firstName,
             "lastName": self.lastName,
-            "password": self.password,
             "email": self.email
     }
 

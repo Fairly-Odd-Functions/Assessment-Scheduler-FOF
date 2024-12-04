@@ -75,7 +75,6 @@ def search_staff_action(email):
 @user_views.route("/staffCourses/<string:email>", methods=["GET"])
 @jwt_required()
 def get_staff_courses_action(email):
-
     if email:
         try :
             staff_courses = get_staff_with_courses(email)
@@ -97,23 +96,23 @@ def get_staff_courses_action(email):
 def get_course_staff_action():
 
     data = request.get_json()
-    courseCode = data.get('courseCode')
-    semesterName = data.get('semesterName')
-    academicYear = data.get('academicYear')
+    courseCode = data['courseCode']
+    semesterName = data['semesterName']
+    academicYear = data['academicYear']
 
-    if not courseCode or not semesterName or not academicYear:
+    if courseCode and semesterName and academicYear:
         try:    
             course_staff = get_course_staff(courseCode, semesterName, academicYear)    
 
-            if course_staff.get("Error"):        
+            if course_staff.get("Error"):
                 return jsonify(course_staff), 404
-            
+
             elif course_staff.get("Message"):
                 return jsonify(course_staff), 404
-            
+
             else:
                 return jsonify(course_staff), 200
-            
+
         except Exception as e:
             print(f"Error: {e}")
             return jsonify(error=f"An error occurred while searching for the course with code '{courseCode}'"), 500

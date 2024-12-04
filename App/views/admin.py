@@ -20,11 +20,11 @@ Written By Rynnia(Rynnia.R) - Task 10.3. Implement API Views for Admin (Main)
 @admin_views.route('/registerStaff', methods=['POST'])
 @jwt_required(Admin)
 def register_staff_action():
-    data = request.form
-    firstName = data.get('firstName')
-    lastName = data.get('lastName')
-    email = data.get('email')
-    password = data.get('password')
+    data = request.get_json()
+    firstName = data['firstName']
+    lastName = data['lastName']
+    email = data['email']
+    password = data['password']
 
     result = register_staff(firstName, lastName, password, email)
 
@@ -35,7 +35,7 @@ def register_staff_action():
         return jsonify(error = result["error"]), 400
     
     if result:
-        return jsonify(message = "Staff registered successfully"), 201
+        return jsonify(result.get_json()), 201
 
     return jsonify(error = "An unknown error occurred"), 500
     
@@ -43,20 +43,23 @@ def register_staff_action():
 @admin_views.route('/createAdmin', methods=['POST'])
 @jwt_required(Admin)
 def create_admin_action():
-    
-    data = request.form
-    firstName = data.get('firstName')
-    lastName = data.get('lastName')
-    email = data.get('email')
-    password = data.get('password')
+    data = request.get_json()
+    firstName = data['firstName']
+    lastName = data['lastName']
+    email = data['email']
+    password = data['password']
 
-    result = create_admin(firstName, lastName, password, email)
+    result = create_admin(firstName=firstName,
+                          lastName=lastName,
+                          password=password,
+                          email=email)
 
     if result is None:
         return jsonify(error = "Admin with this email already exists"), 400
     
     if result:
-        return jsonify(message = "Admin created successfully"), 201
+        response_json = result.get_json()
+        return jsonify(message = "Admin Created Successfully!", admin=response_json), 201
 
     return jsonify(error = "An unknown error occurred"), 500
 
@@ -64,19 +67,13 @@ def create_admin_action():
 @admin_views.route('/allStaff', methods=['GET'])
 @jwt_required(Admin)
 def list_all_staff_action():
-    
     allStaff = get_all_staff()
 
-    if allStaff is None:
-        #there is no staff
+    if not allStaff:
         return jsonify(error = "No Staff Found."), 404
 
-    elif allStaff:
-
-        allStaff = [staff.get_json() for staff in allStaff]
-        return jsonify(allStaff), 200    
-    else:
-        return jsonify(error = "An unknown error occurred"), 500
+    allStaff = [staff.get_json() for staff in allStaff]
+    return jsonify(allStaff), 200
 
 # 04 : Get All Admin Users
 @admin_views.route('/allAdmin', methods=['GET'])
@@ -95,82 +92,96 @@ def list_all_admin_action():
         return jsonify(error = "An unknown error occurred"), 500
 
 # 05 : Update Staff
-@admin_views.route('/updateStaff/<string:staffEmail>', methods=['POST'])
+@admin_views.route('/updateStaff/<string:staffEmail>', methods=['PUT'])
 @jwt_required(Admin)
 def update_staff_action(staffEmail):
+    data = request.get_json()
+    new_firstName = data['firstName']
+    new_lastName = data['lastName']
+    new_email = data['email']
+    new_password = data['password']
+
+    result = update_staff(staffEmail=staffEmail,
+                          firstName=new_firstName,
+                          lastName=new_lastName,
+                          password=new_password,
+                          email=new_email)
+
+    if isinstance(result, dict) and "error" in result:
+        return jsonify(error=result["error"]), 400
     
-    data = request.form
-    firstName = data.get('firstName')
-    lastName = data.get('lastName')
-    email = data.get('email')
-    password = data.get('password')
+    if isinstance(result, Staff):
+        response_json = result.get_json()
+        return jsonify(message="Staff Member Updated Successfully!", staff=response_json), 200
 
-    result = update_staff(staffEmail, firstName, lastName, password, email)
-
-    if "error" in result:
-        return jsonify(error = result["error"]), 400
-    
-    if result:
-        return jsonify(message = "Staff member updated successfully"), 200
-
-    return jsonify(error = "An unknown error occurred"), 500
+    return jsonify(error="An unknown error occurred"), 500
 
 # 06 : Remove Admin
-@admin_views.route('/removeAdmin/<string:adminEmail>', methods=['POST'])
+@admin_views.route('/removeAdmin/<string:adminEmail>', methods=['DELETE'])
 @jwt_required(Admin)
 def remove_admin_action(adminEmail):
-
     admin = Admin.query.filter_by(email=adminEmail).first()
 
     if not admin:
         return jsonify(error = "No Admin Found."), 404
 
-    if admin:
-        result = delete_admin(adminEmail)
+    result = delete_admin(adminEmail)
 
-        if "error" in result:
-            return jsonify(error=result["error"]), 400
-        
-        if result is not None:
-            return jsonify(message="Admin deleted successfully"), 200
+    if isinstance(result, dict) and "error" in result:
+        return jsonify(error=result["error"]), 400
+
+    if result is not None:
+        return jsonify(message="Admin deleted successfully"), 200
 
     return jsonify(error="An unknown error occurred"), 500
 
 # 07 : Update Admin
-@admin_views.route('/updateAdmin/<string:adminEmail>', methods=['POST'])
+@admin_views.route('/updateAdmin/<string:adminEmail>', methods=['PUT'])
 @jwt_required(Admin)
 def update_admin_action(adminEmail):
-    
-    data = request.form
-    firstName = data.get('firstName')
-    lastName = data.get('lastName')
-    email = data.get('email')
-    password = data.get('password')
+    try:
+        data = request.get_json()
+        new_firstName = data['firstName']
+        new_lastName = data['lastName']
+        new_email = data['email']
+        new_password = data['password']
 
-    result = update_admin(adminEmail, firstName, lastName, password, email)
+        result = update_admin(adminEmail=adminEmail,
+                              firstName=new_firstName,
+                              lastName=new_lastName,
+                              password=new_password,
+                              email=new_email)
 
-    if "error" in result:
-        return jsonify(error = result["error"]), 400
-    
-    if result:
-        return jsonify(message = "Admin updated successfully"), 200
+        if isinstance(result, dict) and "error" in result:
+            return jsonify(error=result["error"]), 400
 
-    return jsonify(error = "An unknown error occurred"), 500
-    
+        if isinstance(result, Admin):
+            response_json = result.get_json()
+            return jsonify(message="Admin Member Updated Successfully!", admin=response_json), 200
+
+        return jsonify(error="An unknown error occurred"), 500
+
+    except Exception as e:
+        print(f"Error occurred while updating admin: {e}")
+        return jsonify(error="An error occurred while updating the admin"), 500
+
 # 08 : Remove Staff
-@admin_views.route('/removeStaff/<string:staffEmail>', methods=['POST'])
+@admin_views.route('/removeStaff/<string:staffEmail>', methods=['DELETE'])
 @jwt_required(Admin)
 def remove_staff_action(staffEmail):
-    
-    result = delete_staff(staffEmail)
+    try:
+        result = delete_staff(staffEmail)
 
-    if "Error" in result:
-        return jsonify(error = result), 400
-    
-    if "Staff member deleted successfully" in result:
-        return jsonify(message = result), 200
+        if "Error" in result:
+            return jsonify(error = result), 400
 
-    return jsonify(error = "An unknown error occurred"), 500
+        if "Staff member deleted successfully" in result:
+            return jsonify(message = result), 200
+
+        return jsonify(error = "An unknown error occurred"), 500
+    except Exception as e:
+            print(f"{e}")
+            return jsonify(error="An error occurred while updating the admin"), 500
 
 """
 Course [4]
@@ -273,6 +284,20 @@ def list_course_action():
         print(f"DEBUG: {e}")
         return jsonify(error = f"An Error Occurred While Listing Courses"), 500
 
+# 05 : Get Course Degree Programme
+# Written By Daniel
+@admin_views.route("/getCourseProgramme/<string:courseCode>", methods=["GET"])
+@jwt_required(Admin)
+def get_course_programme_action(courseCode):
+    try: 
+        course_programme = get_degree_programme(courseCode)
+        if course_programme is None:
+            return jsonify(error=f'Course with ID:{courseCode} Not enlisted in Programme'),404
+        return jsonify(course_programme.get_json()),200
+    except Exception as e:
+        print(f"{e}")
+        return jsonify(error=f'An Error Occurred While Searching For Course With ID: {courseCode}'), 500
+
 """
 Semester [2]
 Written By Daniel Young
@@ -283,12 +308,20 @@ Written By Daniel Young
 @jwt_required(Admin)
 def add_semester_action():
     try:
-        data = request.json
+        data = request.get_json()
         semesterName = data['semesterName']
         academicYear = data['academicYear']
         startDate = data['startDate']
         endDate = data['endDate']
-        response = add_semester(semesterName, academicYear, startDate, endDate)
+
+        start_date = datetime.strptime(startDate, "%Y-%m-%d").date()
+        end_date = datetime.strptime(endDate, "%Y-%m-%d").date()
+
+        response = add_semester(semesterName=semesterName,
+                                academicYear=academicYear,
+                                startDate=start_date,
+                                endDate=end_date)
+
         if "Error Message" in response:
             return jsonify({"message" : response['Error Message']}),400
         else:
@@ -297,85 +330,80 @@ def add_semester_action():
         return jsonify(error=f'An Error Occurred While trying to add semester'), 500
 
 # 02 : Update Semester
-@admin_views.route('/updateSemester', methods=['POST'])
+@admin_views.route('/updateSemester/<int:semesterID>', methods=['PUT'])
 @jwt_required(Admin)
-def update_semester_action():
+def update_semester_action(semesterID):
     try:
         data = request.get_json()
-        semesterName = data.get("semesterName")
-        academicYear = data.get("academicYear")
         new_semesterName = data.get("new_semesterName")
         new_academicYear = data.get("new_academicYear")
         startDate = data.get("startDate")
         endDate = data.get("endDate")
-        response = update_semester(semesterName, academicYear, new_semesterName=None, new_academicYear=None, startDate=None, endDate=None)
+
+        start_date = datetime.strptime(startDate, "%Y-%m-%d").date()
+        end_date = datetime.strptime(endDate, "%Y-%m-%d").date()
+
+        response = update_semester(semester_id=semesterID,
+                                   new_semesterName=new_semesterName,
+                                   new_academicYear=new_academicYear,
+                                   startDate=start_date,
+                                   endDate=end_date)
         if "Error Message" in response:
-            return jsonify({"message" : response['Error Message']}),400
+            return jsonify({"message": response['Error Message']}), 400
         else:
-            return jsonify(response),201
+            semester_data = response.get("Semester Updated", {})
+            if semester_data:
+                return jsonify({"Semester Updated": semester_data.get_json()}), 200
+            else:
+                return jsonify(error="Failed to update semester"), 500
+    
     except Exception as e:
+        print(f"{e}")
         return jsonify(error=f'An Error Occurred While trying to update semester'), 500
 
 # 09 : Search Semester
-@admin_views.route('/searchSemester', methods=['GET'])
+@admin_views.route('/searchSemester/<int:semesterID>', methods=['GET'])
 @jwt_required(Admin)
-def search_semester_action():
-    # try:
-        data = request.get_json()
-        semesterName = data.get("semesterName")
-        academicYear = data.get("academicYear")
-        response = get_semester(semesterName, academicYear)
-        if "Error Message" in response:
-            return jsonify({"message" : response['Error Message']}),400
+def search_semester_action(semesterID):
+    try:
+        response = get_semester_by_id(semesterID)
+
+        if response is None:
+            return jsonify({"message": f"Semester with ID {semesterID} not found"}), 404
         else:
-            message=f'{response.semesterName} retrieved'
-            return jsonify(message=message),201
-    # except Exception as e:
-        # return jsonify(error=f'An Error Occurred While trying to find semester'), 500
+            return jsonify(response.get_json()), 200
+    except Exception as e:
+        print(f"{e}")
+        return jsonify(error=f'An Error Occurred While Trying To Find Semester'), 500
 
 # 10 : List Semesters
 @admin_views.route('/listSemesters', methods=['GET'])
 @jwt_required(Admin)
 def list_semesters_action():
     try:
-        response = list_semesters()
+        response = list_semesters_json()
         if "Error Message" in response:
-            return jsonify({"message" : response['Error Message']}),400
+            return jsonify({"message" : response['Error Message']}), 400
         else:
-            return jsonify(response),201
+            return jsonify(response), 200
     except Exception as e:
+        print(f"{e}")
         return jsonify(error=f'An Error Occurred While trying to list semesters'), 500
 
-
 # 11 : List Semester Courses
-@admin_views.route('/listSemesterCourses', methods=['GET'])
+@admin_views.route('/listSemesterCourses/<int:semesterID>', methods=['GET'])
 @jwt_required(Admin)
-def list_semester_courses_action():
+def list_semester_courses_action(semesterID):
     try:
-        data = request.get_json()
-        semesterName = data.get("semesterName")
-        academicYear = data.get("academicYear")
-        response = list_courses_for_semester(semesterName, academicYear)
-        if "Error Message" in response:
-            return jsonify({"message" : response['Error Message']}),400
+        course_offerings =  list_courses_for_semester(semesterID=semesterID)
+        if "Error Message" in course_offerings:
+            return jsonify({"message" : course_offerings['Error Message']}),400
         else:
-            return jsonify(response),201
+            courses_data = [course.get_json() for course in course_offerings]
+            return jsonify(courses_data), 200
     except Exception as e:
+        print(f"{e}")
         return jsonify(error=f'An Error Occurred While trying to list Courses for the semesters'), 500
-
-@admin_views.route('/getSemesterByAcademicYear', methods=['GET'])
-@jwt_required(Admin)
-def get_semester_by_academic_year():
-    try:
-        data = request.get_json()
-        academicYear = data.get("academicYear")
-        response = get_semesters_by_academic_year(academicYear)
-        if "Error Message" in response:
-            return jsonify({"message" : response['Error Message']}),400
-        else:
-            return jsonify(response),201
-    except Exception as e:
-        return jsonify(error=f'An Error Occurred While trying to Semesters or an academic year'), 500
 
 """
 ProgrammeCourse [4]
@@ -400,7 +428,7 @@ def add_programme_course_action():
     return jsonify({"message":"An unknown error occured"}),500
 
 # 02 : Remove Programme Course
-@admin_views.route('/removeProgrammeCourse', methods=['POST'])
+@admin_views.route('/removeProgrammeCourse', methods=['DELETE'])
 @jwt_required(Admin)
 def remove_programme_course_action():
     data = request.json
@@ -416,33 +444,18 @@ def remove_programme_course_action():
         }),201
     return jsonify({"message":"Unable to delete"}), 500
 
-# 03 : Get Course Degree Programme
-@admin_views.route("/courseProgramme/<string:courseCode>", methods=["GET"])
+# 03 : List Programme Courses
+@admin_views.route('/listProgrammeCourses/<int:programmeID>', methods=['GET'])
 @jwt_required(Admin)
-def get_course_programme_action(courseCode):
-    try: 
-        course_programme = get_degree_programme(courseCode)
-        if course_programme is None:
-            return jsonify(error=f'Course with ID:{courseCode} Not enlisted in Programme'),404
-        return jsonify(course_programme),200
-    except Exception as e:
-        return jsonify(error=f'An Error Occurred While Searching For Course With ID: {courseCode}'), 500
-
-# 04 : List Programme Courses
-@admin_views.route('/listProgrammeCourses', methods=['GET'])
-@jwt_required(Admin)
-def list_programme_courses_action():
-    data = request.json
-    programmeID = data['programmeID']
-    
+def list_programme_courses_action(programmeID):
     response = get_course_programme(programmeID)
     if "Error" in response:
-        return jsonify ({"message" : response["Error"]}),400
+        return jsonify ({"message" : response["Error"]}), 400
     if "Message" in response:
-        return jsonify ({"message" : response['Message']}),404
+        return jsonify ({"message" : response['Message']}), 404
     if "CourseProgrammes" in response:
-        return jsonify({"CourseProgrammes":response["CourseProgrammes"]}),201
-    return jsonify({"message":"An unknown error occured"}),500
+        return jsonify({"CourseProgrammes":response["CourseProgrammes"]}), 200
+    return jsonify({"message":"An unknown error occured"}), 500
 
 """
 CourseOffering [4]
@@ -539,97 +552,70 @@ Written By Rynnia Ryan (Rynnia.R) - Task 10.3.4. Implement API Views for Admin (
 """
 
 # 01 : Add Course Staff - My idea is that when on view of a course you can add a staff member hence course code
-@admin_views.route('/addCourseStaff/<int:courseCode>', methods=['POST'])
+@admin_views.route('/addCourseStaff/<string:courseCode>', methods=['POST'])
 @jwt_required(Admin)
 def add_course_staff_action(courseCode):
+    try:
+        data = request.get_json()
+        staffEmail = data['staffEmail']
+        semesterName = data['semesterName']
+        academicYear = data['academicYear']
 
-    staffEmail = request.form.get('staffEmail')
-    semesterName = request.form.get('semesterName')
-    academicYear = request.form.get('academicYear')
+        staff = get_staff_by_email(staffEmail)
+        if staff is None:
+            return jsonify(error="Staff Member Not Found"), 404
 
-    staff = get_staff_by_email(staffEmail)
-    if staff is None:
-        return jsonify(error="Staff member not found"), 404
+        if staffEmail:
+            result = add_course_staff(courseCode, semesterName, academicYear, staff.userID)
+            print(result)
 
-    if staffEmail:
-        result = add_course_staff(courseCode, semesterName, academicYear, staff.staffID)
-        
-        if result["Error"]:
-            return jsonify(result), 400
-        
-        elif result["Message"]:
-            return jsonify(result), 201
-        
+            if "Error" in result:
+                print(f"Error Response: {result['Error']}")
+                return jsonify(result), 400
+            
+            elif "Message" in result:
+                return jsonify(result), 201
+            
+            else:
+                return jsonify({"error": "Unknown response structure"}), 500
+
         else:
-            return jsonify(result), 500
+            return jsonify(error="Please provide all required fields"), 400
+    except Exception as e:
+        print(f"Error While Adding Staff To Course: {e}")
+        return jsonify(error="An Error Occurred While Assigning Course To Staff"), 500
 
-    else:
-        return jsonify(error="Please provide all required fields"), 400
-
-
-# 02 : Add Multiple Course to a Staff
-@admin_views.route('/addMultipleCourseStaff', methods=['POST'])
-@jwt_required(Admin)
-def add_multiple_courses_to_staff_action():
-
-    #Getting CSv file from the request
-    file = request.files['file']
-
-    if not file:
-        return jsonify(error="Please Upload a CSV File"), 400
-    
-    staffEmail = request.form.get('staffEmail')
-    if not staffEmail:
-        return jsonify(error="Please provide staff email"), 400
-
-    staff = get_staff_by_email(staffEmail)
-    if staff is None:
-        return jsonify(error="Staff Member Not Found"), 404
-
-    #Reading CSV file, splitting it into lines and saving each line into a list
-    csv_data = file.read().decode('utf-8')
-    lines = csv_data.splitlines()
-    course_codes = []
-
-    for line in lines:
-        columns = line.split(',')
-        course_code = columns[0] #Getting the course code from the first column
-        course_codes.append(course_code)
-
-    result = add_multiple_courses_to_staff(staffEmail, course_codes)
-
-    if result["Error"]:
-        return jsonify(result), 400
-
-    elif result["Message"]:
-        return jsonify(result), 201
-
-    else:
-        return jsonify(result), 500
-
-# 03 : Remove Course Staff
-@admin_views.route('/removeCourseStaff/<int:courseCode>', methods=['POST'])
+# 02 : Remove Course Staff
+@admin_views.route('/removeCourseStaff/<string:courseCode>', methods=['DELETE'])
 @jwt_required(Admin)
 def remove_course_staff_action(courseCode):
-    staffEmail = request.form.get('staffEmail')
-    semesterName = request.form.get('semesterName')
-    academicYear = request.form.get('academicYear')
+    try:
+        data = request.get_json()
+        staffEmail = data['staffEmail']
+        semesterName = data['semesterName']
+        academicYear = data['academicYear']
 
-    staff = get_staff_by_email(staffEmail)
-    if staff is None:
-        return jsonify(error="Staff Member Not Found."), 404
-    
-    result = remove_course_staff(courseCode, semesterName, academicYear, staff.staffID)
+        staff = get_staff_by_email(staffEmail)
+        if staff is None:
+            return jsonify(error="Staff Member Not Found."), 404
+        
+        result = remove_course_staff(courseCode=courseCode,
+                                    semesterName=semesterName,
+                                    academicYear=academicYear,
+                                    staffID=staff.userID)
 
-    if result["Error"]:
-        return jsonify(result), 400
-
-    elif result["Message"]:
-        return jsonify(result), 200
-
-    else:
-        return jsonify(result), 500
-
+        if "Error" in result:
+            print(f"Error Response: {result['Error']}")
+            return jsonify(result), 400
+        
+        elif "Message" in result:
+            return jsonify(result), 200
+        
+        else:
+            return jsonify({"error": "Unknown response structure"}), 500
+    except Exception as e:
+            print(f"Error While Adding Staff To Course: {e}")
+            return jsonify(error="An Error Occurred While Assigning Course To Staff"), 500
 """
 Programme [3]
 Written By Daniel Young
@@ -644,116 +630,80 @@ def add_programme_action():
     programmeDescription = data['programmeDescription']
 
     response = create_programme(programmeTitle, programmeDescription)
+
     if "Error Message" in response:
         return jsonify({"message" : response["Error Message"]}), 400
+
     if "Programme" in response:
+        programme_json = response["Programme"].get_json() if hasattr(response["Programme"], 'get_json') else response["Programme"]
+
         return jsonify({
             "message" : response["Message"],
-            "Programme" : response["Programme"]
-        }),201
-    return jsonify({"message":"An unknown error occorred"}),500
+            "Programme" : programme_json
+        }), 201
+    return jsonify({"message":"An unknown error occorred"}), 500
 
-# 02 : Remove Programme
+# 02 : Remove Programme ****
 @admin_views.route('/removeProgramme', methods=['POST'])
 @jwt_required(Admin)
 def remove_programme_action():
     pass
 
 # 03 : Update Programme
-@admin_views.route('/updateProgramme', methods=['POST'])
+@admin_views.route('/updateProgramme/<int:programmeID>', methods=['PUT'])
 @jwt_required(Admin)
-def update_programme_action():
+def update_programme_action(programmeID):
     data = request.get_json()
-    programmeTitle = data.get("programmeTitle")
-    new_title = data.get("new_title")
-    new_description = data.get("new_description")
+    new_title = data['new_title']
+    new_description = data['new_description']
 
-    response = update_programme(programmeTitle, new_title=None, new_description=None)
+    programme = Programme.query.filter_by(programmeID=programmeID).first()
+    if not programme:
+        return jsonify({"message": f"No Programme Found With ID: {programmeID}"}), 404
+
+    programmeTitle = programme.programmeTitle
+
+    response = update_programme(programmeTitle, new_title=new_title, new_description=new_description)
     if "Error Message" in response:
         return jsonify({"message" : response["Error Message"]}), 400
+
     if "Programme" in response:
-        return jsonify({"message" : response['Message'],
-                    "Programme": response['Programme']
-        }),201
-    return jsonify({"message":"An unknown error occorred"}),500
-                    
+        updated_programme = response["Programme"]
+        return jsonify({
+            "message": response['Message'],
+            "Programme": {
+                "programmeID": updated_programme.programmeID,
+                "programmeTitle": updated_programme.programmeTitle,
+                "programmeDescription": updated_programme.programmeDescription
+            }
+        }), 201
+    return jsonify({"message":"An Unknown Error Occorred"}),500
 
-# 05 : Get Programme Course
-@admin_views.route('/getProgrammeCourse', methods=['GET'])
-@jwt_required(Admin)
-def get_programme_course_action():
-    
-    data = request.get_json()
-    programmeID = data.get("programmeID")
-    
-    response = get_course_programme(programmeID)
-    if "Error" in response:
-        return jsonify ({"message" : response["Error"]}),400
-    if "Message" in response:
-        return jsonify ({"message" : response['Message']}),404
-    if "CourseProgrammes" in response:
-        return jsonify({"CourseProgrammes":response["CourseProgrammes"]}),201
-    return jsonify({"message":"An unknown error occured"}),500
-
-# 07 : List Programmes
-@admin_views.route('/listProgrammes', methods=['GET'])
+# 04 : List Programmes
+@admin_views.route('/listAllProgrammes', methods=['GET'])
 @jwt_required(Admin)
 def list_programmes_action():
     try :
-        response = list_programmes()
+        response = list_programmes_json()
         if "Error Message" in response:
             return jsonify ({"message" : response['Error Message']}),400
         if "Message" in response:
             return jsonify ({"message" : response['Message']}),404
         return jsonify(response),201
     except Exception as e:
+         print(f"{e}")
          return jsonify(error=f'An Error Occurred While Searching For Programmes'), 500
 
-    
-# 08 : List Programme Courses
-@admin_views.route('/listProgrammeCourses', methods=['GET'])
-@jwt_required(Admin)
-def list_programme_courses_action():
-    try:
-        data = request.get_json
-        programmeTitle = data.get("programmeTitle")
-
-        response = list_programme_courses(programmeTitle)
-        if "Error Message" in response:
-            return jsonify ({"message" : response['Error Message']}), 400
-        else:
-            return jsonify(response), 201
-    except Exception as e:
-        return jsonify(error=f'An Error Occurred While Searching For Programmes Courses'), 500
-   
-
-# 08 : Programme by ID
-@admin_views.route('/getProgrammeByID/<int:programmeID>', methods=['GET'])
+# 05 : Programme by ID
+@admin_views.route('/searchProgramme/<int:programmeID>', methods=['GET'])
 @jwt_required(Admin)
 def get_programme_by_id_action(programmeID):
     try:
-        
         response = get_programme_by_id(programmeID)
         if response is None:
-            return jsonify (error=f"No programme found with ID:{programmeID} "), 404
+            return jsonify(error=f"No programme found with ID:{programmeID} "), 404
         else:
-            return jsonify(response), 201
+            return jsonify(response.get_json()), 200
     except Exception as e:
-        return jsonify(error=f'An Error Occurred While Searching For Programmes Courses'), 500
-
-
-# 08 : Programme by title
-@admin_views.route('/getProgrammeByTitle/<string:programmeTitle>', methods=['GET'])
-@jwt_required(Admin)
-def get_programme_by_title_action(programmeTitle):
-    try:
-        # data = request.json
-        # programmeTitle = data['programmeTitle']
-
-        response = get_programme_by_title(programmeTitle)
-        if "Error Message" in response:
-            return jsonify ({"message" : response['Error Message']}), 400
-        else:
-            return jsonify(response), 201
-    except Exception as e:
+        print(f"{e}")
         return jsonify(error=f'An Error Occurred While Searching For Programmes Courses'), 500

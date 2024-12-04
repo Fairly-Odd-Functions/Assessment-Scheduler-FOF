@@ -81,7 +81,7 @@ def update_staff(staffEmail, firstName=None, lastName=None, password=None, email
             # Checking If Email Is Unique
             if email and Staff.query.filter_by(email=email).first() != staff_member:
                 if Staff.query.filter_by(email=email).count() > 0:
-                    #[Added a more appropriate error message]
+                    #[Added a more appropriate error message] Gosh so long
                     return {"error":"Email address is already in use by another staff member. Please choose a different email address."}
                 staff_member.email = email
 
@@ -152,9 +152,24 @@ def get_staff_with_courses(staffEmail):
     staff_member = Staff.query.filter_by(email=staffEmail).first()
     if not staff_member:
         return None
+    
+    course_staff_entries = CourseStaff.query.filter_by(staffID=staff_member.userID).all()
 
-    courses = [item.courseCode for item in staff_member.assigned_courses]
+    courses = [
+        {
+        "courseCode": entry.course_offering.courseCode,
+        "courseTitle": entry.course_offering.course.courseTitle if entry.course_offering.course else None,
+        "semester": entry.course_offering.semester.semesterName if entry.course_offering.semester else None,
+        "academicYear": entry.course_offering.semester.academicYear if entry.course_offering.semester else None,
+        }
+        for entry in course_staff_entries if entry.course_offering
+    ]
+
     return {
-        "Staff": staff_member,
-        "Courses": courses
+        "Staff": {
+            "staffID": staff_member.userID,
+            "staffName": f"{staff_member.firstName} {staff_member.lastName}",
+            "staffEmail": staff_member.email,
+        },
+        "Courses": courses,
     }
