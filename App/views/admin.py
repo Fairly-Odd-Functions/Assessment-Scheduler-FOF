@@ -618,10 +618,10 @@ def remove_programme_action():
 @admin_views.route('/updateProgramme', methods=['POST'])
 @jwt_required(Admin)
 def update_programme_action():
-    data = request.json
-    programmeTitle = data['programmeTitle']
-    new_title = data['new_title']
-    new_description = data['new_description']
+    data = request.get_json()
+    programmeTitle = data.get("programmeTitle")
+    new_title = data.get("new_title")
+    new_description = data.get("new_description")
 
     response = update_programme(programmeTitle, new_title=None, new_description=None)
     if "Error Message" in response:
@@ -638,8 +638,8 @@ def update_programme_action():
 @jwt_required(Admin)
 def get_programme_course_action():
     
-    data = request.json
-    programmeID = data['programmeID']
+    data = request.get_json()
+    programmeID = data.get("programmeID")
     
     response = get_course_programme(programmeID)
     if "Error" in response:
@@ -661,7 +661,7 @@ def list_programmes_action():
         if "Message" in rsponse:
             return jsonify ({"message" : response['Message']}),404
         return jsonify(response),201
-    except Exeption as e:
+    except Exception as e:
          return jsonify(error=f'An Error Occurred While Searching For Programmes'), 500
 
     
@@ -670,8 +670,8 @@ def list_programmes_action():
 @jwt_required(Admin)
 def list_programme_courses_action():
     try:
-        data = request.json
-        programmeTitle = data['programmeTitle']
+        data = request.get_json
+        programmeTitle = data.get("programmeTitle")
 
         response = list_programme_courses(programmeTitle)
         if "Error Message" in response:
@@ -683,13 +683,11 @@ def list_programme_courses_action():
    
 
 # 08 : Programme by ID
-@admin_views.route('/getProgrammeByID<int:programmeID>', methods=['GET'])
+@admin_views.route('/getProgrammeByID/<int:programmeID>', methods=['GET'])
 @jwt_required(Admin)
 def get_programme_by_id_action(programmeID):
     try:
-        data = request.json
-        programmeID = data['programmeID']
-
+        
         response = get_programme_by_id(programmeID)
         if response is None:
             return jsonify (error=f"No programme found with ID:{programmeID} "), 404
@@ -700,12 +698,12 @@ def get_programme_by_id_action(programmeID):
 
 
 # 08 : Programme by title
-@admin_views.route('/getProgrammeByTitle<string:programmeTitle>', methods=['GET'])
+@admin_views.route('/getProgrammeByTitle/<string:programmeTitle>', methods=['GET'])
 @jwt_required(Admin)
 def get_programme_by_title_action(programmeTitle):
     try:
-        data = request.json
-        programmeTitle = data['programmeTitle']
+        # data = request.json
+        # programmeTitle = data['programmeTitle']
 
         response = get_programme_by_title(programmeTitle)
         if "Error Message" in response:
