@@ -67,6 +67,7 @@ def remove_staff_action():
 """
 Course [6]
 Written By: Katoya Ottley
+Task Re-Assigned: Jalene Armstrong (JaleneA)
 Task: 10.3.1. Implement API Views for Admin (Course)
 """
 
@@ -108,22 +109,31 @@ def add_course_action():
 def update_course_action(courseCode):
     try:
         data = request.get_json()
-        courseCode = data.get("courseCode")
-        new_courseTitle = data.get("new_courseTitle")
-        new_courseCredits = data.get("new_courseCredits")
-        new_courseDescription = data.get("new_courseDescription")
-        new_courseLevel = data.get("new_courseLevel")
 
-        #if not is_valid_course_code(courseCode):
-        #    return jsonify(error = "Invalid Course Code, Please Try Again"), 400
+        new_courseTitle = data["courseTitle"]
+        new_courseCredits = data["courseCredits"]
+        new_courseDescription = data["courseDescription"]
+        new_courseLevel = data["courseLevel"]
+
+        if not any([new_courseTitle, new_courseCredits, new_courseDescription, new_courseLevel]):
+            return jsonify(error="At Least One Field Is Required To Update The Course"), 400
+
+        result = edit_course(
+            courseCode,
+            new_courseTitle=new_courseTitle,
+            new_courseCredits=new_courseCredits,
+            new_courseDescription=new_courseDescription,
+            new_courseLevel=new_courseLevel)
+
+        if "Error" in result:
+            return jsonify(error=result["Error"]), 400
         
-        updatedCourse = edit_course(courseCode, new_courseTitle=None, new_courseCredits=None, new_courseDescription=None, new_courseLevel=None)
-        if updatedCourse is None:
-            return jsonify(error = "Failed To Update Course or Course Does Not Exists."), 400
-
-        message = f'Course: {updatedCourse.courseCode} - {updatedCourse.new_courseTitle} Updated Successfully!'
-        return jsonify(message=message), 201
-    
+        updated_course = result["Course"]
+        return jsonify(
+            message=f'Course: {updated_course["courseCode"]} - {updated_course["courseTitle"]} Updated Successfully!',
+            course=updated_course
+        ), 200
+       
     except Exception as e:
         print (f"Error While Updating Course: {e}")
         return jsonify(error = "An Error Occurred While Updating Course"), 500
