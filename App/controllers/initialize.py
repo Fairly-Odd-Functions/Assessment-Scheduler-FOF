@@ -15,7 +15,9 @@ def initialize():
         # Create Default Staff User
         rick = Staff(firstName="Rick", lastName="Rickson", password="rickpass", email="rick.rickson@mail.com")
 
-         # To Be Populated With Good Data For Postman
+        # To Be Populated With Good Data For Postman
+        course = Course(courseCode="COMP3603", courseTitle="Course", courseCredits=3, courseDescription="Yap", courseLevel=3)
+        db.session.add(course)
 
         db.session.add(bob)
         db.session.add(rick)

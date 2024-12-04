@@ -65,42 +65,103 @@ def remove_staff_action():
     pass
 
 """
-Course [2]
-Written By
+Course [3]
+Written By Rynnia Ryan (Rynnia.R) - Task 10.3.4. Implement API Views for Admin (CourseStaff)
 """
 
-# 01 : Add Course *
-@admin_views.route('/addCourse', methods=['POST'])
+# 01 : Add Course Staff - My idea is that when on view of a course you can add a staff member hence course code
+@admin_views.route('/addCourseStaff/<int:courseCode>', methods=['POST'])
 @jwt_required(Admin)
-def add_course_action():
-    if request.method == 'POST':
-        courseCode = request.form.get('course_code')
-        title = request.form.get('title')
-        description = request.form.get('description')
-        data = request.form
-        level = request.form.get('level')
-        semester = request.form.get('semester')
-        numAssessments = request.form.get('numAssessments')
-        course = add_Course(courseCode,title,description,level,semester,numAssessments)
-        pass
+def add_course_staff_action(courseCode):
 
-# 02 : Update Course *
-@admin_views.route('/updateCourse', methods=['POST'])
+    staffEmail = request.form.get('staffEmail')
+    semesterName = request.form.get('semesterName')
+    academicYear = request.form.get('academicYear')
+
+    staff = get_staff_by_email(staffEmail)
+    if staff is None:
+        return jsonify(error="Staff member not found"), 404
+
+    if staffEmail:
+        result = add_course_staff(courseCode, semesterName, academicYear, staff.staffID)
+        
+        if result["Error"]:
+            return jsonify(result), 400
+        
+        elif result["Message"]:
+            return jsonify(result), 201
+        
+        else:
+            return jsonify(result), 500
+
+    else:
+        return jsonify(error="Please provide all required fields"), 400
+
+
+# 02 : Add Multiple Course to a Staff
+@admin_views.route('/addMultipleCourseStaff', methods=['POST'])
 @jwt_required(Admin)
-def update_course_action():
-    if request.method == 'POST':
-        courseCode = request.form.get('code')
-        title = request.form.get('title')
-        description = request.form.get('description')
-        level = request.form.get('level')
-        semester = request.form.get('semester')
-        numAssessments = request.form.get('assessment')
-        # programme = request.form.get('programme')
+def add_multiple_courses_to_staff_action():
 
-        delete_Course(get_course(courseCode)) # Woah that's extreme
-        add_Course(courseCode, title, description, level, semester, numAssessments)
-        flash("Course Updated Successfully!") 
-    pass
+    #Getting CSv file from the request
+    file = request.files['file']
+
+    if not file:
+        return jsonify(error="Please Upload a CSV File"), 400
+    
+    staffEmail = request.form.get('staffEmail')
+    if not staffEmail:
+        return jsonify(error="Please provide staff email"), 400
+
+    staff = get_staff_by_email(staffEmail)
+    if staff is None:
+        return jsonify(error="Staff Member Not Found"), 404
+
+    #Reading CSV file, splitting it into lines and saving each line into a list
+    csv_data = file.read().decode('utf-8')
+    lines = csv_data.splitlines()
+    course_codes = []
+
+    for line in lines:
+        columns = line.split(',')
+        course_code = columns[0] #Getting the course code from the first column
+        course_codes.append(course_code)
+
+    result = add_multiple_courses_to_staff(staffEmail, course_codes)
+
+    if result["Error"]:
+        return jsonify(result), 400
+
+    elif result["Message"]:
+        return jsonify(result), 201
+
+    else:
+        return jsonify(result), 500
+
+# 03 : Remove Course Staff
+@admin_views.route('/removeCourseStaff/<int:courseCode>', methods=['POST'])
+@jwt_required(Admin)
+def remove_course_staff_action(courseCode):
+    staffEmail = request.form.get('staffEmail')
+    semesterName = request.form.get('semesterName')
+    academicYear = request.form.get('academicYear')
+
+    staff = get_staff_by_email(staffEmail)
+    if staff is None:
+        return jsonify(error="Staff Member Not Found."), 404
+    
+    result = remove_course_staff(courseCode, semesterName, academicYear, staff.staffID)
+
+    if result["Error"]:
+        return jsonify(result), 400
+
+    elif result["Message"]:
+        return jsonify(result), 200
+
+    else:
+        return jsonify(result), 500
+
+
 
 
 """
