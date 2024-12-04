@@ -114,3 +114,18 @@ def get_course_offerings(courseCode, academicYear):
     except Exception as e:
         print(f"Error while fetching course offerings: {e}")
         return {"Error": "An error occurred while fetching course offerings"}
+    
+# Get All Course Offerings In The Database
+def get_all_offerings():
+    try:
+        course_offerings = CourseOffering.query.all()
+
+        if not course_offerings:
+            return {"Message": "No Course Offerings Available."}
+
+        return {
+            "CourseOfferings": [offering.get_json() for offering in course_offerings]
+        }
+    except Exception as e:
+        print(f"Error While Fetching All Course Offerings: {e}")
+        return {"Error": "An Error Occurred While Fetching All Course Offerings"}

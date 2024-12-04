@@ -1,6 +1,6 @@
 from .user import User
 from App.database import db
-from flask_login import UserMixin
+from flask_login import UserMixin # type: ignore
 
 class Admin(User, UserMixin):
     __tablename__ = 'admin'

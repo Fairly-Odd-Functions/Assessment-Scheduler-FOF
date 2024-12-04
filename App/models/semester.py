@@ -18,7 +18,8 @@ class Semester(db.Model):
 
     def get_json(self):
         return{
-            "semester_name":self.semesterName,
+            "semesterID": self.semesterID,
+            "semesterName":self.semesterName,
             "academicYear": self.academicYear,
             "startDate":self.startDate,
             "endDate":self.endDate

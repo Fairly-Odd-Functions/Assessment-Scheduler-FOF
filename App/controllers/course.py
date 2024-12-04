@@ -67,7 +67,7 @@ def edit_course(courseCode, new_courseTitle=None, new_courseCredits=None, new_co
 
 def get_degree_programme(courseCode):
     try:
-        course = Course.query.filter_by(courseCode=courseCode).first()
+        course = Course.query.get(courseCode)
         if not course:
             raise ValueError(f"No course found with courseCode: {courseCode}")
 

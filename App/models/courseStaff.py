@@ -10,7 +10,7 @@ class CourseStaff(db.Model):
 
     # Relationships
     course_offering = db.relationship('CourseOffering', backref='course_staff')
-    staff = db.relationship('Staff', backref='assigned_courses')
+    staff = db.relationship('Staff', backref='assigned_courses', lazy='joined')
 
     def __init__(self, courseOfferingID, staffID):
         self.courseOfferingID = courseOfferingID
@@ -43,7 +43,7 @@ class CourseStaff(db.Model):
         )
         staff_details = (
             f"staffID='{self.staffID}', "
-            f"staffName='{self.staff.firstName} {self.staff.lastName}' if self.staff else 'No name', "
+            f"staffFullName='{f'{self.staff.firstName} {self.staff.lastName}' if self.staff else 'No name'}', "
             f"staffEmail='{self.staff.email if self.staff else 'No email'}'"
         )
         return f"CourseStaff({course_details}, {staff_details})"

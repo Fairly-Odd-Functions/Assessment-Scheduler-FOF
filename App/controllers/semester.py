@@ -35,7 +35,7 @@ def add_semester(semesterName, academicYear, startDate, endDate):
 
 def update_semester(semester_id, new_semesterName=None, new_academicYear=None, startDate=None, endDate=None):
     try:
-        semester = Semester.get(semester_id)
+        semester = Semester.query.get(semester_id)
         if not semester:
             return {"Error Message": f"Semester With ID: {semester_id} Not Found"}
 

@@ -20,7 +20,7 @@ def add_course_staff(courseCode, semesterName, academicYear, staffID):
 
         already_assigned_staff = CourseStaff.query.filter_by(courseOfferingID=course_offering.offeringID, staffID=staffID).first()
         if already_assigned_staff:
-            return {"Message": "Staff Member Is Already Assigned To Course."}
+            return {"Error": "Staff member is already assigned to this course"}
 
         new_course_staff = CourseStaff(courseOfferingID=course_offering.offeringID, staffID=staffID)
         db.session.add(new_course_staff)
@@ -49,7 +49,7 @@ def remove_course_staff(courseCode, semesterName, academicYear, staffID):
         if not course_offering:
             return {"Error": "Course Offering Not Found For The Given Semester"}
 
-        assigned_staff = CourseStaff.query.filter_by(courseOffering=course_offering.offeringID, staffID=staffID).first()
+        assigned_staff = CourseStaff.query.filter_by(courseOfferingID=course_offering.offeringID, staffID=staffID).first()
         if not assigned_staff:
             return {"Error": "Staff Not Assigned To This Course In The Given Semester"}
 
