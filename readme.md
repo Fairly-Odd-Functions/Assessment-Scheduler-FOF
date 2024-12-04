@@ -289,7 +289,7 @@ You can then execute all all application as follows:
 $ pytest
 ```
 
-![Screenshot1](./img/test.png)
+![Screenshot1](./img/tests.png)
 
 or run perform specific tests with the following convention:
 
