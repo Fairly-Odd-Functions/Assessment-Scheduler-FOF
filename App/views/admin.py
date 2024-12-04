@@ -154,16 +154,15 @@ def search_course_action(courseCode):
         print(f"DEBUG: {e}")
         return jsonify(error = f"An Error Occurred While Searching for Course With Code: {courseCode}"), 500
 
-# 04 : List All Courses*
+# 04 : List All Courses
 @admin_views.route('/listCourses', methods=['GET'])
 @jwt_required(Admin)
 def list_course_action():
     try:
-        
         courseList = list_courses()
         return jsonify(courseList), 200
-
     except Exception as e:
+        print(f"DEBUG: {e}")
         return jsonify(error = f"An Error Occurred While Listing Courses"), 500
 
 """
