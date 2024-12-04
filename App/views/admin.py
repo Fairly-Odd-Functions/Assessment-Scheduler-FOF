@@ -65,6 +65,7 @@ def remove_staff_action():
     pass
 
 """
+<<<<<<< HEAD
 Course [6]
 Written By: Katoya Ottley
 
@@ -206,9 +207,9 @@ def add_programme_course_action():
 def remove_programme_course_action():
     pass
 
-
 """
 CourseOffering [3]
+<<<<<<< HEAD
 Written By Katoya Ottley
 
 Task Re-Assigned:

@@ -34,7 +34,7 @@ def add_course_assessment(courseCode, assessmentID, startDate, startTime, endDat
             endDate=date_validation["endDate"],
             startTime=time_validation["startTime"],
             endTime=time_validation["endTime"],
-            clashRule=clashRule
+            clashRule=clashRule.upper()
         )
 
         validation_result = validate_assessment_clash(new_course_assessment)
@@ -48,7 +48,41 @@ def add_course_assessment(courseCode, assessmentID, startDate, startTime, endDat
 
     except Exception as e:
         db.session.rollback()
+        print(e)
         return {"Error": "An Error Occurred While Associating The Course With The Assessment"}
+
+# Reschedule An Assessment
+def reschedule_course_assessment(courseAssessmentID, newStartDate, newStartTime, newEndDate, newEndTime):
+    try:
+        course_assessment = CourseAssessment.query.get(courseAssessmentID)
+        if not course_assessment:
+            return {"Error": "CourseAssessment Not Found"}
+
+        date_validation = validate_dates(newStartDate, newEndDate)
+        if "Error Message" in date_validation:
+            return {"Error": date_validation["Error Message"]}
+
+        time_validation = validate_times(newStartTime, newEndTime)
+        if "Error Message" in time_validation:
+            return {"Error": time_validation["Error Message"]}
+
+        course_assessment.startDate = date_validation["startDate"]
+        course_assessment.endDate = date_validation["endDate"]
+        course_assessment.startTime = time_validation["startTime"]
+        course_assessment.endTime = time_validation["endTime"]
+
+        validation_result = validate_assessment_clash(course_assessment)
+        if validation_result["status"] == "error":
+            return validation_result
+
+        db.session.commit()
+        return {"Message": "CourseAssessment Successfully Rescheduled",
+                "CourseAssessment": course_assessment.get_json()}
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error While Rescheduling Course Assessment: {e}")
+        return {"Error": "An Error Occurred While Rescheduling The Course Assessment"}
 
 # List All Assessments For A Specific Course (Throughout Time)
 def list_course_assessments(courseCode):
@@ -118,9 +152,17 @@ def delete_course_assessment(courseAssessmentID):
 
 # Get All Scheduled Assessments For A Specific Course Given A Date Range (Too Tired For Error Handling)
 def get_scheduled_assessments(courseCode, start_date, end_date):
-    assessments = CourseAssessment.query.filter(
-        CourseAssessment.courseCode == courseCode,
-        CourseAssessment.startDate >= start_date,
-        CourseAssessment.endDate <= end_date
-    ).all()
-    return assessments
+    try:
+        assessments = CourseAssessment.query.filter(
+            CourseAssessment.courseCode == courseCode,
+            CourseAssessment.startDate >= start_date,
+            CourseAssessment.endDate <= end_date
+        ).all()
+
+        if not assessments:
+            return {"Error": "No Scheduled Assessments Found For Given Criteria."}
+        return {"CourseAssessments": [assessment.get_json() for assessment in assessments]}
+
+    except Exception as e:
+        print(f"Error While Fetching Scheduled Assessments: {e}")
+        return {"Error": "An Error Occurred While Retrieving The Scheduled Assessments."}

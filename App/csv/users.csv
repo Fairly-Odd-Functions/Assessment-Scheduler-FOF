@@ -1,0 +1,11 @@
+firstName;lastName;password;email;user_type
+John;Doe;password123;john.doe@example.com;admin
+Jane;Smith;securePass456;jane.smith@example.com;staff
+Alice;Johnson;password789;alice.johnson@example.com;staff
+Bob;Williams;adminPass000;bob.williams@example.com;admin
+Charlie;Brown;myPassword321;charlie.brown@example.com;staff
+Diana;Davis;password456;diana.davis@example.com;admin
+Edward;Moore;pass789123;edward.moore@example.com;staff
+Fiona;Taylor;secure123;fiona.taylor@example.com;admin
+George;Anderson;1234password;george.anderson@example.com;staff
+Hannah;Thomas;pass2024;hannah.thomas@example.com;admin
