@@ -104,7 +104,9 @@ class SemesterUnitTest(unittest.TestCase):
     def test_unit_11_semester_json(self):
         newSemester = Semester("Semester 2", "2024/2025", "2025-01-02", "2025-05-20")
         semester_json = newSemester.get_json()
-        self.assertDictEqual({"semester_name": "Semester 2",
+        self.assertDictEqual({
+                              "semesterID": None,
+                              "semesterName": "Semester 2",
                               "academicYear": "2024/2025",
                               "startDate": "2025-01-02",
                               "endDate": "2025-05-20"}, semester_json)
@@ -239,7 +241,7 @@ class CourseIntegrationTests(unittest.TestCase):
         assessment = Assessment("Governance and Culture Course Work Exam 1", AssessmentTypes.COURSEWORK)
         db.session.add(assessment)
         db.session.commit()
-        message = add_course_assessment("12310", 1, startDate=datetime(2024, 10, 12), startTime=time(9, 0), endDate=datetime(2024, 10, 12), endTime=time(12, 0))
+        message = add_course_assessment("12310", 1, startDate=datetime(2024, 10, 12), startTime=time(9, 0), endDate=datetime(2024, 10, 12), endTime=time(12, 0), clashRule=None)
         assert message["Message"] == "Course And Assessment Successfully Associated"
         assert message["CourseAssessment"] == {
                                 "courseAssessmentID": 1,
@@ -293,11 +295,13 @@ class CourseIntegrationTests(unittest.TestCase):
         assert message["CourseOffering"] == {"offeringID": 1,
                                              "courseCode": "13542",
                                              "semesterID": 1,
-                                             "semester": {"semester_name":"Semester 1",
+                                             "semester": {
+                                                          "semesterID": 1,
+                                                          "semesterName":"Semester 1",
                                                           "academicYear": "2024/2025",
                                                           "startDate": date(2024, 9, 4),
                                                           "endDate": date(2024, 12, 20)},
-                                             "totalStudentsEnrolled": 0}
+                                                          "totalStudentsEnrolled": 0}
 
     def test_integration_12_add_course_staff(self):
         add_course("13512","UI Fundamentals", 3, "Learn the basics of User Interface in Society",3)
@@ -407,49 +411,36 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         self.assertEqual(result["status"], "error")
         self.assertIn("Degree Clash Detected", result["message"])
     
-    '''
-    #It has two assessments that are not overlapping but it's showing a clash [ AssertionError: 'error' != 'success']
     def test_integration_18_validate_by_student_overlap_no_clash(self):
-        create_programme("BSc. Computer Science", "The study of computers and computing - Google")
-        add_semester("Semester 2", "2024/2025", date(2025, 1, 13), date(2025,5,25))
-        
-        add_course("COMP 1603", "Computer Programming III", 3, "Introduction to programming", 1)
-        add_course("COMP 1604", "Mathematics for Computing ", 3, "Welcome to Mathematics 101", 1)
-        
-        add_course_offering("COMP 1603", 1, 350)
-        add_course_offering("COMP 1604", 1, 250)
+        programme = create_programme("BSc. Computer Science", "The study of computers and computing")
+        programmeID = programme["Programme"].programmeID
 
-        #Testing
-        #course1 = get_course_offering("COMP 1603", 1)
-        #print("HERE 1 -", course1 )
-        #course2 = get_course_offering("COMP 1604", 1)
-        #print("HERE 2 -", course2 )
+        semester = add_semester("Semester 2", "2024/2025", date(2025, 1, 13), date(2025, 5, 25))
+        semesterID = semester["New Semester Added"]["semesterID"]
 
-        add_course_to_programme("COMP 1603", 1)
-        add_course_to_programme("COMP 1604", 1)
-        
-        create_assessment("Assignment 1", AssessmentTypes.ASSIGNMENT)
-        create_assessment("Assignment 2", AssessmentTypes.ASSIGNMENT)
-        
-        #Testing
-        #listOfAssessment = list_assessments()
-        #print(listOfAssessment)
+        assessment1 = create_assessment("Governance and Culture Course Work Exam 1", "COURSEWORK")
+        assessment1ID = assessment1["Assessment"]["assessmentID"]
+        assessment2 = create_assessment("Governance and Culture Course Work Exam 2", "COURSEWORK")
+        assessment2ID = assessment2["Assessment"]["assessmentID"]
 
-        #add_course_assessment("COMP 1603", 1, date(2025, 1, 20), time(12,0), date(2025, 1, 28), time(23,0), clashRule=None)
-        #add_course_assessment("COMP 1604", 2, date(2025, 2, 4), time(12,0), date(2025, 2, 16), time(23,0), clashRule=None)
-        
-        assessment1 = CourseAssessment("COMP 1603", 1, date(2025, 1, 20), date(2025, 1, 28), time(12,0), time(23,0), clashRule=None)
-        assessment2 = CourseAssessment("COMP 1604", 2, date(2025, 2, 4),date(2025, 2, 16), time(12,0), time(23,0), clashRule=None)
-        db.session.add(assessment1)
-        db.session.add(assessment2)
-        db.session.commit()
+        course1 = add_course("COMP 1603", "Computer Programming III", 3, "Introduction to programming", 1)
+        course1ID = course1["Course"]["courseCode"]
+        course2 = add_course("COMP 1604", "Mathematics for Computing", 3, "Welcome to Mathematics 101", 1)
+        course2ID =course2["Course"]["courseCode"]
 
-        result = validate_by_student_overlap("COMP 1603", date(2025, 1, 20), date(2025, 1, 28), 75)
-        self.assertEqual(result["status"], "success")
-        self.assertEqual(result["message"], "No Assessment Clashes Found Due To Overlapping Student Enrollment")
-    '''
-    
-    
+        add_course_to_programme(courseCode=course1ID, programmeID=programmeID)
+        add_course_to_programme(courseCode=course2ID, programmeID=programmeID)
+
+        add_course_offering(course1ID, semesterID=semesterID, totalStudentsEnrolled=350)
+        add_course_offering(course2ID, semesterID=semesterID, totalStudentsEnrolled=250)
+
+        add_course_assessment(courseCode=course1ID, assessmentID=assessment1ID, startDate=date(2024, 12,10), startTime=time(12,0), endDate=date(2024,12,10), endTime=time(12,30), clashRule="student_overlap")
+        result = add_course_assessment(courseCode=course2ID, assessmentID=assessment2ID, startDate=date(2024, 12,12), startTime=time(13,0), endDate=date(2024,12,12), endTime=time(13,30), clashRule="student_overlap")
+
+        self.assertEqual(result["Message"], "Course And Assessment Successfully Associated")
+        self.assertEqual(result["CourseAssessment"]["clashRule"], "STUDENT_OVERLAP")
+
+
     #Overlapping assessments
     def test_integration_19_validate_by_student_overlap_clash(self):
         create_programme("BSc. Computer Science", "The study of computers and computing - Google")
@@ -475,34 +466,36 @@ class SpecialFeatureIntegrationTests(unittest.TestCase):
         self.assertIn("Assessment Clash Found Due To Overlapping Student Enrollment", result["message"])
     
 
-    '''
     #Two assessments are scheduled but but are not overlapping but I'm getting a clash - AssertionError: 'error' != 'success'
     def test_integration_20_validate_by_assessment_type_no_clash(self):
-        create_programme("BSc. Computer Science", "The study of computers and computing - Google")
-        add_semester("Semester 2", "2024/2025", date(2025, 1, 13), date(2025,5,25))
-        
-        add_course("COMP 1603", "Computer Programming III", 3, "Introduction to programming", 1)
-        add_course("COMP 1604", "Mathematics for Computing ", 3, "Welcome to Mathematics 101", 1)
-        
-        add_course_to_programme("COMP 1603", 1)
-        add_course_to_programme("COMP 1604", 1)
-        
-        create_assessment("Course Work Exam 1", AssessmentTypes.COURSEWORK)
-        assessmentObject1 = Assessment("Course Work Exam 1", AssessmentTypes.COURSEWORK)
-        
-        create_assessment("Quiz 3", AssessmentTypes.QUIZ)
-        assessmentObject2 = Assessment("Quiz 3", AssessmentTypes.QUIZ)
-        
-        add_course_assessment("COMP 1603", 1, date(2025, 1, 15), time(12,00,00,00, None), date(2025, 1, 30), time(23,00,00,00, None), clashRule=None)
-        add_course_assessment("COMP 1604", 2, date(2025, 3, 1), time(12,00,00,00, None), date(2025, 2, 17), time(23,00,00,00, None), clashRule=None)
+        programme = create_programme("BSc. Computer Science", "The study of computers and computing")
+        programmeID = programme["Programme"].programmeID
 
-        result = validate_by_assessment_type(assessmentObject1, date(2025, 1, 15), 14)
-        #print(result)
-        self.assertEqual(result["status"], "success")
-        self.assertEqual(result["message"], "No Assessment Clashes Found Due To Overlapping Student Enrollment")
-    '''   
-    
-    
+        semester = add_semester("Semester 2", "2024/2025", date(2025, 1, 13), date(2025, 5, 25))
+        semesterID = semester["New Semester Added"]["semesterID"]
+
+        assessment1 = create_assessment("Governance and Culture Course Work Exam 1", "COURSEWORK")
+        assessment1ID = assessment1["Assessment"]["assessmentID"]
+        assessment2 = create_assessment("Governance and Culture Course Work Exam 2", "COURSEWORK")
+        assessment2ID = assessment2["Assessment"]["assessmentID"]
+
+        course1 = add_course("COMP 1603", "Computer Programming III", 3, "Introduction to programming", 1)
+        course1ID = course1["Course"]["courseCode"]
+        course2 = add_course("COMP 1604", "Mathematics for Computing", 3, "Welcome to Mathematics 101", 1)
+        course2ID =course2["Course"]["courseCode"]
+
+        add_course_to_programme(courseCode=course1ID, programmeID=programmeID)
+        add_course_to_programme(courseCode=course2ID, programmeID=programmeID)
+
+        add_course_offering(course1ID, semesterID=semesterID, totalStudentsEnrolled=350)
+        add_course_offering(course2ID, semesterID=semesterID, totalStudentsEnrolled=250)
+
+        add_course_assessment(courseCode=course1ID, assessmentID=assessment1ID, startDate=date(2024, 12,10), startTime=time(12,0), endDate=date(2024,12,10), endTime=time(12,30), clashRule="assessment_type")
+        result = add_course_assessment(courseCode=course2ID, assessmentID=assessment2ID, startDate=date(2024, 12,15), startTime=time(13,0), endDate=date(2024,12,15), endTime=time(13,30), clashRule="assessment_type")
+
+        self.assertEqual(result["Message"], "Course And Assessment Successfully Associated")
+        self.assertEqual(result["CourseAssessment"]["clashRule"], "ASSESSMENT_TYPE")
+
     #It has the Reserved start date for preparation: 2024-12-31, not sure where it got that date from
     def test_integration_21_validate_by_assessment_type_clash(self):
         create_programme("BSc. Computer Science", "The study of computers and computing - Google")

@@ -441,7 +441,7 @@ def remove_programme_course_action():
     if "Message" in response:
         return jsonify({
             "message" : response["Message"]
-        }),201
+        }),200
     return jsonify({"message":"Unable to delete"}), 500
 
 # 03 : List Programme Courses
@@ -512,7 +512,7 @@ def remove_offering_action():
             return jsonify(error=removeCourseOffering["Error"]), 400
 
         message = removeCourseOffering["Message"]
-        return jsonify(message=message), 201
+        return jsonify(message=message), 200
 
     except Exception as e:
         print (f"Error While Removing Course Offering: {e}")
