@@ -216,11 +216,23 @@ def update_offering_action():
     pass
 '''
 
-# 04 : List Course Offerings
-@admin_views.route('/listCourseOfferings', methods=['GET'])
+# 04 : List All Offerings
+@admin_views.route('/listAllOfferings', methods=['GET'])
 @jwt_required(Admin)
-def list_course_offerings_action():
-    pass
+def list_all_offerings_action():
+    try:
+        course_offerings = get_all_offerings()
+
+        if "Error" in course_offerings:
+            return jsonify(error=course_offerings["Error"]), 500
+        elif "Message" in course_offerings:
+            return jsonify(message=course_offerings["Message"]), 404
+
+        return jsonify(course_offerings), 200
+
+    except Exception as e:
+        print(f"Error While Fetching All Offerings: {e}")
+        return jsonify(error="An Error Occurred While Listing All Course Offerings"), 500
 
 """
 CourseStaff [3]
