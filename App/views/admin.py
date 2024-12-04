@@ -70,37 +70,42 @@ Written By: Katoya Ottley
 Task: 10.3.1. Implement API Views for Admin (Course)
 """
 
-# 01 : Add Course *
+# 01 : Add Course
 @admin_views.route('/addCourse', methods=['POST'])
 @jwt_required(Admin)
 def add_course_action():
     try:
-        data = request.form
-        courseCode = data.get("courseCode")
-        courseTitle = data.get("courseTitle")
-        courseCredits = data.get("courseCredits")
-        courseDescription = data.get("courseDescription")
-        courseLevel = data.get("courseLevel")
+        data = request.get_json()
+        courseCode = data["courseCode"]
+        courseTitle = data["courseTitle"]
+        courseCredits = data["courseCredits"]
+        courseDescription = data["courseDescription"]
+        courseLevel = data["courseLevel"]
 
         if not courseCode or not courseTitle or not courseCredits or not courseDescription or not courseLevel:
             return jsonify(error= "All Fields are Required To Add Course"), 400
 
-        newCourse = add_course(courseCode, courseTitle, courseCredits, courseDescription, courseLevel)
-        if newCourse is None:
-            return jsonify(error = "Failed To Add Course or Course Already Exists."), 400
+        result = add_course(courseCode=courseCode, 
+                               courseTitle=courseTitle,
+                               courseCredits=courseCredits,
+                               courseDescription=courseDescription,
+                               courseLevel=courseLevel)
+        if "Error" in result:
+            return jsonify(error=result["Error"]), 400
+        
+        if "Message" in result and "Course" in result:
+            course = result["Course"]
+            return jsonify(message=result["Message"], course=course), 201
+        return jsonify(error="Unexpected Error Ocurrred While Adding The Course"), 500
 
-        if newCourse:
-            return jsonify (message = f'Course: {newCourse.courseCode} - {newCourse.courseTitle} Added Successfully!'),201
-    
     except Exception as e:
         print (f"Error While Adding Course: {e}")
         return jsonify(error = "An Error Occurred While Adding Course"), 500
 
-
 # 02 : Update Course *
-@admin_views.route('/updateCourse', methods=['PUT'])
+@admin_views.route('/updateCourse/<string:courseCode>', methods=['PUT'])
 @jwt_required(Admin)
-def update_course_action():
+def update_course_action(courseCode):
     try:
         data = request.get_json()
         courseCode = data.get("courseCode")
@@ -124,7 +129,7 @@ def update_course_action():
         return jsonify(error = "An Error Occurred While Updating Course"), 500
 
 # 03 : Get Course By Code*
-@admin_views.route('/search/<str:courseCode>', methods=['GET'])
+@admin_views.route('/searchCourse/<string:courseCode>', methods=['GET'])
 @jwt_required(Admin)
 def search_course_action(courseCode):
     try:
@@ -141,7 +146,7 @@ def search_course_action(courseCode):
         return jsonify(error = f"An Error Occurred While Searching for Course With Code: {courseCode}"), 500
 
 # 04 : List All Courses*
-@admin_views.route('listCourses', methods=['GET'])
+@admin_views.route('/listCourses', methods=['GET'])
 @jwt_required(Admin)
 def list_course_action():
     try:
@@ -151,62 +156,6 @@ def list_course_action():
 
     except Exception as e:
         return jsonify(error = f"An Error Occurred While Listing Courses"), 500
-
-# 05 : Assign A Staff to A Course *
-@admin_views.route('/addStaff', methods=['POST'])
-@jwt_required(Admin)
-def add_course_staff_action():
-    try:
-        data = request.get_json()
-        courseCode = data.get("courseCode")
-        semesterName = data.get("semesterName")
-        academicYear = data.get("academicYear")
-        staffID = data.get("staffID")
-        
-        if not courseCode or not semesterName or not academicYear or not staffID:
-            return jsonify(error= "All Fields are Required To Assign Staff to Course"), 400
-
-        #if not is_valid_staff_id(staffID):
-        #    return jsonify(error = "Invalid Staff ID, Please Try Again."), 400
-
-        newStaff =  add_course_staff(courseCode, semesterName, academicYear, staffID)
-        if newStaff is None:
-            return jsonify(error = "Failed To Add Staff To The Course or Staff Already Assigned to That Course."), 400
-
-        message = f'Staff: {newStaff.staffID} Assigned to {courseCode} for Academic Year {academicYear}, Semester {semesterName} Added Successfully!'
-        return jsonify(message=message), 201
-    
-    except Exception as e:
-        print (f"Error While Assigning Staff To Course: {e}")
-        return jsonify(error = "An Error Occurred While Assigning Staff To Course"), 500
-    
-# 06 : Remove A Staff from A Course *
-@admin_views.route('/removeStaff', methods=['DELETE'])
-@jwt_required(Admin)
-def add_course_staff_action():
-    try:
-        data = request.get_json()
-        courseCode = data.get("courseCode")
-        semesterName = data.get("semesterName")
-        academicYear = data.get("academicYear")
-        staffID = data.get("staffID")
-        
-        if not courseCode or not semesterName or not academicYear or not staffID:
-            return jsonify(error= "All Fields are Required To Remove Staff From A Course"), 400
-
-        #if not is_valid_staff_id(staffID):
-        #    return jsonify(error = "Invalid Staff ID, Please Try Again."), 400
-
-        removeStaff =  remove_course_staff(courseCode, semesterName, academicYear, staffID)
-        if removeStaff is None:
-            return jsonify(error = "Failed To Remove Staff From Course or Staff Is Not Assigned to That Course."), 400
-
-        message = f'Staff: {removeStaff.staffID} From {courseCode} for Academic Year {academicYear}, Semester {semesterName} Removed Successfully!'
-        return jsonify(message=message), 201
-    
-    except Exception as e:
-        print (f"Error While Removing Staff From Course: {e}")
-        return jsonify(error = "An Error Occurred While Removing Staff From Course"), 500
 
 """
 Semester [2]
@@ -294,6 +243,62 @@ def remove_course_staff_action():
 @jwt_required(Admin)
 def update_course_staff_action():
     pass
+
+# # 05 : Assign A Staff to A Course *
+# @admin_views.route('/addCourseStaff', methods=['POST'])
+# @jwt_required(Admin)
+# def add_course_staff_action():
+#     try:
+#         data = request.get_json()
+#         courseCode = data.get("courseCode")
+#         semesterName = data.get("semesterName")
+#         academicYear = data.get("academicYear")
+#         staffID = data.get("staffID")
+        
+#         if not courseCode or not semesterName or not academicYear or not staffID:
+#             return jsonify(error= "All Fields are Required To Assign Staff to Course"), 400
+
+#         #if not is_valid_staff_id(staffID):
+#         #    return jsonify(error = "Invalid Staff ID, Please Try Again."), 400
+
+#         newStaff =  add_course_staff(courseCode, semesterName, academicYear, staffID)
+#         if newStaff is None:
+#             return jsonify(error = "Failed To Add Staff To The Course or Staff Already Assigned to That Course."), 400
+
+#         message = f'Staff: {newStaff.staffID} Assigned to {courseCode} for Academic Year {academicYear}, Semester {semesterName} Added Successfully!'
+#         return jsonify(message=message), 201
+    
+#     except Exception as e:
+#         print (f"Error While Assigning Staff To Course: {e}")
+#         return jsonify(error = "An Error Occurred While Assigning Staff To Course"), 500
+    
+# # 06 : Remove A Staff from A Course *
+# @admin_views.route('/removeCourseStaff', methods=['DELETE'])
+# @jwt_required(Admin)
+# def remove_course_staff_action():
+#     try:
+#         data = request.get_json()
+#         courseCode = data.get("courseCode")
+#         semesterName = data.get("semesterName")
+#         academicYear = data.get("academicYear")
+#         staffID = data.get("staffID")
+        
+#         if not courseCode or not semesterName or not academicYear or not staffID:
+#             return jsonify(error= "All Fields are Required To Remove Staff From A Course"), 400
+
+#         #if not is_valid_staff_id(staffID):
+#         #    return jsonify(error = "Invalid Staff ID, Please Try Again."), 400
+
+#         removeStaff =  remove_course_staff(courseCode, semesterName, academicYear, staffID)
+#         if removeStaff is None:
+#             return jsonify(error = "Failed To Remove Staff From Course or Staff Is Not Assigned to That Course."), 400
+
+#         message = f'Staff: {removeStaff.staffID} From {courseCode} for Academic Year {academicYear}, Semester {semesterName} Removed Successfully!'
+#         return jsonify(message=message), 201
+    
+#     except Exception as e:
+#         print (f"Error While Removing Staff From Course: {e}")
+#         return jsonify(error = "An Error Occurred While Removing Staff From Course"), 500
 
 """
 Programme [3]
